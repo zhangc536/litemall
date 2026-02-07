@@ -81,7 +81,7 @@
     "uploadFile": 10000,
     "downloadFile": 10000
   },
-  "debug": true,
+  "debug": false,
   "usingComponents": {
     "van-cell": "./lib/vant-weapp/cell/index",
     "van-cell-group": "./lib/vant-weapp/cell-group/index",
