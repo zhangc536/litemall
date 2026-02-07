@@ -6,6 +6,7 @@ var app = getApp();
 Page({
   data: {
     canIUseGetUserProfile: false,
+    isLoggingIn: false
   },
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
@@ -31,6 +32,9 @@ Page({
 
   },
   wxLogin: function(e) {
+    if (this.data.isLoggingIn) {
+      return;
+    }
     if (this.data.canIUseGetUserProfile) {
       wx.getUserProfile({
         desc: '用于完善会员资料', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
@@ -52,7 +56,18 @@ Page({
     }
   },
   doLogin: function(userInfo) {
-    user.checkLogin().catch(() => {
+    this.setData({
+      isLoggingIn: true
+    });
+    user.checkLogin().then(() => {
+      this.setData({
+        isLoggingIn: false
+      });
+      app.globalData.hasLogin = true;
+      wx.navigateBack({
+        delta: 1
+      })
+    }).catch(() => {
       user.loginByWeixin(userInfo).then(res => {
         app.globalData.hasLogin = true;
         wx.navigateBack({
@@ -61,8 +76,11 @@ Page({
       }).catch((err) => {
         app.globalData.hasLogin = false;
         util.showErrorToast('微信登录失败');
+      }).finally(() => {
+        this.setData({
+          isLoggingIn: false
+        });
       });
-
     });
   },
   accountLogin: function() {
