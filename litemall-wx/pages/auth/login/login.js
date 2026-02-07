@@ -41,8 +41,8 @@ Page({
         success: (res) => {
           this.doLogin(res.userInfo)
         },
-        fail: () => {
-          util.showErrorToast('微信登录失败');
+        fail: (err) => {
+          util.showErrorToast(err && err.errMsg ? err.errMsg : '微信登录失败');
         }
       })
     }
@@ -75,7 +75,7 @@ Page({
         })
       }).catch((err) => {
         app.globalData.hasLogin = false;
-        util.showErrorToast('微信登录失败');
+        util.showErrorToast(err && err.errmsg ? err.errmsg : '微信登录失败');
       }).finally(() => {
         this.setData({
           isLoggingIn: false
