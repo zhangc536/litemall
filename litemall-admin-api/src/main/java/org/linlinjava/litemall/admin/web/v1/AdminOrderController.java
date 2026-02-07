@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController
+@RestController("adminOrderControllerV1")
 @RequestMapping("/api/v1/admin/order")
 @Validated
 public class AdminOrderController {

@@ -175,8 +175,8 @@ public class AdminAuthController {
     private ApplicationContext context;
     private HashMap<String, String> systemPermissionsMap = null;
 
-    private Collection<String> toApi(Set<String> permissions) {
-        if (systemPermissionsMap == null) {
+    private HashMap<String, String> getSystemPermissionsMap() {
+        if (systemPermissionsMap == null || systemPermissionsMap.isEmpty()) {
             systemPermissionsMap = new HashMap<>();
             final String basicPackage = "org.linlinjava.litemall.admin";
             List<Permission> systemPermissions = PermissionUtil.listPermission(context, basicPackage);
@@ -186,19 +186,25 @@ public class AdminAuthController {
                 systemPermissionsMap.put(perm, api);
             }
         }
+        return systemPermissionsMap;
+    }
 
+    private Collection<String> toApi(Set<String> permissions) {
+        HashMap<String, String> permissionsMap = getSystemPermissionsMap();
         Collection<String> apis = new HashSet<>();
         for (String perm : permissions) {
-            String api = systemPermissionsMap.get(perm);
-            apis.add(api);
-
-            if (perm.equals("*")) {
+            if ("*".equals(perm)) {
                 apis.clear();
                 apis.add("*");
                 return apis;
-                //                return systemPermissionsMap.values();
-
             }
+            String api = permissionsMap.get(perm);
+            if (api == null) {
+                systemPermissionsMap = null;
+                permissionsMap = getSystemPermissionsMap();
+                api = permissionsMap.get(perm);
+            }
+            apis.add(api);
         }
         return apis;
     }

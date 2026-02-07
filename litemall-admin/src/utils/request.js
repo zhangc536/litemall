@@ -5,10 +5,13 @@ import { getToken } from '@/utils/auth'
 
 axios.defaults.withCredentials = true
 
-// create an axios instance
+const resolvedBaseURL = process.env.VUE_APP_BASE_API || (typeof window !== 'undefined'
+  ? `${window.location.protocol}//${window.location.hostname}:8080/admin`
+  : 'http://localhost:8080/admin')
+
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // api 的 base_url
-  timeout: 5000 // request timeout
+  baseURL: resolvedBaseURL,
+  timeout: 5000
 })
 
 // request interceptor

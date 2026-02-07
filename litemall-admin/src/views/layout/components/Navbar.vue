@@ -31,14 +31,10 @@
             </el-dropdown-item>
           </router-link>
           <el-dropdown-item divided>
-            <a target="_blank" href="https://github.com/linlinjava/litemall">
-              {{ $t('navbar.menu.github') }}
-            </a>
+            <span>{{ $t('navbar.menu.github') }}</span>
           </el-dropdown-item>
           <el-dropdown-item>
-            <a target="_blank" href="https://gitee.com/linlinjava/litemall">
-              {{ $t('navbar.menu.gitee') }}
-            </a>
+            <span>{{ $t('navbar.menu.gitee') }}</span>
           </el-dropdown-item>
           <el-dropdown-item divided>
             <router-link to="/profile/password">

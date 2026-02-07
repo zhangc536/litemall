@@ -8,7 +8,7 @@ export default {
     menu: {
       dashboard: '首页',
       user: '用户管理',
-      user_user: '会员管理',
+      user_user: '用户',
       user_address: '收货地址',
       user_collect: '会员收藏',
       user_footprint: '会员足迹',

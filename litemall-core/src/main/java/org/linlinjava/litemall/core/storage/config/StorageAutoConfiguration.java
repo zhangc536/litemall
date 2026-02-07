@@ -39,6 +39,9 @@ public class StorageAutoConfiguration {
     public LocalStorage localStorage() {
         LocalStorage localStorage = new LocalStorage();
         StorageProperties.Local local = this.properties.getLocal();
+        if (local == null) {
+            local = new StorageProperties.Local();
+        }
         localStorage.setAddress(local.getAddress());
         localStorage.setStoragePath(local.getStoragePath());
         return localStorage;
@@ -48,6 +51,9 @@ public class StorageAutoConfiguration {
     public AliyunStorage aliyunStorage() {
         AliyunStorage aliyunStorage = new AliyunStorage();
         StorageProperties.Aliyun aliyun = this.properties.getAliyun();
+        if (aliyun == null) {
+            aliyun = new StorageProperties.Aliyun();
+        }
         aliyunStorage.setAccessKeyId(aliyun.getAccessKeyId());
         aliyunStorage.setAccessKeySecret(aliyun.getAccessKeySecret());
         aliyunStorage.setBucketName(aliyun.getBucketName());
@@ -59,6 +65,9 @@ public class StorageAutoConfiguration {
     public TencentStorage tencentStorage() {
         TencentStorage tencentStorage = new TencentStorage();
         StorageProperties.Tencent tencent = this.properties.getTencent();
+        if (tencent == null) {
+            tencent = new StorageProperties.Tencent();
+        }
         tencentStorage.setSecretId(tencent.getSecretId());
         tencentStorage.setSecretKey(tencent.getSecretKey());
         tencentStorage.setBucketName(tencent.getBucketName());
@@ -70,6 +79,9 @@ public class StorageAutoConfiguration {
     public QiniuStorage qiniuStorage() {
         QiniuStorage qiniuStorage = new QiniuStorage();
         StorageProperties.Qiniu qiniu = this.properties.getQiniu();
+        if (qiniu == null) {
+            qiniu = new StorageProperties.Qiniu();
+        }
         qiniuStorage.setAccessKey(qiniu.getAccessKey());
         qiniuStorage.setSecretKey(qiniu.getSecretKey());
         qiniuStorage.setBucketName(qiniu.getBucketName());

@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.linlinjava.litemall.admin.annotation.RequiresPermissionsDesc;
+import org.linlinjava.litemall.admin.service.AdminOrderService;
 import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.db.domain.LitemallOrder;
 import org.linlinjava.litemall.db.service.LitemallOrderService;
@@ -26,6 +27,8 @@ public class AdminOrderController {
 
     @Autowired
     private LitemallOrderService orderService;
+    @Autowired
+    private AdminOrderService adminOrderService;
 
     @RequiresPermissions("admin:order:audit")
     @RequiresPermissionsDesc(menu = {"商品管理", "凭证审核"}, button = "审核")

@@ -84,6 +84,16 @@ export const asyncRoutes = [
     },
     children: [
       {
+        path: 'list',
+        component: () => import('@/views/user/user'),
+        name: 'userList',
+        meta: {
+          perms: ['GET /admin/user/list'],
+          title: 'app.menu.user_user',
+          noCache: true
+        }
+      },
+      {
         path: 'address',
         component: () => import('@/views/user/address'),
         name: 'address',
