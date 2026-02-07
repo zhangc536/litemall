@@ -75,7 +75,7 @@ Page({
         })
       }).catch((err) => {
         app.globalData.hasLogin = false;
-        util.showErrorToast(err && err.errmsg ? err.errmsg : '微信登录失败');
+        util.showErrorToast(err && err.errmsg ? err.errmsg : (err && err.errMsg ? err.errMsg : '微信登录失败'));
       }).finally(() => {
         this.setData({
           isLoggingIn: false

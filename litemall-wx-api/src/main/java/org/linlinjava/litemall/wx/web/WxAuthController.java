@@ -134,7 +134,7 @@ public class WxAuthController {
         }
 
         if (sessionKey == null || openId == null) {
-            return ResponseUtil.fail();
+            return ResponseUtil.fail(AUTH_OPENID_UNACCESS, "微信登录失败，请检查小程序 appid/appsecret");
         }
 
         LitemallUser user = userService.queryByOid(openId);
