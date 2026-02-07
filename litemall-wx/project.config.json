@@ -120,12 +120,6 @@
         },
         {
           "id": -1,
-          "name": "分类",
-          "pathName": "pages/catalog/catalog",
-          "query": ""
-        },
-        {
-          "id": -1,
           "name": "分类详情",
           "pathName": "pages/category/category",
           "query": "id=1008002"
