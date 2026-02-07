@@ -118,6 +118,7 @@ public class WxAuthController {
     public Object loginByWeixin(@RequestBody WxLoginInfo wxLoginInfo, HttpServletRequest request) {
         String code = wxLoginInfo.getCode();
         UserInfo userInfo = wxLoginInfo.getUserInfo();
+        String inviteCode = wxLoginInfo.getInviteCode();
         if (code == null || userInfo == null) {
             return ResponseUtil.badArgument();
         }
@@ -138,6 +139,18 @@ public class WxAuthController {
 
         LitemallUser user = userService.queryByOid(openId);
         if (user == null) {
+            if (StringUtils.isEmpty(inviteCode)) {
+                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+            }
+            Integer inviterUserId;
+            try {
+                inviterUserId = Integer.valueOf(inviteCode);
+            } catch (NumberFormatException e) {
+                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+            }
+            if (userService.findById(inviterUserId) == null) {
+                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+            }
             user = new LitemallUser();
             user.setUsername(openId);
             user.setPassword(openId);
@@ -238,6 +251,7 @@ public class WxAuthController {
         String password = JacksonUtil.parseString(body, "password");
         String mobile = JacksonUtil.parseString(body, "mobile");
         String code = JacksonUtil.parseString(body, "code");
+        String inviteCode = JacksonUtil.parseString(body, "inviteCode");
         // 如果是小程序注册，则必须非空
         // 其他情况，可以为空
         String wxCode = JacksonUtil.parseString(body, "wxCode");
@@ -269,6 +283,18 @@ public class WxAuthController {
         // 非空，则是小程序注册
         // 继续验证openid
         if(!StringUtils.isEmpty(wxCode)) {
+            if (StringUtils.isEmpty(inviteCode)) {
+                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+            }
+            Integer inviterUserId;
+            try {
+                inviterUserId = Integer.valueOf(inviteCode);
+            } catch (NumberFormatException e) {
+                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+            }
+            if (userService.findById(inviterUserId) == null) {
+                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+            }
             try {
                 WxMaJscode2SessionResult result = this.wxService.getUserService().getSessionInfo(wxCode);
                 openId = result.getOpenid();
