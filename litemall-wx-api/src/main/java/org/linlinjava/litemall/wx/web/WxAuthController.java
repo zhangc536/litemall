@@ -130,11 +130,15 @@ public class WxAuthController {
             sessionKey = result.getSessionKey();
             openId = result.getOpenid();
         } catch (Exception e) {
-            e.printStackTrace();
+            String message = e.getMessage();
+            if (message == null || message.isEmpty()) {
+                message = "微信登录失败";
+            }
+            return ResponseUtil.fail(AUTH_OPENID_UNACCESS, message);
         }
 
         if (sessionKey == null || openId == null) {
-            return ResponseUtil.fail(AUTH_OPENID_UNACCESS, "微信登录失败，请检查小程序 appid/appsecret");
+            return ResponseUtil.fail(AUTH_OPENID_UNACCESS, "微信登录失败");
         }
 
         LitemallUser user = userService.queryByOid(openId);

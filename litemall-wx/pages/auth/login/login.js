@@ -75,7 +75,16 @@ Page({
         })
       }).catch((err) => {
         app.globalData.hasLogin = false;
-        util.showErrorToast(err && err.errmsg ? err.errmsg : (err && err.errMsg ? err.errMsg : '微信登录失败'));
+        const message = err && err.errmsg ? err.errmsg : (err && err.errMsg ? err.errMsg : '');
+        if (message) {
+          wx.showModal({
+            title: '登录失败',
+            content: message,
+            showCancel: false
+          });
+        } else {
+          util.showErrorToast('微信登录失败');
+        }
       }).finally(() => {
         this.setData({
           isLoggingIn: false
