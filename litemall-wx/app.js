@@ -15,6 +15,18 @@ App({
                }
            )
     }
+    const opts = wx.getLaunchOptionsSync();
+    let inviteCode = null;
+    if (opts && opts.query && opts.query.inviteCode) {
+      inviteCode = opts.query.inviteCode;
+    } else if (opts && opts.scene) {
+      try {
+        inviteCode = decodeURIComponent(opts.scene);
+      } catch(e) {}
+    }
+    if (inviteCode) {
+      wx.setStorageSync('inviteCode', inviteCode);
+    }
     const updateManager = wx.getUpdateManager();
     wx.getUpdateManager().onUpdateReady(function() {
       wx.showModal({
