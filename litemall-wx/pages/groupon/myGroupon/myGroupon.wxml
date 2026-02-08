@@ -4,6 +4,7 @@
   <view class="card">
     <view class="title">我的邀请码</view>
     <view class="code">{{inviteCode || '未获取'}}</view>
+    <image class="qrcode" src="{{inviteQrcodeUrl}}" mode="widthFix" wx:if="{{inviteQrcodeUrl}}"></image>
     <button class="share-btn" open-type="share" disabled="{{!inviteCode}}">邀请好友</button>
   </view>
 

@@ -12,6 +12,7 @@ import org.linlinjava.litemall.core.util.JacksonUtil;
 import org.linlinjava.litemall.core.util.RegexUtil;
 import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.core.util.bcrypt.BCryptPasswordEncoder;
+import org.linlinjava.litemall.core.qcode.QCodeService;
 import org.linlinjava.litemall.db.domain.LitemallUser;
 import org.linlinjava.litemall.db.service.CouponAssignService;
 import org.linlinjava.litemall.db.service.LitemallUserService;
@@ -55,6 +56,9 @@ public class WxAuthController {
 
     @Autowired
     private CouponAssignService couponAssignService;
+
+    @Autowired
+    private QCodeService qCodeService;
 
     /**
      * 账号登录
@@ -361,6 +365,17 @@ public class WxAuthController {
             return ResponseUtil.updatedDataFailed();
         }
         return ResponseUtil.ok();
+    }
+
+    @GetMapping("invite_qrcode")
+    public Object inviteQrcode(@LoginUser Integer userId) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        String url = qCodeService.createInviteQrcode(String.valueOf(userId));
+        Map<Object, Object> data = new HashMap<Object, Object>();
+        data.put("url", url);
+        return ResponseUtil.ok(data);
     }
 
     /**

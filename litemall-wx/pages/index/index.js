@@ -78,6 +78,10 @@ Page({
         wx.navigateTo({
           url: '../goods/goods?grouponId=' + id
         });
+      } else if (_type == 'invite') {
+        if (id) {
+          wx.setStorageSync('inviteCode', id);
+        }
       } else {
         wx.navigateTo({
           url: '../index/index'

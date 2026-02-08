@@ -21,7 +21,15 @@ App({
       inviteCode = opts.query.inviteCode;
     } else if (opts && opts.scene) {
       try {
-        inviteCode = decodeURIComponent(opts.scene);
+        const scene = decodeURIComponent(opts.scene);
+        if (scene.indexOf(',') > -1) {
+          const parts = scene.split(',');
+          if (parts[0] === 'invite' && parts[1]) {
+            inviteCode = parts[1];
+          }
+        } else if (/^\d+$/.test(scene)) {
+          inviteCode = scene;
+        }
       } catch(e) {}
     }
     if (inviteCode) {

@@ -92,6 +92,25 @@ public class QCodeService {
         return "GOOD_QCODE_" + goodId + ".jpg";
     }
 
+    public String createInviteQrcode(String userId) {
+        try {
+            File file = wxMaService.getQrcodeService().createWxaCodeUnlimit("invite," + userId, "pages/index/index");
+            FileInputStream inputStream = new FileInputStream(file);
+            LitemallStorage storageInfo = storageService.store(inputStream, file.length(), "image/png",
+                    getInviteKeyName(userId));
+            return storageInfo.getUrl();
+        } catch (WxErrorException e) {
+            logger.error(e.getMessage(), e);
+        } catch (FileNotFoundException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return "";
+    }
+
+    private String getInviteKeyName(String userId) {
+        return "INVITE_QRCODE_" + userId + ".png";
+    }
+
     /**
      * 将商品图片，商品名字画到模版图中
      *

@@ -8,7 +8,9 @@ Page({
     inviteCodeInput: '',
     isSubmitting: false,
     isLoading: false,
-    hasLogin: false
+    hasLogin: false,
+    inviteQrcodeUrl: '',
+    isQrcodeLoading: false
   },
   onLoad: function(options) {
     const storedInviteCode = wx.getStorageSync('inviteCode') || '';
@@ -32,11 +34,12 @@ Page({
       this.setData({
         hasLogin: true
       });
-      return this.fetchInviteCode();
+      return Promise.all([this.fetchInviteCode(), this.fetchInviteQrcode()]);
     }).catch(() => {
       this.setData({
         hasLogin: false,
-        inviteCode: ''
+        inviteCode: '',
+        inviteQrcodeUrl: ''
       });
     });
   },
@@ -63,6 +66,25 @@ Page({
   bindInviteInput: function(e) {
     this.setData({
       inviteCodeInput: e.detail.value
+    });
+  },
+  fetchInviteQrcode() {
+    if (this.data.isQrcodeLoading) {
+      return Promise.resolve();
+    }
+    this.setData({
+      isQrcodeLoading: true
+    });
+    return util.request(api.AuthInviteQrcode).then((res) => {
+      if (res.errno === 0) {
+        this.setData({
+          inviteQrcodeUrl: res.data.url || ''
+        });
+      }
+    }).finally(() => {
+      this.setData({
+        isQrcodeLoading: false
+      });
     });
   },
   submitInvite: function() {

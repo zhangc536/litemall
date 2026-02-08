@@ -35,6 +35,12 @@ page {
   margin: 20rpx 0;
 }
 
+.qrcode {
+  width: 320rpx;
+  margin: 0 auto 20rpx;
+  display: block;
+}
+
 .input-box {
   background: #f7f7f7;
   border-radius: 8rpx;
