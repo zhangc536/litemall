@@ -1,52 +1,141 @@
 var util = require('../../../utils/util.js');
 var api = require('../../../config/api.js');
+var user = require('../../../utils/user.js');
 
 Page({
   data: {
-    orderList: [],
-    showType: 0
+    inviteCode: '',
+    inviteCodeInput: '',
+    isSubmitting: false,
+    isLoading: false,
+    hasLogin: false
   },
   onLoad: function(options) {
-    // 页面初始化 options为页面跳转所带来的参数
+    const storedInviteCode = wx.getStorageSync('inviteCode') || '';
+    if (storedInviteCode) {
+      this.setData({
+        inviteCodeInput: storedInviteCode
+      });
+    }
   },
 
   onPullDownRefresh() {
-    wx.showNavigationBarLoading() //在标题栏中显示加载
-    this.getOrderList();
-    wx.hideNavigationBarLoading() //完成停止加载
-    wx.stopPullDownRefresh() //停止下拉刷新
+    wx.showNavigationBarLoading()
+    this.refreshInviteInfo().finally(() => {
+      wx.hideNavigationBarLoading()
+      wx.stopPullDownRefresh()
+    });
   },
 
-  getOrderList() {
-    let that = this;
-    util.request(api.GroupOnMy, {
-      showType: that.data.showType
-    }).then(function(res) {
-      if (res.errno === 0) {
-        that.setData({
-          orderList: res.data.list
-        });
-      }
+  refreshInviteInfo() {
+    return user.checkLogin().then(() => {
+      this.setData({
+        hasLogin: true
+      });
+      return this.fetchInviteCode();
+    }).catch(() => {
+      this.setData({
+        hasLogin: false,
+        inviteCode: ''
+      });
     });
   },
-  switchTab: function(event) {
-    let showType = event.currentTarget.dataset.index;
+  fetchInviteCode() {
+    if (this.data.isLoading) {
+      return Promise.resolve();
+    }
     this.setData({
-      showType: showType
+      isLoading: true
     });
-    this.getOrderList();
+    return util.request(api.AuthInfo).then((res) => {
+      if (res.errno === 0) {
+        const code = res.data.userId ? String(res.data.userId) : '';
+        this.setData({
+          inviteCode: code
+        });
+      }
+    }).finally(() => {
+      this.setData({
+        isLoading: false
+      });
+    });
+  },
+  bindInviteInput: function(e) {
+    this.setData({
+      inviteCodeInput: e.detail.value
+    });
+  },
+  submitInvite: function() {
+    if (this.data.isSubmitting) {
+      return;
+    }
+    if (!this.data.hasLogin) {
+      wx.navigateTo({
+        url: "/pages/auth/login/login"
+      });
+      return;
+    }
+    const inviteCode = (this.data.inviteCodeInput || '').trim();
+    if (!inviteCode) {
+      wx.showModal({
+        title: '错误信息',
+        content: '请输入邀请码',
+        showCancel: false
+      });
+      return;
+    }
+    this.setData({
+      isSubmitting: true
+    });
+    util.request(api.AuthBindInviteCode, { inviteCode: inviteCode }, 'POST')
+      .then((res) => {
+        if (res.errno !== 0) {
+          util.showErrorToast(res.errmsg || '绑定失败');
+          return;
+        }
+        wx.removeStorageSync('inviteCode');
+        this.setData({
+          inviteCodeInput: ''
+        });
+        wx.showModal({
+          title: '绑定成功',
+          content: '邀请码绑定成功',
+          showCancel: false
+        });
+      })
+      .catch((err) => {
+        const message = err && err.errmsg ? err.errmsg : (err && err.errMsg ? err.errMsg : '');
+        if (message) {
+          util.showErrorToast(message);
+        } else {
+          util.showErrorToast('绑定失败');
+        }
+      })
+      .finally(() => {
+        this.setData({
+          isSubmitting: false
+        });
+      });
   },
   onReady: function() {
     // 页面渲染完成
   },
   onShow: function() {
     // 页面显示
-    this.getOrderList();
+    this.refreshInviteInfo();
   },
   onHide: function() {
     // 页面隐藏
   },
   onUnload: function() {
     // 页面关闭
+  },
+  onShareAppMessage: function() {
+    const inviteCode = this.data.inviteCode;
+    const path = inviteCode ? '/pages/index/index?inviteCode=' + inviteCode : '/pages/index/index';
+    return {
+      title: '邀请你来逛商城',
+      path: path
+    };
   }
 })

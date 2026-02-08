@@ -584,6 +584,7 @@ public class WxAuthController {
 
         LitemallUser user = userService.findById(userId);
         Map<Object, Object> data = new HashMap<Object, Object>();
+        data.put("userId", user.getId());
         data.put("nickName", user.getNickname());
         data.put("avatar", user.getAvatar());
         data.put("mobile", user.getMobile());

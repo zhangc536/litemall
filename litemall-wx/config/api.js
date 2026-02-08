@@ -23,6 +23,7 @@ module.exports = {
   AuthRegisterCaptcha: WxApiRoot + 'auth/regCaptcha', //验证码
   AuthBindPhone: WxApiRoot + 'auth/bindPhone', //绑定微信手机号
   AuthBindInviteCode: WxApiRoot + 'auth/bind_invite_code', //绑定邀请码
+  AuthInfo: WxApiRoot + 'auth/info', //用户信息
 
   GoodsCount: WxApiRoot + 'goods/count', //统计商品总数
   GoodsList: WxApiRoot + 'goods/list', //获得商品列表

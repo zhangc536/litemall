@@ -63,7 +63,7 @@
     </view>
     <view class='user_column_item' bindtap='goGroupon'>
       <image class='user_column_item_image' src='/static/images/group.png'></image>
-      <view class='user_column_item_text'>我的拼团</view>
+      <view class='user_column_item_text'>邀请</view>
     </view>
 
     <view class='user_column_item' bindtap='goAddress'>
