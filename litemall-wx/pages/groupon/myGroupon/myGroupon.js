@@ -12,12 +12,9 @@ Page({
     isQrcodeLoading: false
   },
   onLoad: function(options) {
-    const storedInviteCode = wx.getStorageSync('inviteCode') || '';
-    if (storedInviteCode) {
-      this.setData({
-        inviteCodeInput: storedInviteCode
-      });
-    }
+    this.setData({
+      inviteCodeInput: ''
+    });
   },
 
   onPullDownRefresh() {
