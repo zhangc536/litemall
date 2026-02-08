@@ -8,9 +8,11 @@ import org.linlinjava.litemall.core.storage.StorageService;
 import org.linlinjava.litemall.core.system.SystemConfig;
 import org.linlinjava.litemall.db.domain.LitemallGroupon;
 import org.linlinjava.litemall.db.domain.LitemallStorage;
+import org.linlinjava.litemall.db.service.LitemallStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -26,6 +28,9 @@ public class QCodeService {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private LitemallStorageService litemallStorageService;
 
 
     public String createGrouponShareImage(String goodName, String goodPicUrl, LitemallGroupon groupon) {
@@ -93,16 +98,24 @@ public class QCodeService {
     }
 
     public String createInviteQrcode(String userId) {
+        String fileName = getInviteKeyName(userId);
+        LitemallStorage exist = litemallStorageService.findByName(fileName);
+        if (exist != null && !StringUtils.isEmpty(exist.getUrl())) {
+            return exist.getUrl();
+        }
         try {
             File file = wxMaService.getQrcodeService().createWxaCodeUnlimit("invite," + userId, "pages/index/index");
             FileInputStream inputStream = new FileInputStream(file);
             LitemallStorage storageInfo = storageService.store(inputStream, file.length(), "image/png",
-                    getInviteKeyName(userId));
+                    fileName);
             return storageInfo.getUrl();
         } catch (WxErrorException e) {
             logger.error(e.getMessage(), e);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
+        }
+        if (exist != null) {
+            return exist.getUrl();
         }
         return "";
     }

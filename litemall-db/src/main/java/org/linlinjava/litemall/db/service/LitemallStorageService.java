@@ -34,6 +34,15 @@ public class LitemallStorageService {
         return storageMapper.selectOneByExample(example);
     }
 
+    public LitemallStorage findByName(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
+        LitemallStorageExample example = new LitemallStorageExample();
+        example.or().andNameEqualTo(name).andDeletedEqualTo(false);
+        return storageMapper.selectOneByExample(example);
+    }
+
     public int update(LitemallStorage storageInfo) {
         storageInfo.setUpdateTime(LocalDateTime.now());
         return storageMapper.updateByPrimaryKeySelective(storageInfo);
