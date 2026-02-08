@@ -77,9 +77,15 @@ Page({
     });
     return util.request(api.AuthInviteQrcode).then((res) => {
       if (res.errno === 0) {
-        this.setData({
-          inviteQrcodeUrl: res.data.url || ''
-        });
+        const isObject = res.data && typeof res.data === 'object';
+        const code = isObject && res.data.code ? String(res.data.code) : '';
+        const url = isObject ? (res.data.url || '') : (res.data || '');
+        const patch = {};
+        if (code) {
+          patch.inviteCode = code;
+        }
+        patch.inviteQrcodeUrl = url;
+        this.setData(patch);
       }
     }).finally(() => {
       this.setData({

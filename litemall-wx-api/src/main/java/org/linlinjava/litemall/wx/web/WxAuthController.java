@@ -374,6 +374,7 @@ public class WxAuthController {
         }
         String url = qCodeService.createInviteQrcode(String.valueOf(userId));
         Map<Object, Object> data = new HashMap<Object, Object>();
+        data.put("code", userId);
         data.put("url", url);
         return ResponseUtil.ok(data);
     }
