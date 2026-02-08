@@ -7,16 +7,11 @@ const app = getApp();
 
 Page({
   data: {
-    newGoods: [],
-    hotGoods: [],
-    topics: [],
-    brands: [],
-    groupons: [],
-    floorGoods: [],
-    banner: [],
-    channel: [],
-    coupon: [],
-    goodsCount: 0
+    goodsList: [],
+    goodsCount: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1
   },
 
   onShareAppMessage: function() {
@@ -29,29 +24,34 @@ Page({
 
   onPullDownRefresh() {
     wx.showNavigationBarLoading() //在标题栏中显示加载
-    this.getIndexData();
-    wx.hideNavigationBarLoading() //完成停止加载
-    wx.stopPullDownRefresh() //停止下拉刷新
+    this.setData({
+      goodsList: [],
+      page: 1,
+      totalPages: 1
+    });
+    Promise.all([this.getGoodsList(), this.getGoodsCount()]).finally(() => {
+      wx.hideNavigationBarLoading() //完成停止加载
+      wx.stopPullDownRefresh() //停止下拉刷新
+    });
   },
 
-  getIndexData: function() {
+  getGoodsList: function() {
     let that = this;
-    util.request(api.IndexUrl).then(function(res) {
+    return util.request(api.GoodsList, {
+      page: that.data.page,
+      limit: that.data.limit
+    }).then(function(res) {
       if (res.errno === 0) {
         that.setData({
-          newGoods: res.data.newGoodsList,
-          hotGoods: res.data.hotGoodsList,
-          topics: res.data.topicList,
-          brands: res.data.brandList,
-          floorGoods: res.data.floorGoodsList,
-          banner: res.data.banner,
-          groupons: res.data.grouponList,
-          channel: res.data.channel,
-          coupon: res.data.couponList
+          goodsList: that.data.goodsList.concat(res.data.list),
+          totalPages: res.data.pages
         });
       }
     });
-    util.request(api.GoodsCount).then(function (res) {
+  },
+  getGoodsCount: function() {
+    let that = this;
+    return util.request(api.GoodsCount).then(function (res) {
       that.setData({
         goodsCount: res.data
       });
@@ -113,7 +113,8 @@ Page({
       });
     }
 
-    this.getIndexData();
+    this.getGoodsList();
+    this.getGoodsCount();
   },
   onReady: function() {
     // 页面渲染完成
@@ -127,19 +128,19 @@ Page({
   onUnload: function() {
     // 页面关闭
   },
-  getCoupon(e) {
-    let couponId = e.currentTarget.dataset.index
-    util.request(api.CouponReceive, {
-      couponId: couponId
-    }, 'POST').then(res => {
-      if (res.errno === 0) {
-        wx.showToast({
-          title: "领取成功"
-        })
-      }
-      else{
-        util.showErrorToast(res.errmsg);
-      }
-    })
-  },
+  onReachBottom() {
+    if (this.data.totalPages > this.data.page) {
+      this.setData({
+        page: this.data.page + 1
+      });
+      this.getGoodsList();
+    } else {
+      wx.showToast({
+        title: '没有更多商品了',
+        icon: 'none',
+        duration: 2000
+      });
+      return false;
+    }
+  }
 })
