@@ -127,8 +127,6 @@ export default {
       nickname: 'Nickname',
       avatar: 'Avatar',
       mobile: 'Mobile',
-      gender: 'Gender',
-      birthday: 'Birthday',
       user_level: 'Level',
       status: 'Status',
       actions: 'Actions'
@@ -140,7 +138,6 @@ export default {
       username: 'Username',
       nickname: 'Nickname',
       mobile: 'Mobile',
-      gender: 'Gender',
       user_level: 'Level',
       status: 'Status'
     },
@@ -148,7 +145,6 @@ export default {
       filter_username: 'Username',
       filter_user_id: 'User ID',
       filter_mobile: 'Mobile',
-      gender: 'Please choose',
       user_level: 'Please choose',
       status: 'Please choose'
     }

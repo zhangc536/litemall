@@ -16,7 +16,7 @@
       </el-table-column>
       <el-table-column align="center" label="上传时间" prop="addTime" />
       <el-table-column align="center" label="审核" width="220" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
+        <template>
           <el-button type="success" size="mini" @click="handleAudit('APPROVED')">通过</el-button>
           <el-button type="danger" size="mini" @click="handleAudit('REJECTED')">驳回</el-button>
           <el-button type="primary" size="mini" @click="handleShip">发货</el-button>
@@ -29,11 +29,8 @@
 <script>
 import { listVouchers } from '@/api/voucher'
 import { auditOrder, shipOrder } from '@/api/voucher'
-import Pagination from '@/components/Pagination'
-
 export default {
   name: 'VoucherUpload',
-  components: { Pagination },
   data() {
     return {
       orderId: '',

@@ -12,6 +12,8 @@ import org.linlinjava.litemall.db.service.LitemallUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,5 +39,17 @@ public class AdminUserController {
                        @Order @RequestParam(defaultValue = "desc") String order) {
         List<LitemallUser> userList = userService.querySelective(username, mobile, page, limit, sort, order);
         return ResponseUtil.okList(userList);
+    }
+
+    @RequiresPermissions("admin:user:delete")
+    @RequiresPermissionsDesc(menu = {"用户管理", "会员管理"}, button = "删除")
+    @PostMapping("/delete")
+    public Object delete(@RequestBody LitemallUser user) {
+        Integer id = user.getId();
+        if (id == null) {
+            return ResponseUtil.badArgument();
+        }
+        userService.deleteById(id);
+        return ResponseUtil.ok();
     }
 }

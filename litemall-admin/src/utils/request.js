@@ -3,7 +3,7 @@ import { Message, MessageBox } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
-axios.defaults.withCredentials = true
+axios.defaults.withCredentials = false
 
 const resolvedBaseURL = process.env.VUE_APP_BASE_API || (typeof window !== 'undefined'
   ? `${window.location.protocol}//${window.location.hostname}:8080/admin`
@@ -24,12 +24,13 @@ service.interceptors.request.use(
     }
     return config
   },
-  error => {
-    // Do something with request error
-    console.log(error) // for debug
-    Promise.reject(error)
-  }
+  error => Promise.reject(error)
 )
+
+function buildError(errmsg) {
+  const data = { errmsg }
+  return { data }
+}
 
 // response interceptor
 service.interceptors.response.use(
@@ -45,37 +46,37 @@ service.interceptors.response.use(
           location.reload()
         })
       })
-      return Promise.reject('error')
+      return Promise.reject(buildError('系统未登录，请重新登录'))
     } else if (res.errno === 502) {
       MessageBox.alert('系统内部错误，请联系管理员维护', '错误', {
         confirmButtonText: '确定',
         type: 'error'
       })
-      return Promise.reject('error')
+      return Promise.reject(buildError('系统内部错误，请联系管理员维护'))
     } else if (res.errno === 503) {
       MessageBox.alert('请求业务目前未支持', '警告', {
         confirmButtonText: '确定',
         type: 'error'
       })
-      return Promise.reject('error')
+      return Promise.reject(buildError('请求业务目前未支持'))
     } else if (res.errno === 504) {
       MessageBox.alert('更新数据已经失效，请刷新页面重新操作', '警告', {
         confirmButtonText: '确定',
         type: 'error'
       })
-      return Promise.reject('error')
+      return Promise.reject(buildError('更新数据已经失效，请刷新页面重新操作'))
     } else if (res.errno === 505) {
       MessageBox.alert('更新失败，请再尝试一次', '警告', {
         confirmButtonText: '确定',
         type: 'error'
       })
-      return Promise.reject('error')
+      return Promise.reject(buildError('更新失败，请再尝试一次'))
     } else if (res.errno === 506) {
       MessageBox.alert('没有操作权限，请联系管理员授权', '错误', {
         confirmButtonText: '确定',
         type: 'error'
       })
-      return Promise.reject('error')
+      return Promise.reject(buildError('没有操作权限，请联系管理员授权'))
     } else if (res.errno !== 0) {
       // 非5xx的错误属于业务错误，留给具体页面处理
       return Promise.reject(response)
@@ -83,13 +84,13 @@ service.interceptors.response.use(
       return response
     }
   }, error => {
-    console.log('err' + error)// for debug
+    console.log('err' + error)
     Message({
       message: '登录连接超时（后台不能连接，请联系系统管理员）',
       type: 'error',
       duration: 5 * 1000
     })
-    return Promise.reject(error)
+    return Promise.reject(buildError('登录连接超时（后台不能连接，请联系系统管理员）'))
   })
 
 export default service

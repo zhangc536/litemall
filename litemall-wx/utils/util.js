@@ -48,14 +48,6 @@ function request(url, data = {}, method = "GET") {
             wx.navigateTo({
               url: '/pages/auth/login/login'
             });
-          } else if (res.data.errno == 715) {
-            const pages = getCurrentPages();
-            const current = pages.length ? pages[pages.length - 1] : null;
-            if (!current || current.route !== 'pages/auth/invite/invite') {
-              wx.navigateTo({
-                url: '/pages/auth/invite/invite'
-              });
-            }
           } else {
             resolve(res.data);
           }

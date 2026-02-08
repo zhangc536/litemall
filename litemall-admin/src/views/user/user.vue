@@ -22,14 +22,6 @@
 
       <el-table-column align="center" min-width="140px" :label="$t('user_user.table.mobile')" prop="mobile" />
 
-      <el-table-column align="center" min-width="100px" :label="$t('user_user.table.gender')" prop="gender">
-        <template slot-scope="scope">
-          {{ formatGender(scope.row.gender) }}
-        </template>
-      </el-table-column>
-
-      <el-table-column align="center" min-width="140px" :label="$t('user_user.table.birthday')" prop="birthday" />
-
       <el-table-column align="center" min-width="120px" :label="$t('user_user.table.user_level')" prop="userLevel">
         <template slot-scope="scope">
           {{ formatUserLevel(scope.row.userLevel) }}
@@ -41,6 +33,12 @@
           <el-tag :type="formatStatusType(scope.row.status)">{{ formatStatus(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
+
+      <el-table-column align="center" min-width="120px" :label="$t('user_user.table.actions')" class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button v-permission="['POST /admin/user/delete']" type="danger" size="mini" @click="handleDelete(scope.row)">{{ $t('app.button.delete') }}</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
@@ -48,14 +46,8 @@
 </template>
 
 <script>
-import { listUser } from '@/api/user'
+import { listUser, deleteUser } from '@/api/user'
 import Pagination from '@/components/Pagination'
-
-const genderMap = {
-  0: '未知',
-  1: '男',
-  2: '女'
-}
 
 const userLevelMap = {
   0: '普通',
@@ -98,9 +90,6 @@ export default {
     this.getList()
   },
   methods: {
-    formatGender(gender) {
-      return genderMap[gender] || genderMap[0]
-    },
     formatUserLevel(level) {
       return userLevelMap[level] || userLevelMap[0]
     },
@@ -126,14 +115,27 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
+    handleDelete(row) {
+      deleteUser(row).then(() => {
+        this.$notify.success({
+          title: '成功',
+          message: '删除用户成功'
+        })
+        this.getList()
+      }).catch(response => {
+        this.$notify.error({
+          title: '失败',
+          message: response.data.errmsg
+        })
+      })
+    },
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['用户ID', '用户名', '昵称', '手机号码', '性别', '生日', '用户等级', '状态']
-        const filterVal = ['id', 'username', 'nickname', 'mobile', 'gender', 'birthday', 'userLevel', 'status']
+        const tHeader = ['用户ID', '用户名', '昵称', '手机号码', '用户等级', '状态']
+        const filterVal = ['id', 'username', 'nickname', 'mobile', 'userLevel', 'status']
         const list = this.list.map(item => ({
           ...item,
-          gender: this.formatGender(item.gender),
           userLevel: this.formatUserLevel(item.userLevel),
           status: this.formatStatus(item.status)
         }))

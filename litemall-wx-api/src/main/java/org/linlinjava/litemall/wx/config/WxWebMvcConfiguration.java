@@ -1,7 +1,5 @@
 package org.linlinjava.litemall.wx.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.db.domain.LitemallUser;
 import org.linlinjava.litemall.db.service.LitemallUserService;
 import org.linlinjava.litemall.wx.annotation.LoginUser;
@@ -20,8 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-import static org.linlinjava.litemall.wx.util.WxResponseCode.AUTH_INVITE_CODE_REQUIRED;
-
 @Configuration
 public class WxWebMvcConfiguration implements WebMvcConfigurer {
     @Autowired
@@ -39,7 +35,6 @@ public class WxWebMvcConfiguration implements WebMvcConfigurer {
 
     private static class InviteCodeInterceptor implements HandlerInterceptor {
         private final LitemallUserService userService;
-        private final ObjectMapper objectMapper = new ObjectMapper();
 
         private InviteCodeInterceptor(LitemallUserService userService) {
             this.userService = userService;
@@ -77,13 +72,6 @@ public class WxWebMvcConfiguration implements WebMvcConfigurer {
             LitemallUser user = userService.findById(userId);
             if (user == null) {
                 return true;
-            }
-            Integer inviterUserId = user.getInviterUserId();
-            if (inviterUserId == null || inviterUserId == 0) {
-                response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write(objectMapper.writeValueAsString(
-                        ResponseUtil.fail(AUTH_INVITE_CODE_REQUIRED, "请先绑定邀请码")));
-                return false;
             }
             return true;
         }

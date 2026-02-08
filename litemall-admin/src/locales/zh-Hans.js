@@ -127,8 +127,6 @@ export default {
       nickname: '用户昵称',
       avatar: '用户头像',
       mobile: '手机号码',
-      gender: '性别',
-      birthday: '生日',
       user_level: '用户等级',
       status: '状态',
       actions: '操作'
@@ -140,7 +138,6 @@ export default {
       username: '用户名',
       nickname: '用户昵称',
       mobile: '用户手机',
-      gender: '用户性别',
       user_level: '用户等级',
       status: '状态'
     },
@@ -148,7 +145,6 @@ export default {
       filter_username: '请输入用户名',
       filter_user_id: '请输入用户Id',
       filter_mobile: '请输入手机号',
-      gender: '请选择',
       user_level: '请选择',
       status: '请选择'
     }

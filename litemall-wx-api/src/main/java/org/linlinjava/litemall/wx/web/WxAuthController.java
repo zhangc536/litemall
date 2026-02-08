@@ -148,7 +148,6 @@ public class WxAuthController {
             user.setWeixinOpenid(openId);
             user.setAvatar(userInfo.getAvatarUrl());
             user.setNickname(userInfo.getNickName());
-            user.setGender(userInfo.getGender());
             user.setUserLevel((byte) 0);
             user.setStatus((byte) 0);
             user.setLastLoginTime(LocalDateTime.now());
@@ -304,7 +303,6 @@ public class WxAuthController {
         user.setWeixinOpenid(openId);
         user.setAvatar("https://yanxuan.nosdn.127.net/80841d741d7fa3073e0ae27bf487339f.jpg?imageView&quality=90&thumbnail=64x64");
         user.setNickname(username);
-        user.setGender((byte) 0);
         user.setUserLevel((byte) 0);
         user.setStatus((byte) 0);
         user.setLastLoginTime(LocalDateTime.now());
@@ -529,15 +527,11 @@ public class WxAuthController {
             return ResponseUtil.unlogin();
         }
         String avatar = JacksonUtil.parseString(body, "avatar");
-        Byte gender = JacksonUtil.parseByte(body, "gender");
         String nickname = JacksonUtil.parseString(body, "nickname");
 
         LitemallUser user = userService.findById(userId);
         if(!StringUtils.isEmpty(avatar)){
             user.setAvatar(avatar);
-        }
-        if(gender != null){
-            user.setGender(gender);
         }
         if(!StringUtils.isEmpty(nickname)){
             user.setNickname(nickname);
@@ -592,7 +586,6 @@ public class WxAuthController {
         Map<Object, Object> data = new HashMap<Object, Object>();
         data.put("nickName", user.getNickname());
         data.put("avatar", user.getAvatar());
-        data.put("gender", user.getGender());
         data.put("mobile", user.getMobile());
 
         return ResponseUtil.ok(data);

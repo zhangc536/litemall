@@ -1,4 +1,4 @@
-﻿/*M!999999\- enable the sandbox mode */ 
+/*M!999999\- enable the sandbox mode */ 
 -- MariaDB dump 10.19-12.1.2-MariaDB, for Win64 (AMD64)
 --
 -- Host: localhost    Database: litemall
@@ -7279,8 +7279,6 @@ CREATE TABLE `litemall_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(63) NOT NULL COMMENT '用户名称',
   `password` varchar(63) NOT NULL DEFAULT '' COMMENT '用户密码',
-  `gender` tinyint(3) NOT NULL DEFAULT 0 COMMENT '性别：0 未知， 1男， 1 女',
-  `birthday` date DEFAULT NULL COMMENT '生日',
   `last_login_time` datetime DEFAULT NULL COMMENT '最近一次登录时间',
   `last_login_ip` varchar(63) NOT NULL DEFAULT '' COMMENT '最近一次登录IP地址',
   `user_level` tinyint(3) DEFAULT 0 COMMENT '0 普通用户，1 VIP用户，2 高级VIP用户',
@@ -7306,7 +7304,7 @@ LOCK TABLES `litemall_user` WRITE;
 /*!40000 ALTER TABLE `litemall_user` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `litemall_user` VALUES
-(1,'user123','$2a$10$lTu9qi0hr19OC800Db.eludFr0AXuJUSrMHi/iPYhKRlPFeqJxlye',1,NULL,'2019-04-20 22:17:43','0:0:0:0:0:0:0:1',0,'user123','','','','',0,'2019-04-20 22:17:43','2019-04-20 22:17:43',0);
+(1,'user123','$2a$10$lTu9qi0hr19OC800Db.eludFr0AXuJUSrMHi/iPYhKRlPFeqJxlye','2019-04-20 22:17:43','0:0:0:0:0:0:0:1',0,'user123','','','','',0,'2019-04-20 22:17:43','2019-04-20 22:17:43',0);
 /*!40000 ALTER TABLE `litemall_user` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;

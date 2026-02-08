@@ -88,7 +88,7 @@ export const asyncRoutes = [
         component: () => import('@/views/user/user'),
         name: 'userList',
         meta: {
-          perms: ['GET /admin/user/list'],
+          perms: ['GET /admin/user/list', 'POST /admin/user/delete'],
           title: 'app.menu.user_user',
           noCache: true
         }
@@ -125,7 +125,6 @@ export const asyncRoutes = [
       }
     ]
   },
-
 
   {
     path: '/goods',

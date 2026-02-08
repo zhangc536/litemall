@@ -7,7 +7,6 @@ public class UserInfo {
     private String province;
     private String city;
     private String language;
-    private Byte gender;
 
     public String getCountry() {
         return country;
@@ -39,14 +38,6 @@ public class UserInfo {
 
     public void setLanguage(String language) {
         this.language = language;
-    }
-
-    public Byte getGender() {
-        return gender;
-    }
-
-    public void setGender(Byte gender) {
-        this.gender = gender;
     }
 
     public String getNickName() {

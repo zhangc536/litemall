@@ -117,13 +117,15 @@ export default {
           this.$store.dispatch('LoginByUsername', this.loginForm).then(() => {
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
-          }).catch(response => {
-            if (response.data.data) {
-              this.codeImg = response.data.data
+          }).catch(err => {
+            const resp = err && err.data ? err : (err.response || null)
+            if (resp && resp.data && resp.data.data) {
+              this.codeImg = resp.data.data
             }
+            const msg = (resp && resp.data && resp.data.errmsg) ? resp.data.errmsg : (err && err.message ? err.message : '登录失败')
             this.$notify.error({
               title: '失败',
-              message: response.data.errmsg
+              message: msg
             })
             this.loading = false
           })

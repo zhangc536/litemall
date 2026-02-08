@@ -7,3 +7,11 @@ export function listUser(query) {
     params: query
   })
 }
+
+export function deleteUser(data) {
+  return request({
+    url: '/user/delete',
+    method: 'post',
+    data
+  })
+}
