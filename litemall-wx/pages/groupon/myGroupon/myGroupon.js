@@ -1,6 +1,5 @@
 var util = require('../../../utils/util.js');
 var api = require('../../../config/api.js');
-var user = require('../../../utils/user.js');
 
 Page({
   data: {
@@ -30,12 +29,19 @@ Page({
   },
 
   refreshInviteInfo() {
-    return user.checkLogin().then(() => {
+    const token = wx.getStorageSync('token');
+    if (!token) {
       this.setData({
-        hasLogin: true
+        hasLogin: false,
+        inviteCode: '',
+        inviteQrcodeUrl: ''
       });
-      return Promise.all([this.fetchInviteCode(), this.fetchInviteQrcode()]);
-    }).catch(() => {
+      return Promise.resolve();
+    }
+    this.setData({
+      hasLogin: true
+    });
+    return Promise.all([this.fetchInviteCode(), this.fetchInviteQrcode()]).catch(() => {
       this.setData({
         hasLogin: false,
         inviteCode: '',
