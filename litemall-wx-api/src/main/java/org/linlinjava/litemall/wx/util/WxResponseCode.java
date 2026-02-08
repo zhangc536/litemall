@@ -12,6 +12,7 @@ public class WxResponseCode {
     public static final Integer AUTH_OPENID_UNACCESS = 708;
     public static final Integer AUTH_OPENID_BINDED = 709;
     public static final Integer AUTH_INVALID_INVITE_CODE = 714;
+    public static final Integer AUTH_INVITE_CODE_REQUIRED = 715;
 
     public static final Integer GOODS_UNSHELVE = 710;
     public static final Integer GOODS_NO_STOCK = 711;

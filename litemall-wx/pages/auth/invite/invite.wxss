@@ -1,0 +1,33 @@
+.container {
+  padding: 40rpx 30rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  color: #333;
+  margin-bottom: 40rpx;
+  font-weight: 500;
+}
+
+.input-box {
+  background: #fff;
+  border-radius: 8rpx;
+  padding: 20rpx 24rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.04);
+}
+
+.invite-input {
+  width: 100%;
+  font-size: 30rpx;
+  color: #333;
+}
+
+.tips {
+  margin-top: 24rpx;
+  font-size: 26rpx;
+  color: #999;
+}
+
+.submit-btn {
+  margin-top: 60rpx;
+}

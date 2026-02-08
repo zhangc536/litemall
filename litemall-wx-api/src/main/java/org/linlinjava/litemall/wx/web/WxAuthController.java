@@ -118,7 +118,6 @@ public class WxAuthController {
     public Object loginByWeixin(@RequestBody WxLoginInfo wxLoginInfo, HttpServletRequest request) {
         String code = wxLoginInfo.getCode();
         UserInfo userInfo = wxLoginInfo.getUserInfo();
-        String inviteCode = wxLoginInfo.getInviteCode();
         if (code == null || userInfo == null) {
             return ResponseUtil.badArgument();
         }
@@ -143,18 +142,6 @@ public class WxAuthController {
 
         LitemallUser user = userService.queryByOid(openId);
         if (user == null) {
-            if (StringUtils.isEmpty(inviteCode)) {
-                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
-            }
-            Integer inviterUserId;
-            try {
-                inviterUserId = Integer.valueOf(inviteCode);
-            } catch (NumberFormatException e) {
-                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
-            }
-            if (userService.findById(inviterUserId) == null) {
-                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
-            }
             user = new LitemallUser();
             user.setUsername(openId);
             user.setPassword(openId);
@@ -255,7 +242,6 @@ public class WxAuthController {
         String password = JacksonUtil.parseString(body, "password");
         String mobile = JacksonUtil.parseString(body, "mobile");
         String code = JacksonUtil.parseString(body, "code");
-        String inviteCode = JacksonUtil.parseString(body, "inviteCode");
         // 如果是小程序注册，则必须非空
         // 其他情况，可以为空
         String wxCode = JacksonUtil.parseString(body, "wxCode");
@@ -287,18 +273,6 @@ public class WxAuthController {
         // 非空，则是小程序注册
         // 继续验证openid
         if(!StringUtils.isEmpty(wxCode)) {
-            if (StringUtils.isEmpty(inviteCode)) {
-                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
-            }
-            Integer inviterUserId;
-            try {
-                inviterUserId = Integer.valueOf(inviteCode);
-            } catch (NumberFormatException e) {
-                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
-            }
-            if (userService.findById(inviterUserId) == null) {
-                return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
-            }
             try {
                 WxMaJscode2SessionResult result = this.wxService.getUserService().getSessionInfo(wxCode);
                 openId = result.getOpenid();
@@ -352,6 +326,43 @@ public class WxAuthController {
         result.put("token", token);
         result.put("userInfo", userInfo);
         return ResponseUtil.ok(result);
+    }
+
+    @PostMapping("bind_invite_code")
+    public Object bindInviteCode(@LoginUser Integer userId, @RequestBody String body) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        String inviteCode = JacksonUtil.parseString(body, "inviteCode");
+        if (StringUtils.isEmpty(inviteCode)) {
+            return ResponseUtil.badArgument();
+        }
+        Integer inviterUserId;
+        try {
+            inviterUserId = Integer.valueOf(inviteCode);
+        } catch (NumberFormatException e) {
+            return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+        }
+        if (inviterUserId.equals(userId)) {
+            return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+        }
+        LitemallUser inviterUser = userService.findById(inviterUserId);
+        if (inviterUser == null) {
+            return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+        }
+        LitemallUser user = userService.findById(userId);
+        if (user == null) {
+            return ResponseUtil.unlogin();
+        }
+        if (user.getInviterUserId() != null && user.getInviterUserId() > 0) {
+            return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码已绑定");
+        }
+        user.setInviterUserId(inviterUserId);
+        user.setUpdateTime(LocalDateTime.now());
+        if (userService.updateById(user) == 0) {
+            return ResponseUtil.updatedDataFailed();
+        }
+        return ResponseUtil.ok();
     }
 
     /**

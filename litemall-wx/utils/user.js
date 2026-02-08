@@ -51,8 +51,7 @@ function loginByWeixin(userInfo) {
       //登录远程服务器
       util.request(api.AuthLoginByWeixin, {
         code: res.code,
-        userInfo: userInfo,
-        inviteCode: wx.getStorageSync('inviteCode') || ''
+        userInfo: userInfo
       }, 'POST').then(res => {
         if (res.errno === 0) {
           //存储用户信息

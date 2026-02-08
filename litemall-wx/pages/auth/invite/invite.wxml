@@ -1,0 +1,8 @@
+<view class="container">
+  <view class="title">绑定邀请码</view>
+  <view class="input-box">
+    <input class="invite-input" type="number" maxlength="20" placeholder="请输入邀请码" bindinput="bindInviteInput" value="{{inviteCode}}" />
+  </view>
+  <view class="tips">绑定后可正常使用商城功能</view>
+  <button class="submit-btn" type="primary" bindtap="submitInvite" loading="{{isSubmitting}}" disabled="{{isSubmitting}}">绑定</button>
+</view>
