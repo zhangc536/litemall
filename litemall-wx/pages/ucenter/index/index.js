@@ -25,20 +25,27 @@ Page({
   },
   onShow: function() {
 
-    //获取用户的登录信息
-    if (app.globalData.hasLogin) {
-      let userInfo = wx.getStorageSync('userInfo');
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+    if (token && userInfo) {
       this.setData({
         userInfo: userInfo,
         hasLogin: true
       });
-
       let that = this;
       util.request(api.UserIndex).then(function(res) {
         if (res.errno === 0) {
           that.setData({
             order: res.data.order
           });
+        }
+      });
+    } else {
+      this.setData({
+        hasLogin: false,
+        userInfo: {
+          nickName: '点击登录',
+          avatarUrl: '/static/images/my.png'
         }
       });
     }
