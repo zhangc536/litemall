@@ -24,13 +24,21 @@ function formatNumber(n) {
  */
 function request(url, data = {}, method = "GET") {
   return new Promise(function(resolve, reject) {
+    var token = wx.getStorageSync('token');
+    if (token && (data == null || data.token === undefined)) {
+      data = data || {};
+      data.token = token;
+    }
+    if (token && url.indexOf('token=') === -1) {
+      url = url + (url.indexOf('?') === -1 ? '?' : '&') + 'token=' + encodeURIComponent(token);
+    }
     wx.request({
       url: url,
       data: data,
       method: method,
       header: {
         'Content-Type': 'application/json',
-        'X-Litemall-Token': wx.getStorageSync('token')
+        'X-Litemall-Token': token
       },
       success: function(res) {
 
