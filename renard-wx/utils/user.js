@@ -76,13 +76,18 @@ function loginByWeixin(userInfo) {
  */
 function checkLogin() {
   return new Promise(function(resolve, reject) {
-    if (wx.getStorageSync('userInfo') && wx.getStorageSync('token')) {
+    const userInfo = wx.getStorageSync('userInfo');
+    const token = wx.getStorageSync('token');
+    const hasProfile = userInfo && userInfo.nickName && userInfo.avatarUrl;
+    if (token && hasProfile) {
       checkSession().then(() => {
         resolve(true);
       }).catch(() => {
         reject(false);
       });
     } else {
+      wx.removeStorageSync('token');
+      wx.removeStorageSync('userInfo');
       reject(false);
     }
   });

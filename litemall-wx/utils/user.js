@@ -83,10 +83,13 @@ function checkLogin() {
   return new Promise(function(resolve, reject) {
     const userInfo = wx.getStorageSync('userInfo');
     const token = wx.getStorageSync('token');
-    if (userInfo && token) {
+    const hasProfile = userInfo && userInfo.nickName && userInfo.avatarUrl;
+    if (token && hasProfile) {
       resolve(true);
       return;
     }
+    wx.removeStorageSync('token');
+    wx.removeStorageSync('userInfo');
     reject(false);
   });
 }
