@@ -40,17 +40,14 @@ Page({
     })
   },
   doLogin: function(userInfo) {
-    user.checkLogin().catch(() => {
-      user.loginByWeixin(userInfo).then(res => {
-        app.globalData.hasLogin = true;
-        wx.navigateBack({
-          delta: 1
-        })
-      }).catch((err) => {
-        app.globalData.hasLogin = false;
-        util.showErrorToast('微信登录失败');
-      });
-
+    user.loginByWeixin(userInfo).then(res => {
+      app.globalData.hasLogin = true;
+      wx.navigateBack({
+        delta: 1
+      })
+    }).catch((err) => {
+      app.globalData.hasLogin = false;
+      util.showErrorToast('微信登录失败');
     });
   }
 })

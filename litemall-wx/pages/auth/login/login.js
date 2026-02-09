@@ -47,36 +47,26 @@ Page({
     this.setData({
       isLoggingIn: true
     });
-    user.checkLogin().then(() => {
-      this.setData({
-        isLoggingIn: false
-      });
+    user.loginByWeixin(userInfo).then(res => {
       app.globalData.hasLogin = true;
       wx.reLaunch({
         url: '/pages/index/index'
       })
-    }).catch(() => {
-      user.loginByWeixin(userInfo).then(res => {
-        app.globalData.hasLogin = true;
-        wx.reLaunch({
-          url: '/pages/index/index'
-        })
-      }).catch((err) => {
-        app.globalData.hasLogin = false;
-        const message = err && err.errmsg ? err.errmsg : (err && err.errMsg ? err.errMsg : '');
-        if (message) {
-          wx.showModal({
-            title: '登录失败',
-            content: message,
-            showCancel: false
-          });
-        } else {
-          util.showErrorToast('微信登录失败');
-        }
-      }).finally(() => {
-        this.setData({
-          isLoggingIn: false
+    }).catch((err) => {
+      app.globalData.hasLogin = false;
+      const message = err && err.errmsg ? err.errmsg : (err && err.errMsg ? err.errMsg : '');
+      if (message) {
+        wx.showModal({
+          title: '登录失败',
+          content: message,
+          showCancel: false
         });
+      } else {
+        util.showErrorToast('微信登录失败');
+      }
+    }).finally(() => {
+      this.setData({
+        isLoggingIn: false
       });
     });
   },
