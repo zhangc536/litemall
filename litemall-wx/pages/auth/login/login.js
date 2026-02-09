@@ -5,7 +5,9 @@ var user = require('../../../utils/user.js');
 var app = getApp();
 Page({
   data: {
-    isLoggingIn: false
+    isLoggingIn: false,
+    avatarUrl: '',
+    nickName: ''
   },
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
@@ -32,23 +34,31 @@ Page({
     if (this.data.isLoggingIn) {
       return;
     }
-    if (!wx.getUserProfile) {
-      util.showErrorToast('当前微信版本不支持获取用户信息');
+    const nickName = (this.data.nickName || '').trim();
+    const avatarUrl = this.data.avatarUrl || '';
+    if (!nickName || !avatarUrl) {
+      util.showErrorToast('请先选择头像并填写昵称');
       return;
     }
-    wx.getUserProfile({
-      desc: '用于完善会员资料', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-      success: (res) => {
-        if (!res || !res.userInfo || !res.userInfo.nickName) {
-          util.showErrorToast('未获取到微信用户信息');
-          return;
-        }
-        this.doLogin(res.userInfo)
-      },
-      fail: (err) => {
-        util.showErrorToast(err && err.errMsg ? err.errMsg : '微信登录失败');
-      }
+    this.doLogin({
+      nickName: nickName,
+      avatarUrl: avatarUrl
     })
+  },
+  onChooseAvatar: function(e) {
+    const avatarUrl = e && e.detail ? e.detail.avatarUrl : '';
+    if (!avatarUrl) {
+      util.showErrorToast('未获取到头像');
+      return;
+    }
+    this.setData({
+      avatarUrl: avatarUrl
+    });
+  },
+  onNicknameInput: function(e) {
+    this.setData({
+      nickName: e.detail.value
+    });
   },
   doLogin: function(userInfo) {
     this.setData({
