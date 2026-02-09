@@ -64,14 +64,14 @@ Page({
         isLoggingIn: false
       });
       app.globalData.hasLogin = true;
-      wx.navigateBack({
-        delta: 1
+      wx.reLaunch({
+        url: '/pages/index/index'
       })
     }).catch(() => {
       user.loginByWeixin(userInfo).then(res => {
         app.globalData.hasLogin = true;
-        wx.navigateBack({
-          delta: 1
+        wx.reLaunch({
+          url: '/pages/index/index'
         })
       }).catch((err) => {
         app.globalData.hasLogin = false;
