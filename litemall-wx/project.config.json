@@ -41,7 +41,7 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "2.4.0",
+  "libVersion": "2.10.4",
   "appid": "wx1eedfb8d81a3244b",
   "projectname": "litemall-wx",
   "simulatorType": "wechat",
