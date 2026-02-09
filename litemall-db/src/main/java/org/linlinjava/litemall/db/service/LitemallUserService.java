@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class LitemallUserService {
@@ -39,6 +40,26 @@ public class LitemallUserService {
         user.setAddTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
         userMapper.insertSelective(user);
+    }
+
+    public LitemallUser queryByInviteCode(String inviteCode) {
+        return userMapper.selectByInviteCode(inviteCode);
+    }
+
+    public Integer generateUniqueUserId() {
+        Integer userId;
+        do {
+            userId = randomEightDigitNumber();
+        } while (userMapper.selectByPrimaryKey(userId) != null);
+        return userId;
+    }
+
+    public String generateUniqueInviteCode() {
+        String inviteCode;
+        do {
+            inviteCode = String.valueOf(randomEightDigitNumber());
+        } while (userMapper.countByInviteCode(inviteCode) > 0);
+        return inviteCode;
     }
 
     public int updateById(LitemallUser user) {
@@ -97,7 +118,20 @@ public class LitemallUserService {
         return userMapper.selectByExample(example);
     }
 
+    public List<LitemallUser> queryByIds(List<Integer> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        LitemallUserExample example = new LitemallUserExample();
+        example.or().andIdIn(userIds).andDeletedEqualTo(false);
+        return userMapper.selectByExample(example);
+    }
+
     public void deleteById(Integer id) {
         userMapper.logicalDeleteByPrimaryKey(id);
+    }
+
+    private Integer randomEightDigitNumber() {
+        return ThreadLocalRandom.current().nextInt(10000000, 100000000);
     }
 }

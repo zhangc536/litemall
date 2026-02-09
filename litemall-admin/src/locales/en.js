@@ -127,6 +127,7 @@ export default {
       nickname: 'Nickname',
       avatar: 'Avatar',
       mobile: 'Mobile',
+      inviter: 'Referrer',
       user_level: 'Level',
       status: 'Status',
       actions: 'Actions'

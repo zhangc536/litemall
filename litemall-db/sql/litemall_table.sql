@@ -814,13 +814,15 @@ CREATE TABLE `litemall_user` (
   `avatar` varchar(255) NOT NULL DEFAULT '' COMMENT '用户头像图片',
   `weixin_openid` varchar(63) NOT NULL DEFAULT '' COMMENT '微信登录openid',
   `inviter_user_id` int(11) DEFAULT NULL COMMENT '邀请人用户ID',
+  `invite_code` varchar(8) NOT NULL DEFAULT '' COMMENT '邀请码',
   `session_key` varchar(100) NOT NULL DEFAULT '' COMMENT '微信登录会话KEY',
   `status` tinyint(3) NOT NULL DEFAULT 0 COMMENT '0 可用, 1 禁用, 2 注销',
   `add_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `deleted` tinyint(1) DEFAULT 0 COMMENT '逻辑删除',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `user_name` (`username`)
+  UNIQUE KEY `user_name` (`username`),
+  UNIQUE KEY `invite_code` (`invite_code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 

@@ -22,6 +22,12 @@
 
       <el-table-column align="center" min-width="140px" :label="$t('user_user.table.mobile')" prop="mobile" />
 
+      <el-table-column align="center" min-width="140px" :label="$t('user_user.table.inviter')" prop="inviterName">
+        <template slot-scope="scope">
+          {{ scope.row.inviterName || scope.row.inviterUserId || '-' }}
+        </template>
+      </el-table-column>
+
       <el-table-column align="center" min-width="120px" :label="$t('user_user.table.user_level')" prop="userLevel">
         <template slot-scope="scope">
           {{ formatUserLevel(scope.row.userLevel) }}
@@ -132,10 +138,11 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['用户ID', '用户名', '昵称', '手机号码', '用户等级', '状态']
-        const filterVal = ['id', 'username', 'nickname', 'mobile', 'userLevel', 'status']
+        const tHeader = ['用户ID', '用户名', '昵称', '手机号码', '推荐人', '用户等级', '状态']
+        const filterVal = ['id', 'username', 'nickname', 'mobile', 'inviterName', 'userLevel', 'status']
         const list = this.list.map(item => ({
           ...item,
+          inviterName: item.inviterName || item.inviterUserId || '-',
           userLevel: this.formatUserLevel(item.userLevel),
           status: this.formatStatus(item.status)
         }))

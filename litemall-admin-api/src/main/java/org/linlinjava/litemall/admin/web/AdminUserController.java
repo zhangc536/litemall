@@ -18,7 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/admin/user")
@@ -38,7 +43,38 @@ public class AdminUserController {
                        @Sort @RequestParam(defaultValue = "add_time") String sort,
                        @Order @RequestParam(defaultValue = "desc") String order) {
         List<LitemallUser> userList = userService.querySelective(username, mobile, page, limit, sort, order);
-        return ResponseUtil.okList(userList);
+        Set<Integer> inviterIds = new HashSet<>();
+        for (LitemallUser user : userList) {
+            Integer inviterUserId = user.getInviterUserId();
+            if (inviterUserId != null && inviterUserId > 0) {
+                inviterIds.add(inviterUserId);
+            }
+        }
+        Map<Integer, LitemallUser> inviterMap = new HashMap<>();
+        if (!inviterIds.isEmpty()) {
+            List<LitemallUser> inviterList = userService.queryByIds(new ArrayList<>(inviterIds));
+            for (LitemallUser inviter : inviterList) {
+                inviterMap.put(inviter.getId(), inviter);
+            }
+        }
+        List<Map<String, Object>> list = new ArrayList<>(userList.size());
+        for (LitemallUser user : userList) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", user.getId());
+            item.put("username", user.getUsername());
+            item.put("nickname", user.getNickname());
+            item.put("avatar", user.getAvatar());
+            item.put("mobile", user.getMobile());
+            item.put("userLevel", user.getUserLevel());
+            item.put("status", user.getStatus());
+            item.put("inviterUserId", user.getInviterUserId());
+            LitemallUser inviter = inviterMap.get(user.getInviterUserId());
+            if (inviter != null) {
+                item.put("inviterName", inviter.getNickname());
+            }
+            list.add(item);
+        }
+        return ResponseUtil.okList(list, userList);
     }
 
     @RequiresPermissions("admin:user:delete")

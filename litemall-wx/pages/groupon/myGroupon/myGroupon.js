@@ -55,7 +55,7 @@ Page({
     });
     return util.request(api.AuthInfo).then((res) => {
       if (res.errno === 0) {
-        const code = res.data.userId ? String(res.data.userId) : '';
+        const code = res.data.inviteCode ? String(res.data.inviteCode) : '';
         this.setData({
           inviteCode: code
         });
@@ -81,7 +81,7 @@ Page({
     return util.request(api.AuthInviteQrcode).then((res) => {
       if (res.errno === 0) {
         const isObject = res.data && typeof res.data === 'object';
-        const code = isObject && res.data.code ? String(res.data.code) : '';
+        const code = isObject && (res.data.inviteCode || res.data.code) ? String(res.data.inviteCode || res.data.code) : '';
         const url = isObject ? (res.data.url || '') : (res.data || '');
         const patch = {};
         if (code) {

@@ -149,4 +149,8 @@ public interface LitemallUserMapper {
      * @mbg.generated
      */
     int logicalDeleteByPrimaryKey(Integer id);
+
+    LitemallUser selectByInviteCode(@Param("inviteCode") String inviteCode);
+
+    int countByInviteCode(@Param("inviteCode") String inviteCode);
 }

@@ -91,6 +91,9 @@ public class WxAuthController {
         }
 
         // 更新登录情况
+        if (StringUtils.isEmpty(user.getInviteCode())) {
+            user.setInviteCode(userService.generateUniqueInviteCode());
+        }
         user.setLastLoginTime(LocalDateTime.now());
         user.setLastLoginIp(IpUtil.getIpAddr(request));
         if (userService.updateById(user) == 0) {
@@ -125,6 +128,7 @@ public class WxAuthController {
         if (code == null || userInfo == null) {
             return ResponseUtil.badArgument();
         }
+        String inviteCode = wxLoginInfo.getInviteCode();
 
         String sessionKey = null;
         String openId = null;
@@ -147,6 +151,9 @@ public class WxAuthController {
         LitemallUser user = userService.queryByOid(openId);
         if (user == null) {
             user = new LitemallUser();
+            Integer userId = userService.generateUniqueUserId();
+            user.setId(userId);
+            user.setInviteCode(userService.generateUniqueInviteCode());
             user.setUsername(openId);
             user.setPassword(openId);
             user.setWeixinOpenid(openId);
@@ -157,12 +164,27 @@ public class WxAuthController {
             user.setLastLoginTime(LocalDateTime.now());
             user.setLastLoginIp(IpUtil.getIpAddr(request));
             user.setSessionKey(sessionKey);
+            if (!StringUtils.isEmpty(inviteCode)) {
+                LitemallUser inviterUser = userService.queryByInviteCode(inviteCode);
+                if (inviterUser != null && !inviterUser.getId().equals(userId)) {
+                    user.setInviterUserId(inviterUser.getId());
+                }
+            }
 
             userService.add(user);
 
             // 新用户发送注册优惠券
             couponAssignService.assignForRegister(user.getId());
         } else {
+            if (StringUtils.isEmpty(user.getInviteCode())) {
+                user.setInviteCode(userService.generateUniqueInviteCode());
+            }
+            if ((user.getInviterUserId() == null || user.getInviterUserId() <= 0) && !StringUtils.isEmpty(inviteCode)) {
+                LitemallUser inviterUser = userService.queryByInviteCode(inviteCode);
+                if (inviterUser != null && !inviterUser.getId().equals(user.getId())) {
+                    user.setInviterUserId(inviterUser.getId());
+                }
+            }
             user.setLastLoginTime(LocalDateTime.now());
             user.setLastLoginIp(IpUtil.getIpAddr(request));
             user.setSessionKey(sessionKey);
@@ -301,6 +323,8 @@ public class WxAuthController {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String encodedPassword = encoder.encode(password);
         user = new LitemallUser();
+        user.setId(userService.generateUniqueUserId());
+        user.setInviteCode(userService.generateUniqueInviteCode());
         user.setUsername(username);
         user.setPassword(encodedPassword);
         user.setMobile(mobile);
@@ -339,17 +363,11 @@ public class WxAuthController {
         if (StringUtils.isEmpty(inviteCode)) {
             return ResponseUtil.badArgument();
         }
-        Integer inviterUserId;
-        try {
-            inviterUserId = Integer.valueOf(inviteCode);
-        } catch (NumberFormatException e) {
-            return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
-        }
-        if (inviterUserId.equals(userId)) {
-            return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
-        }
-        LitemallUser inviterUser = userService.findById(inviterUserId);
+        LitemallUser inviterUser = userService.queryByInviteCode(inviteCode);
         if (inviterUser == null) {
+            return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
+        }
+        if (inviterUser.getId().equals(userId)) {
             return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码无效");
         }
         LitemallUser user = userService.findById(userId);
@@ -359,7 +377,7 @@ public class WxAuthController {
         if (user.getInviterUserId() != null && user.getInviterUserId() > 0) {
             return ResponseUtil.fail(AUTH_INVALID_INVITE_CODE, "邀请码已绑定");
         }
-        user.setInviterUserId(inviterUserId);
+        user.setInviterUserId(inviterUser.getId());
         user.setUpdateTime(LocalDateTime.now());
         if (userService.updateById(user) == 0) {
             return ResponseUtil.updatedDataFailed();
@@ -372,9 +390,20 @@ public class WxAuthController {
         if (userId == null) {
             return ResponseUtil.unlogin();
         }
-        String url = qCodeService.createInviteQrcode(String.valueOf(userId));
+        LitemallUser user = userService.findById(userId);
+        if (user == null) {
+            return ResponseUtil.unlogin();
+        }
+        if (StringUtils.isEmpty(user.getInviteCode())) {
+            user.setInviteCode(userService.generateUniqueInviteCode());
+            if (userService.updateById(user) == 0) {
+                return ResponseUtil.updatedDataFailed();
+            }
+        }
+        String inviteCode = user.getInviteCode();
+        String url = qCodeService.createInviteQrcode(inviteCode);
         Map<Object, Object> data = new HashMap<Object, Object>();
-        data.put("code", userId);
+        data.put("code", inviteCode);
         data.put("url", url);
         return ResponseUtil.ok(data);
     }
@@ -599,8 +628,18 @@ public class WxAuthController {
         }
 
         LitemallUser user = userService.findById(userId);
+        if (user == null) {
+            return ResponseUtil.unlogin();
+        }
+        if (StringUtils.isEmpty(user.getInviteCode())) {
+            user.setInviteCode(userService.generateUniqueInviteCode());
+            if (userService.updateById(user) == 0) {
+                return ResponseUtil.updatedDataFailed();
+            }
+        }
         Map<Object, Object> data = new HashMap<Object, Object>();
         data.put("userId", user.getId());
+        data.put("inviteCode", user.getInviteCode());
         data.put("nickName", user.getNickname());
         data.put("avatar", user.getAvatar());
         data.put("mobile", user.getMobile());

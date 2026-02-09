@@ -127,6 +127,7 @@ export default {
       nickname: '用户昵称',
       avatar: '用户头像',
       mobile: '手机号码',
+      inviter: '推荐人',
       user_level: '用户等级',
       status: '状态',
       actions: '操作'

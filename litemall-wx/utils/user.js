@@ -49,14 +49,19 @@ function loginByWeixin(userInfo) {
   return new Promise(function(resolve, reject) {
     return login().then((res) => {
       //登录远程服务器
+      const inviteCode = wx.getStorageSync('inviteCode');
       util.request(api.AuthLoginByWeixin, {
         code: res.code,
-        userInfo: userInfo
+        userInfo: userInfo,
+        inviteCode: inviteCode || ''
       }, 'POST').then(res => {
         if (res.errno === 0) {
           //存储用户信息
           wx.setStorageSync('userInfo', res.data.userInfo);
           wx.setStorageSync('token', res.data.token);
+          if (inviteCode) {
+            wx.removeStorageSync('inviteCode');
+          }
 
           resolve(res);
         } else {
