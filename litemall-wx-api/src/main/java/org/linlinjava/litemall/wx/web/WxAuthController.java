@@ -200,6 +200,12 @@ public class WxAuthController {
                     user.setInviterUserId(inviterUser.getId());
                 }
             }
+            if (!StringUtils.isEmpty(userInfo.getAvatarUrl())) {
+                user.setAvatar(userInfo.getAvatarUrl());
+            }
+            if (!StringUtils.isEmpty(userInfo.getNickName())) {
+                user.setNickname(userInfo.getNickName());
+            }
             user.setLastLoginTime(LocalDateTime.now());
             user.setLastLoginIp(IpUtil.getIpAddr(request));
             user.setSessionKey(sessionKey);
