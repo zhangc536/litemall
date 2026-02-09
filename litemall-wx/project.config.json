@@ -228,12 +228,6 @@
         },
         {
           "id": -1,
-          "name": "账号登录",
-          "pathName": "pages/auth/accountLogin/accountLogin",
-          "query": ""
-        },
-        {
-          "id": -1,
           "name": "注册",
           "pathName": "pages/auth/register/register",
           "query": ""

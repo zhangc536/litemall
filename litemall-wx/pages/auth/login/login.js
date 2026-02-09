@@ -86,10 +86,5 @@ Page({
         isLoggingIn: false
       });
     });
-  },
-  accountLogin: function() {
-    wx.navigateTo({
-      url: "/pages/auth/accountLogin/accountLogin"
-    });
   }
 })
