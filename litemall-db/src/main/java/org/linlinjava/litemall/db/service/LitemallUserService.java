@@ -104,6 +104,16 @@ public class LitemallUserService {
         return userMapper.selectByExample(example);
     }
 
+    public LitemallUser findByUsernameAny(String username) {
+        LitemallUserExample example = new LitemallUserExample();
+        example.or().andUsernameEqualTo(username);
+        List<LitemallUser> users = userMapper.selectByExample(example);
+        if (users == null || users.isEmpty()) {
+            return null;
+        }
+        return users.get(0);
+    }
+
     public boolean checkByUsername(String username) {
         LitemallUserExample example = new LitemallUserExample();
         example.or().andUsernameEqualTo(username).andDeletedEqualTo(false);

@@ -154,13 +154,8 @@ public class WxAuthController {
         LitemallUser user = userService.queryByOid(openId);
         boolean newUser = false;
         if (user == null) {
-            List<LitemallUser> userList = userService.queryByUsername(openId);
-            if (userList != null && !userList.isEmpty()) {
-                user = userList.get(0);
-                if (StringUtils.isEmpty(user.getWeixinOpenid())) {
-                    user.setWeixinOpenid(openId);
-                }
-            } else {
+            user = userService.findByUsernameAny(openId);
+            if (user == null) {
                 newUser = true;
                 user = new LitemallUser();
                 Integer userId = userService.generateUniqueUserId();
@@ -186,6 +181,13 @@ public class WxAuthController {
                 userService.add(user);
 
                 couponAssignService.assignForRegister(user.getId());
+            } else {
+                if (user.getDeleted() != null && user.getDeleted()) {
+                    user.setDeleted(false);
+                }
+                if (StringUtils.isEmpty(user.getWeixinOpenid())) {
+                    user.setWeixinOpenid(openId);
+                }
             }
         }
         if (!newUser) {
