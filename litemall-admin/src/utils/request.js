@@ -5,9 +5,7 @@ import { getToken } from '@/utils/auth'
 
 axios.defaults.withCredentials = false
 
-const resolvedBaseURL = process.env.VUE_APP_BASE_API || (typeof window !== 'undefined'
-  ? `${window.location.protocol}//${window.location.hostname}:8080/admin`
-  : 'http://localhost:8080/admin')
+const resolvedBaseURL = process.env.VUE_APP_BASE_API || '/admin'
 
 const service = axios.create({
   baseURL: resolvedBaseURL,

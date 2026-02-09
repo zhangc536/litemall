@@ -4,8 +4,7 @@ var WxApiRoot = 'http://localhost:8080/wx/';
 // 局域网测试使用
 // var WxApiRoot = 'http://192.168.0.101:8080/wx/';
 // 云平台上线时使用
-// var WxApiRoot = 'https://litemall.menethil.com.cn/wx/';
-// var WxApiRoot = 'https://www.menethil.com.cn/wx/';
+// var WxApiRoot = 'https://www.zhangcde.asia/wx/';
 
 module.exports = {
   IndexUrl: WxApiRoot + 'home/index', //首页数据接口
