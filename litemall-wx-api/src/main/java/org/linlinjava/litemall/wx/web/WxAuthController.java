@@ -152,33 +152,43 @@ public class WxAuthController {
         }
 
         LitemallUser user = userService.queryByOid(openId);
+        boolean newUser = false;
         if (user == null) {
-            user = new LitemallUser();
-            Integer userId = userService.generateUniqueUserId();
-            user.setId(userId);
-            user.setInviteCode(userService.generateUniqueInviteCode());
-            user.setUsername(openId);
-            user.setPassword(openId);
-            user.setWeixinOpenid(openId);
-            user.setAvatar(userInfo.getAvatarUrl());
-            user.setNickname(userInfo.getNickName());
-            user.setUserLevel((byte) 0);
-            user.setStatus((byte) 0);
-            user.setLastLoginTime(LocalDateTime.now());
-            user.setLastLoginIp(IpUtil.getIpAddr(request));
-            user.setSessionKey(sessionKey);
-            if (!StringUtils.isEmpty(inviteCode)) {
-                LitemallUser inviterUser = userService.queryByInviteCode(inviteCode);
-                if (inviterUser != null && !inviterUser.getId().equals(userId)) {
-                    user.setInviterUserId(inviterUser.getId());
+            List<LitemallUser> userList = userService.queryByUsername(openId);
+            if (userList != null && !userList.isEmpty()) {
+                user = userList.get(0);
+                if (StringUtils.isEmpty(user.getWeixinOpenid())) {
+                    user.setWeixinOpenid(openId);
                 }
+            } else {
+                newUser = true;
+                user = new LitemallUser();
+                Integer userId = userService.generateUniqueUserId();
+                user.setId(userId);
+                user.setInviteCode(userService.generateUniqueInviteCode());
+                user.setUsername(openId);
+                user.setPassword(openId);
+                user.setWeixinOpenid(openId);
+                user.setAvatar(userInfo.getAvatarUrl());
+                user.setNickname(userInfo.getNickName());
+                user.setUserLevel((byte) 0);
+                user.setStatus((byte) 0);
+                user.setLastLoginTime(LocalDateTime.now());
+                user.setLastLoginIp(IpUtil.getIpAddr(request));
+                user.setSessionKey(sessionKey);
+                if (!StringUtils.isEmpty(inviteCode)) {
+                    LitemallUser inviterUser = userService.queryByInviteCode(inviteCode);
+                    if (inviterUser != null && !inviterUser.getId().equals(userId)) {
+                        user.setInviterUserId(inviterUser.getId());
+                    }
+                }
+
+                userService.add(user);
+
+                couponAssignService.assignForRegister(user.getId());
             }
-
-            userService.add(user);
-
-            // 新用户发送注册优惠券
-            couponAssignService.assignForRegister(user.getId());
-        } else {
+        }
+        if (!newUser) {
             if (StringUtils.isEmpty(user.getInviteCode())) {
                 user.setInviteCode(userService.generateUniqueInviteCode());
             }
