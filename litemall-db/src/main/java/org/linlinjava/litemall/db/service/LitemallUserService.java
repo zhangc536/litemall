@@ -33,7 +33,11 @@ public class LitemallUserService {
     public LitemallUser queryByOid(String openId) {
         LitemallUserExample example = new LitemallUserExample();
         example.or().andWeixinOpenidEqualTo(openId).andDeletedEqualTo(false);
-        return userMapper.selectOneByExample(example);
+        List<LitemallUser> users = userMapper.selectByExample(example);
+        if (users == null || users.isEmpty()) {
+            return null;
+        }
+        return users.get(0);
     }
 
     public void add(LitemallUser user) {
