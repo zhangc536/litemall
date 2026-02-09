@@ -152,5 +152,5 @@ public interface LitemallUserMapper {
 
     LitemallUser selectByInviteCode(@Param("inviteCode") String inviteCode);
 
-    int countByInviteCode(@Param("inviteCode") String inviteCode);
+    long countByInviteCode(@Param("inviteCode") String inviteCode);
 }
