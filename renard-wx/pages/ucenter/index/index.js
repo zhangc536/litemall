@@ -19,12 +19,25 @@ Page({
   },
   onShow: function() {
 
-    //获取用户的登录信息
-    if (app.globalData.hasLogin) {
-      let userInfo = wx.getStorageSync('userInfo');
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+    const hasProfile = userInfo && userInfo.nickName && userInfo.avatarUrl;
+    if (token && hasProfile) {
+      app.globalData.hasLogin = true;
       this.setData({
         aboutShow: true,
-        userInfo: userInfo,
+        userInfo: userInfo
+      });
+    } else {
+      app.globalData.hasLogin = false;
+      wx.removeStorageSync('token');
+      wx.removeStorageSync('userInfo');
+      this.setData({
+        aboutShow: true,
+        userInfo: {
+          nickName: '点击登录',
+          avatarUrl: 'http://yanxuan.nosdn.127.net/8945ae63d940cc42406c3f67019c5cb6.png'
+        }
       });
     }
 
@@ -37,7 +50,12 @@ Page({
     // 页面关闭
   },
   goLogin() {
-    if (!app.globalData.hasLogin) {
+    const userInfo = wx.getStorageSync('userInfo');
+    const hasProfile = userInfo && userInfo.nickName && userInfo.avatarUrl;
+    if (!app.globalData.hasLogin || !hasProfile) {
+      app.globalData.hasLogin = false;
+      wx.removeStorageSync('token');
+      wx.removeStorageSync('userInfo');
       wx.navigateTo({
         url: "/pages/auth/login/login"
       });

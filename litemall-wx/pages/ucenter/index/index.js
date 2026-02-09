@@ -27,7 +27,8 @@ Page({
 
     const token = wx.getStorageSync('token');
     const userInfo = wx.getStorageSync('userInfo');
-    if (token && userInfo) {
+    const hasProfile = userInfo && userInfo.nickName && userInfo.avatarUrl;
+    if (token && hasProfile) {
       this.setData({
         userInfo: userInfo,
         hasLogin: true
@@ -41,6 +42,9 @@ Page({
         }
       });
     } else {
+      app.globalData.hasLogin = false;
+      wx.removeStorageSync('token');
+      wx.removeStorageSync('userInfo');
       this.setData({
         hasLogin: false,
         userInfo: {
@@ -59,7 +63,12 @@ Page({
     // 页面关闭
   },
   goLogin() {
-    if (!this.data.hasLogin) {
+    const userInfo = wx.getStorageSync('userInfo');
+    const hasProfile = userInfo && userInfo.nickName && userInfo.avatarUrl;
+    if (!this.data.hasLogin || !hasProfile) {
+      app.globalData.hasLogin = false;
+      wx.removeStorageSync('token');
+      wx.removeStorageSync('userInfo');
       wx.navigateTo({
         url: "/pages/auth/login/login"
       });
