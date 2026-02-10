@@ -225,8 +225,13 @@ public class WxAuthController {
         Map<Object, Object> result = new HashMap<Object, Object>();
         result.put("token", token);
         UserInfo responseUserInfo = new UserInfo();
-        responseUserInfo.setNickName(user.getNickname());
-        responseUserInfo.setAvatarUrl(user.getAvatar());
+        if (userInfo != null) {
+            responseUserInfo.setNickName(userInfo.getNickName());
+            responseUserInfo.setAvatarUrl(userInfo.getAvatarUrl());
+        } else {
+            responseUserInfo.setNickName(user.getNickname());
+            responseUserInfo.setAvatarUrl(user.getAvatar());
+        }
         result.put("userInfo", responseUserInfo);
         return ResponseUtil.ok(result);
     }

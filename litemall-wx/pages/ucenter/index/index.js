@@ -33,18 +33,6 @@ Page({
         userInfo: userInfo,
         hasLogin: true
       });
-      util.request(api.AuthInfo).then(res => {
-        if (res.errno === 0 && res.data) {
-          const updatedUserInfo = {
-            nickName: res.data.nickName || userInfo.nickName,
-            avatarUrl: res.data.avatar || userInfo.avatarUrl
-          };
-          wx.setStorageSync('userInfo', updatedUserInfo);
-          this.setData({
-            userInfo: updatedUserInfo
-          });
-        }
-      });
       let that = this;
       util.request(api.UserIndex).then(function(res) {
         if (res.errno === 0) {

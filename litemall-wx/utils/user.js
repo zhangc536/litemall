@@ -50,12 +50,14 @@ function loginByWeixin(userInfo) {
     return login().then((res) => {
       //登录远程服务器
       const inviteCode = wx.getStorageSync('inviteCode');
+      const cachedUserInfo = wx.getStorageSync('userInfo');
+      const resolvedUserInfo = userInfo || (cachedUserInfo && cachedUserInfo.nickName && cachedUserInfo.avatarUrl ? cachedUserInfo : null);
       const payload = {
         code: res.code,
         inviteCode: inviteCode || ''
       };
-      if (userInfo) {
-        payload.userInfo = userInfo;
+      if (resolvedUserInfo) {
+        payload.userInfo = resolvedUserInfo;
       }
       util.request(api.AuthLoginByWeixin, payload, 'POST').then(res => {
         if (res.errno === 0) {
