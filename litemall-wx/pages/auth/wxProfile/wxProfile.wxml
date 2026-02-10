@@ -1,0 +1,10 @@
+<view class="container">
+  <view class="login-box">
+    <button type="default" class="wx-login-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image src="{{avatarUrl || '/static/images/my.png'}}" style="width:80rpx;height:80rpx;border-radius:40rpx;"></image>
+      <text>选择头像</text>
+    </button>
+    <input type="nickname" class="account-login-btn" placeholder="请输入昵称" bindinput="onNicknameInput" value="{{nickName}}" />
+    <button type="primary" class="wx-login-btn" bindtap="wxLogin" disabled="{{!avatarUrl || !nickName || isLoggingIn}}">确认登录</button>
+  </view>
+</view>

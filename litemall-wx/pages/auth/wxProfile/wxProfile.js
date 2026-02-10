@@ -1,46 +1,45 @@
-var api = require('../../../config/api.js');
 var util = require('../../../utils/util.js');
 var user = require('../../../utils/user.js');
 
 var app = getApp();
 Page({
   data: {
-    isLoggingIn: false
+    isLoggingIn: false,
+    avatarUrl: '',
+    nickName: ''
   },
-  onLoad: function(options) {
-    // 页面初始化 options为页面跳转所带来的参数
-    // 页面渲染完成
+  onLoad: function() {
     app.globalData.hasLogin = false;
   },
-  onReady: function() {
-
+  onChooseAvatar: function(e) {
+    const avatarUrl = e && e.detail ? e.detail.avatarUrl : '';
+    if (!avatarUrl) {
+      util.showErrorToast('未获取到头像');
+      return;
+    }
+    this.setData({
+      avatarUrl: avatarUrl
+    });
   },
-  onShow: function() {
-    // 页面显示
+  onNicknameInput: function(e) {
+    this.setData({
+      nickName: e.detail.value
+    });
   },
-  onHide: function() {
-    // 页面隐藏
-
-  },
-  onUnload: function() {
-    // 页面关闭
-
-  },
-  wxQuickLogin: function() {
+  wxLogin: function() {
     if (this.data.isLoggingIn) {
       return;
     }
-    const userInfo = wx.getStorageSync('userInfo');
-    if (userInfo && userInfo.nickName && userInfo.avatarUrl) {
-      this.doLogin({
-        nickName: userInfo.nickName,
-        avatarUrl: userInfo.avatarUrl
-      })
+    const nickName = (this.data.nickName || '').trim();
+    const avatarUrl = this.data.avatarUrl || '';
+    if (!nickName || !avatarUrl) {
+      util.showErrorToast('请先选择头像并填写昵称');
       return;
     }
-    wx.navigateTo({
-      url: '/pages/auth/wxProfile/wxProfile'
-    });
+    this.doLogin({
+      nickName: nickName,
+      avatarUrl: avatarUrl
+    })
   },
   doLogin: function(userInfo) {
     this.setData({
