@@ -128,7 +128,7 @@ public class WxAuthController {
     public Object loginByWeixin(@RequestBody WxLoginInfo wxLoginInfo, HttpServletRequest request) {
         String code = wxLoginInfo.getCode();
         UserInfo userInfo = wxLoginInfo.getUserInfo();
-        if (code == null || userInfo == null) {
+        if (code == null) {
             return ResponseUtil.badArgument();
         }
         String inviteCode = wxLoginInfo.getInviteCode();
@@ -156,6 +156,9 @@ public class WxAuthController {
         if (user == null) {
             user = userService.findByUsernameAny(openId);
             if (user == null) {
+                if (userInfo == null) {
+                    return ResponseUtil.fail(AUTH_INVALID_ACCOUNT, "请先选择头像和昵称");
+                }
                 newUser = true;
                 user = new LitemallUser();
                 Integer userId = userService.generateUniqueUserId();
@@ -200,11 +203,13 @@ public class WxAuthController {
                     user.setInviterUserId(inviterUser.getId());
                 }
             }
-            if (!StringUtils.isEmpty(userInfo.getAvatarUrl())) {
-                user.setAvatar(userInfo.getAvatarUrl());
-            }
-            if (!StringUtils.isEmpty(userInfo.getNickName())) {
-                user.setNickname(userInfo.getNickName());
+            if (userInfo != null) {
+                if (!StringUtils.isEmpty(userInfo.getAvatarUrl())) {
+                    user.setAvatar(userInfo.getAvatarUrl());
+                }
+                if (!StringUtils.isEmpty(userInfo.getNickName())) {
+                    user.setNickname(userInfo.getNickName());
+                }
             }
             user.setLastLoginTime(LocalDateTime.now());
             user.setLastLoginIp(IpUtil.getIpAddr(request));
@@ -219,7 +224,10 @@ public class WxAuthController {
 
         Map<Object, Object> result = new HashMap<Object, Object>();
         result.put("token", token);
-        result.put("userInfo", userInfo);
+        UserInfo responseUserInfo = new UserInfo();
+        responseUserInfo.setNickName(user.getNickname());
+        responseUserInfo.setAvatarUrl(user.getAvatar());
+        result.put("userInfo", responseUserInfo);
         return ResponseUtil.ok(result);
     }
 
