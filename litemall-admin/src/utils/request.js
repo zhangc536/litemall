@@ -5,7 +5,7 @@ import { getToken } from '@/utils/auth'
 
 axios.defaults.withCredentials = false
 
-const resolvedBaseURL = process.env.VUE_APP_BASE_API || '/admin'
+const resolvedBaseURL = 'https://www.zhangcde.asia/admin'
 
 const service = axios.create({
   baseURL: resolvedBaseURL,
@@ -82,7 +82,18 @@ service.interceptors.response.use(
       return response
     }
   }, error => {
-    console.log('err' + error)
+    const status = error && error.response ? error.response.status : null
+    if (status === 401) {
+      MessageBox.alert('系统未登录，请重新登录', '错误', {
+        confirmButtonText: '确定',
+        type: 'error'
+      }).then(() => {
+        store.dispatch('FedLogOut').then(() => {
+          location.reload()
+        })
+      })
+      return Promise.reject(buildError('系统未登录，请重新登录'))
+    }
     Message({
       message: '登录连接超时（后台不能连接，请联系系统管理员）',
       type: 'error',
