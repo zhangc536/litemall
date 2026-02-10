@@ -125,13 +125,19 @@ public class WxAuthController {
      * @return 登录结果
      */
     @PostMapping("login_by_weixin")
-    public Object loginByWeixin(@RequestBody WxLoginInfo wxLoginInfo, HttpServletRequest request) {
-        String code = wxLoginInfo.getCode();
-        UserInfo userInfo = wxLoginInfo.getUserInfo();
-        if (code == null) {
+    public Object loginByWeixin(@RequestBody(required = false) WxLoginInfo wxLoginInfo, HttpServletRequest request) {
+        String code = wxLoginInfo != null ? wxLoginInfo.getCode() : null;
+        if (StringUtils.isEmpty(code)) {
+            code = request.getParameter("code");
+        }
+        UserInfo userInfo = wxLoginInfo != null ? wxLoginInfo.getUserInfo() : null;
+        if (StringUtils.isEmpty(code)) {
             return ResponseUtil.badArgument();
         }
-        String inviteCode = wxLoginInfo.getInviteCode();
+        String inviteCode = wxLoginInfo != null ? wxLoginInfo.getInviteCode() : null;
+        if (StringUtils.isEmpty(inviteCode)) {
+            inviteCode = request.getParameter("inviteCode");
+        }
 
         String sessionKey = null;
         String openId = null;
