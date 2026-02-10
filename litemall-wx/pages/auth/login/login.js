@@ -7,34 +7,19 @@ Page({
   data: {
     isLoggingIn: false,
     avatarUrl: '',
-    nickName: ''
+    nickName: '',
+    showProfileForm: false
   },
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
     // 页面渲染完成
     app.globalData.hasLogin = false;
-    const userInfo = wx.getStorageSync('userInfo');
-    if (userInfo && userInfo.nickName && userInfo.avatarUrl) {
-      this.setData({
-        avatarUrl: userInfo.avatarUrl,
-        nickName: userInfo.nickName
-      });
-    }
   },
   onReady: function() {
 
   },
   onShow: function() {
     // 页面显示
-    const userInfo = wx.getStorageSync('userInfo');
-    if (userInfo && userInfo.nickName && userInfo.avatarUrl) {
-      if (userInfo.avatarUrl !== this.data.avatarUrl || userInfo.nickName !== this.data.nickName) {
-        this.setData({
-          avatarUrl: userInfo.avatarUrl,
-          nickName: userInfo.nickName
-        });
-      }
-    }
   },
   onHide: function() {
     // 页面隐藏
@@ -71,7 +56,9 @@ Page({
       })
       return;
     }
-    util.showErrorToast('请先选择头像并填写昵称');
+    this.setData({
+      showProfileForm: true
+    });
   },
   onChooseAvatar: function(e) {
     const avatarUrl = e && e.detail ? e.detail.avatarUrl : '';
