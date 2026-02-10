@@ -30,19 +30,9 @@ Page({
     if (this.data.isLoggingIn) {
       return;
     }
-    const userInfo = wx.getStorageSync('userInfo');
-    if (userInfo && userInfo.nickName && userInfo.avatarUrl) {
-      this.doLogin({
-        nickName: userInfo.nickName,
-        avatarUrl: userInfo.avatarUrl
-      })
-      return;
-    }
-    wx.navigateTo({
-      url: '/pages/auth/wxProfile/wxProfile'
-    });
+    this.doLogin(null, true);
   },
-  doLogin: function(userInfo) {
+  doLogin: function(userInfo, allowProfileFallback) {
     this.setData({
       isLoggingIn: true
     });
@@ -54,6 +44,12 @@ Page({
     }).catch((err) => {
       app.globalData.hasLogin = false;
       const message = err && err.errmsg ? err.errmsg : (err && err.errMsg ? err.errMsg : '');
+      if (allowProfileFallback && message === '请先选择头像和昵称') {
+        wx.navigateTo({
+          url: '/pages/auth/wxProfile/wxProfile'
+        });
+        return;
+      }
       if (message) {
         wx.showModal({
           title: '登录失败',

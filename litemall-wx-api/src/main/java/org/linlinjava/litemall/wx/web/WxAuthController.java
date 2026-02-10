@@ -152,7 +152,9 @@ public class WxAuthController {
         }
 
         LitemallUser user = userService.queryByOid(openId);
+        LocalDateTime now = LocalDateTime.now();
         boolean newUser = false;
+        boolean useUserInfoResponse = false;
         if (user == null) {
             user = userService.findByUsernameAny(openId);
             if (user == null) {
@@ -160,6 +162,7 @@ public class WxAuthController {
                     return ResponseUtil.fail(AUTH_INVALID_ACCOUNT, "请先选择头像和昵称");
                 }
                 newUser = true;
+                useUserInfoResponse = true;
                 user = new LitemallUser();
                 Integer userId = userService.generateUniqueUserId();
                 user.setId(userId);
@@ -171,7 +174,7 @@ public class WxAuthController {
                 user.setNickname(userInfo.getNickName());
                 user.setUserLevel((byte) 0);
                 user.setStatus((byte) 0);
-                user.setLastLoginTime(LocalDateTime.now());
+                user.setLastLoginTime(now);
                 user.setLastLoginIp(IpUtil.getIpAddr(request));
                 user.setSessionKey(sessionKey);
                 if (!StringUtils.isEmpty(inviteCode)) {
@@ -203,7 +206,13 @@ public class WxAuthController {
                     user.setInviterUserId(inviterUser.getId());
                 }
             }
-            if (userInfo != null) {
+            LocalDateTime lastLoginTime = user.getLastLoginTime();
+            boolean requiresProfile = lastLoginTime == null || lastLoginTime.isBefore(now.minusDays(7));
+            if (requiresProfile && userInfo == null) {
+                return ResponseUtil.fail(AUTH_INVALID_ACCOUNT, "请先选择头像和昵称");
+            }
+            if (requiresProfile && userInfo != null) {
+                useUserInfoResponse = true;
                 if (!StringUtils.isEmpty(userInfo.getAvatarUrl())) {
                     user.setAvatar(userInfo.getAvatarUrl());
                 }
@@ -211,7 +220,7 @@ public class WxAuthController {
                     user.setNickname(userInfo.getNickName());
                 }
             }
-            user.setLastLoginTime(LocalDateTime.now());
+            user.setLastLoginTime(now);
             user.setLastLoginIp(IpUtil.getIpAddr(request));
             user.setSessionKey(sessionKey);
             if (userService.updateById(user) == 0) {
@@ -225,7 +234,7 @@ public class WxAuthController {
         Map<Object, Object> result = new HashMap<Object, Object>();
         result.put("token", token);
         UserInfo responseUserInfo = new UserInfo();
-        if (userInfo != null) {
+        if (useUserInfoResponse && userInfo != null) {
             responseUserInfo.setNickName(userInfo.getNickName());
             responseUserInfo.setAvatarUrl(userInfo.getAvatarUrl());
         } else {
