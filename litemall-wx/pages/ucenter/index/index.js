@@ -33,6 +33,10 @@ Page({
         userInfo: userInfo,
         hasLogin: true
       });
+      util.request(api.AuthProfile, {
+        avatar: userInfo.avatarUrl,
+        nickname: userInfo.nickName
+      }, 'POST');
       let that = this;
       util.request(api.UserIndex).then(function(res) {
         if (res.errno === 0) {
