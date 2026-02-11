@@ -124,11 +124,17 @@ public class JacksonUtil {
     }
 
     public static <T> T parseObject(String body, String field, Class<T> clazz) {
+        if (body == null) {
+            return null;
+        }
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node;
         try {
             node = mapper.readTree(body);
             node = node.get(field);
+            if (node == null || node.isNull()) {
+                return null;
+            }
             return mapper.treeToValue(node, clazz);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
