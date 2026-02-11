@@ -20,7 +20,6 @@ import org.linlinjava.litemall.db.service.LitemallUserService;
 import org.linlinjava.litemall.wx.annotation.LoginUser;
 import org.linlinjava.litemall.wx.dto.UserInfo;
 import org.linlinjava.litemall.wx.dto.UserToken;
-import org.linlinjava.litemall.wx.dto.WxLoginInfo;
 import org.linlinjava.litemall.wx.service.CaptchaCodeManager;
 import org.linlinjava.litemall.wx.service.UserTokenManager;
 import org.linlinjava.litemall.core.util.IpUtil;
@@ -125,18 +124,18 @@ public class WxAuthController {
      * @return 登录结果
      */
     @PostMapping("login_by_weixin")
-    public Object loginByWeixin(@RequestBody(required = false) WxLoginInfo wxLoginInfo, HttpServletRequest request) {
-        String code = wxLoginInfo != null ? wxLoginInfo.getCode() : null;
+    public Object loginByWeixin(@RequestBody(required = false) String body, HttpServletRequest request) {
+        String code = body == null ? null : JacksonUtil.parseString(body, "code");
+        UserInfo userInfo = body == null ? null : JacksonUtil.parseObject(body, "userInfo", UserInfo.class);
+        String inviteCode = body == null ? null : JacksonUtil.parseString(body, "inviteCode");
         if (StringUtils.isEmpty(code)) {
             code = request.getParameter("code");
         }
-        UserInfo userInfo = wxLoginInfo != null ? wxLoginInfo.getUserInfo() : null;
-        if (StringUtils.isEmpty(code)) {
-            return ResponseUtil.badArgument();
-        }
-        String inviteCode = wxLoginInfo != null ? wxLoginInfo.getInviteCode() : null;
         if (StringUtils.isEmpty(inviteCode)) {
             inviteCode = request.getParameter("inviteCode");
+        }
+        if (StringUtils.isEmpty(code)) {
+            return ResponseUtil.badArgument();
         }
 
         String sessionKey = null;
