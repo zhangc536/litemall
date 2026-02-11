@@ -12,7 +12,6 @@ export default {
       user_address: '收货地址',
       user_collect: '会员收藏',
       user_footprint: '会员足迹',
-      user_history: '搜索历史',
       user_feedback: '意见反馈',
       mall: '商场管理',
       mall_region: '行政区域',
@@ -187,19 +186,6 @@ export default {
     placeholder: {
       filter_user_id: '请输入用户ID',
       filter_goods_id: '请输入商品ID'
-    }
-  },
-  user_history: {
-    table: {
-      id: '搜索ID',
-      user_id: '用户ID',
-      keyword: '关键字',
-      add_time: '添加时间',
-      actions: '操作'
-    },
-    placeholder: {
-      filter_user_id: '请输入用户ID',
-      filter_keyword: '请输入搜索历史关键字'
     }
   },
   user_feedback: {

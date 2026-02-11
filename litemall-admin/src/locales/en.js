@@ -12,7 +12,6 @@ export default {
       user_address: 'Addresses',
       user_collect: 'Favorites',
       user_footprint: 'Footprints',
-      user_history: 'Search history',
       user_feedback: 'Feedbacks',
       mall: 'Mall',
       mall_region: 'Regions',
@@ -187,19 +186,6 @@ export default {
     placeholder: {
       filter_user_id: 'User ID',
       filter_goods_id: 'Goods ID'
-    }
-  },
-  user_history: {
-    table: {
-      id: 'ID',
-      user_id: 'User ID',
-      keyword: 'Keyword',
-      add_time: 'Time added',
-      actions: 'Actions'
-    },
-    placeholder: {
-      filter_user_id: 'User ID',
-      filter_keyword: 'Keyword'
     }
   },
   user_feedback: {

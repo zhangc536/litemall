@@ -104,16 +104,6 @@ export const asyncRoutes = [
         }
       },
       {
-        path: 'history',
-        component: () => import('@/views/user/history'),
-        name: 'history',
-        meta: {
-          perms: ['GET /admin/history/list'],
-          title: 'app.menu.user_history',
-          noCache: true
-        }
-      },
-      {
         path: 'feedback',
         component: () => import('@/views/user/feedback'),
         name: 'feedback',
