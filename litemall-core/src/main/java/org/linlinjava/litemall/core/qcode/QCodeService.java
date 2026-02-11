@@ -97,21 +97,35 @@ public class QCodeService {
         return "GOOD_QCODE_" + goodId + ".jpg";
     }
 
-    public String createInviteQrcode(String userId) {
+    public String createInviteQrcode(Integer userId, String inviteCode, String avatarUrl) {
         String fileName = getInviteKeyName(userId);
         LitemallStorage exist = litemallStorageService.findByName(fileName);
         if (exist != null && !StringUtils.isEmpty(exist.getUrl())) {
             return exist.getUrl();
         }
         try {
-            File file = wxMaService.getQrcodeService().createWxaCode("pages/index/index?inviteCode=" + userId);
+            File file = wxMaService.getQrcodeService().createWxaCode("pages/index/index?inviteCode=" + inviteCode);
+            BufferedImage qrImage = ImageIO.read(file);
+            if (!StringUtils.isEmpty(avatarUrl) && qrImage != null) {
+                BufferedImage merged = addAvatarToQrcode(qrImage, avatarUrl);
+                if (merged != null) {
+                    ByteArrayOutputStream bs = new ByteArrayOutputStream();
+                    ImageIO.write(merged, "png", bs);
+                    byte[] imageData = bs.toByteArray();
+                    ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+                    LitemallStorage storageInfo = storageService.store(inputStream, imageData.length, "image/png",
+                            fileName);
+                    return storageInfo.getUrl();
+                }
+            }
             FileInputStream inputStream = new FileInputStream(file);
-            LitemallStorage storageInfo = storageService.store(inputStream, file.length(), "image/png",
-                    fileName);
+            LitemallStorage storageInfo = storageService.store(inputStream, file.length(), "image/png", fileName);
             return storageInfo.getUrl();
         } catch (WxErrorException e) {
             logger.error(e.getMessage(), e);
         } catch (FileNotFoundException e) {
+            logger.error(e.getMessage(), e);
+        } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
         if (exist != null) {
@@ -120,8 +134,8 @@ public class QCodeService {
         return "";
     }
 
-    private String getInviteKeyName(String userId) {
-        return "INVITE_QRCODE_" + userId + ".png";
+    private String getInviteKeyName(Integer userId) {
+        return "INVITE_QRCODE_AVATAR_" + userId + ".png";
     }
 
     /**
@@ -216,5 +230,30 @@ public class QCodeService {
         Graphics2D g2D = (Graphics2D) baseImage.getGraphics();
         g2D.drawImage(imageToWrite, x, y, width, heigth, null);
         g2D.dispose();
+    }
+
+    private BufferedImage addAvatarToQrcode(BufferedImage qrImage, String avatarUrl) throws IOException {
+        BufferedImage avatarImage = ImageIO.read(new URL(avatarUrl));
+        if (avatarImage == null) {
+            return null;
+        }
+        int width = qrImage.getWidth();
+        int height = qrImage.getHeight();
+        int size = Math.max(40, Math.min(width, height) / 4);
+        int border = Math.max(4, size / 12);
+        int innerSize = size - border * 2;
+        int x = (width - size) / 2;
+        int y = (height - size) / 2;
+
+        BufferedImage combined = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2D = combined.createGraphics();
+        g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2D.drawImage(qrImage, 0, 0, null);
+        g2D.setColor(Color.WHITE);
+        g2D.fillRoundRect(x, y, size, size, border * 2, border * 2);
+        Image scaled = avatarImage.getScaledInstance(innerSize, innerSize, Image.SCALE_SMOOTH);
+        g2D.drawImage(scaled, x + border, y + border, innerSize, innerSize, null);
+        g2D.dispose();
+        return combined;
     }
 }
