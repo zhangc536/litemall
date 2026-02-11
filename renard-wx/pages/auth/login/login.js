@@ -6,6 +6,7 @@ var app = getApp();
 Page({
   data: {
     isLoggingIn: false,
+    isUploadingAvatar: false,
     avatarUrl: '',
     nickName: ''
   },
@@ -34,6 +35,10 @@ Page({
     if (this.data.isLoggingIn) {
       return;
     }
+    if (this.data.isUploadingAvatar) {
+      util.showErrorToast('头像上传中');
+      return;
+    }
     const nickName = (this.data.nickName || '').trim();
     const avatarUrl = this.data.avatarUrl || '';
     if (!nickName || !avatarUrl) {
@@ -52,7 +57,43 @@ Page({
       return;
     }
     this.setData({
-      avatarUrl: avatarUrl
+      avatarUrl: avatarUrl,
+      isUploadingAvatar: true
+    });
+    var that = this;
+    wx.uploadFile({
+      url: api.StorageUpload,
+      filePath: avatarUrl,
+      name: 'file',
+      success: function(res) {
+        var data = null;
+        try {
+          data = JSON.parse(res.data);
+        } catch (e) {
+          data = null;
+        }
+        if (data && data.errno === 0 && data.data && data.data.url) {
+          that.setData({
+            avatarUrl: data.data.url
+          });
+        } else {
+          that.setData({
+            avatarUrl: ''
+          });
+          util.showErrorToast('头像上传失败');
+        }
+      },
+      fail: function() {
+        that.setData({
+          avatarUrl: ''
+        });
+        util.showErrorToast('头像上传失败');
+      },
+      complete: function() {
+        that.setData({
+          isUploadingAvatar: false
+        });
+      }
     });
   },
   onNicknameInput: function(e) {
