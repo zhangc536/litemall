@@ -1,5 +1,5 @@
 // 正式环境使用
-var WxApiRoot = 'https://www.zhangcde.asia/wx/';
+var WxApiRoot = 'http://localhost:8082/wx/';
 
 module.exports = {
   IndexUrl: WxApiRoot + 'home/index', //首页数据接口
