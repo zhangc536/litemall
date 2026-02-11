@@ -7,6 +7,7 @@ Page({
   data: {
     isLoggingIn: false,
     isUploadingAvatar: false,
+    avatarPreviewUrl: '',
     avatarUrl: '',
     nickName: ''
   },
@@ -20,7 +21,8 @@ Page({
       return;
     }
     this.setData({
-      avatarUrl: avatarUrl,
+      avatarPreviewUrl: avatarUrl,
+      avatarUrl: '',
       isUploadingAvatar: true
     });
     var that = this;
@@ -37,7 +39,8 @@ Page({
         }
         if (data && data.errno === 0 && data.data && data.data.url) {
           that.setData({
-            avatarUrl: data.data.url
+            avatarUrl: data.data.url,
+            avatarPreviewUrl: data.data.url
           });
         } else {
           that.setData({
@@ -74,8 +77,13 @@ Page({
     }
     const nickName = (this.data.nickName || '').trim();
     const avatarUrl = this.data.avatarUrl || '';
-    if (!nickName || !avatarUrl) {
+    const avatarPreviewUrl = this.data.avatarPreviewUrl || '';
+    if (!nickName || !avatarPreviewUrl) {
       util.showErrorToast('请先选择头像并填写昵称');
+      return;
+    }
+    if (!avatarUrl) {
+      util.showErrorToast('头像上传失败，请重新选择');
       return;
     }
     this.doLogin({
