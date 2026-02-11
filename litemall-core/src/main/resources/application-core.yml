@@ -91,4 +91,4 @@ litemall:
     local:
       storagePath: storage
       # 这个地方应该是wx模块的WxStorageController的fetch方法对应的地址
-      address: http://209.146.116.109:8082/wx/storage/fetch/
+      address: https://www.zhangcde.asia/wx/storage/fetch/
