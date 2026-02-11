@@ -39,8 +39,7 @@ Page({
         }
         if (data && data.errno === 0 && data.data && data.data.url) {
           that.setData({
-            avatarUrl: data.data.url,
-            avatarPreviewUrl: data.data.url
+            avatarUrl: data.data.url
           });
         } else {
           that.setData({
