@@ -125,12 +125,6 @@
           "query": "id=1008002"
         },
         {
-          "id": -1,
-          "name": "查找",
-          "pathName": "pages/search/search",
-          "query": ""
-        },
-        {
           "id": 12,
           "name": "商品",
           "pathName": "pages/goods/goods",

@@ -11,7 +11,6 @@ import org.linlinjava.litemall.db.domain.*;
 import org.linlinjava.litemall.db.service.*;
 import org.linlinjava.litemall.wx.annotation.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,8 +63,6 @@ public class WxGoodsController {
 	@Autowired
 	private LitemallCategoryService categoryService;
 
-	@Autowired
-	private LitemallSearchHistoryService searchHistoryService;
 
 	@Autowired
 	private LitemallGoodsSpecificationService goodsSpecificationService;
@@ -257,15 +254,6 @@ public class WxGoodsController {
 		@RequestParam(defaultValue = "10") Integer limit,
 		@Sort(accepts = {"add_time", "retail_price", "name"}) @RequestParam(defaultValue = "add_time") String sort,
 		@Order @RequestParam(defaultValue = "desc") String order) {
-
-		//添加到搜索历史
-		if (userId != null && !StringUtils.isEmpty(keyword)) {
-			LitemallSearchHistory searchHistoryVo = new LitemallSearchHistory();
-			searchHistoryVo.setKeyword(keyword);
-			searchHistoryVo.setUserId(userId);
-			searchHistoryVo.setFrom("wx");
-			searchHistoryService.save(searchHistoryVo);
-		}
 
 		//查询列表数据
 		List<LitemallGoods> goodsList = goodsService.querySelective(categoryId, brandId, keyword, isHot, isNew, page, limit, sort, order);
