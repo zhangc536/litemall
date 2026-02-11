@@ -136,6 +136,19 @@ Page({
       });
     };
   },
+  goPoints() {
+    if (this.data.hasLogin) {
+      wx.showToast({
+        title: `当前积分：${this.data.points}`,
+        icon: 'none',
+        duration: 2000
+      });
+    } else {
+      wx.navigateTo({
+        url: "/pages/auth/login/login"
+      });
+    };
+  },
   goFeedback(e) {
     if (this.data.hasLogin) {
       wx.navigateTo({
