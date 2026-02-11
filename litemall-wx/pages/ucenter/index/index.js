@@ -15,6 +15,7 @@ Page({
       unrecv: 0,
       uncomment: 0
     },
+    points: 0,
     hasLogin: false
   },
   onLoad: function(options) {
@@ -37,7 +38,8 @@ Page({
       util.request(api.UserIndex).then(function(res) {
         if (res.errno === 0) {
           that.setData({
-            order: res.data.order
+            order: res.data.order,
+            points: res.data.points || 0
           });
         }
       });
@@ -47,6 +49,7 @@ Page({
       wx.removeStorageSync('userInfo');
       this.setData({
         hasLogin: false,
+        points: 0,
         userInfo: {
           nickName: '点击登录',
           avatarUrl: '/static/images/my.png'
@@ -105,17 +108,6 @@ Page({
         fail: function(res) {},
         complete: function(res) {},
       })
-    } else {
-      wx.navigateTo({
-        url: "/pages/auth/login/login"
-      });
-    };
-  },
-  goCoupon() {
-    if (this.data.hasLogin) {
-      wx.navigateTo({
-        url: "/pages/ucenter/couponList/couponList"
-      });
     } else {
       wx.navigateTo({
         url: "/pages/auth/login/login"

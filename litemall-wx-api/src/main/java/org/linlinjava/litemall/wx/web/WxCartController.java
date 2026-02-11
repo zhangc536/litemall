@@ -40,11 +40,7 @@ public class WxCartController {
     @Autowired
     private LitemallGrouponRulesService grouponRulesService;
     @Autowired
-    private LitemallCouponService couponService;
-    @Autowired
-    private LitemallCouponUserService couponUserService;
-    @Autowired
-    private CouponVerifyService couponVerifyService;
+    private LitemallUserService userService;
 
     /**
      * 用户购物车信息
@@ -401,12 +397,10 @@ public class WxCartController {
      *                  如果购物车商品ID非空，则只下单当前购物车商品。
      * @param addressId 收货地址ID：
      *                  如果收货地址ID是空，则查询当前用户的默认地址。
-     * @param couponId  优惠券ID：
-     *                  如果优惠券ID是空，则自动选择合适的优惠券。
      * @return 购物车操作结果
      */
     @GetMapping("checkout")
-    public Object checkout(@LoginUser Integer userId, Integer cartId, Integer addressId, Integer couponId, Integer userCouponId, Integer grouponRulesId) {
+    public Object checkout(@LoginUser Integer userId, Integer cartId, Integer addressId, Boolean usePoints, Integer grouponRulesId) {
         if (userId == null) {
             return ResponseUtil.unlogin();
         }
@@ -458,80 +452,36 @@ public class WxCartController {
             }
         }
 
-        // 计算优惠券可用情况
-        BigDecimal tmpCouponPrice = new BigDecimal(0.00);
-        Integer tmpCouponId = 0;
-        Integer tmpUserCouponId = 0;
-        int tmpCouponLength = 0;
-        List<LitemallCouponUser> couponUserList = couponUserService.queryAll(userId);
-        for(LitemallCouponUser couponUser : couponUserList){
-            LitemallCoupon coupon = couponVerifyService.checkCoupon(userId, couponUser.getCouponId(), couponUser.getId(), checkedGoodsPrice, checkedGoodsList);
-            if(coupon == null){
-                continue;
-            }
-
-            tmpCouponLength++;
-            if(tmpCouponPrice.compareTo(coupon.getDiscount()) == -1){
-                tmpCouponPrice = coupon.getDiscount();
-                tmpCouponId = coupon.getId();
-                tmpUserCouponId = couponUser.getId();
-            }
-        }
-        // 获取优惠券减免金额，优惠券可用数量
-        int availableCouponLength = tmpCouponLength;
-        BigDecimal couponPrice = new BigDecimal(0);
-        // 这里存在三种情况
-        // 1. 用户不想使用优惠券，则不处理
-        // 2. 用户想自动使用优惠券，则选择合适优惠券
-        // 3. 用户已选择优惠券，则测试优惠券是否合适
-        if (couponId == null || couponId.equals(-1)){
-            couponId = -1;
-            userCouponId = -1;
-        }
-        else if (couponId.equals(0)) {
-            couponPrice = tmpCouponPrice;
-            couponId = tmpCouponId;
-            userCouponId = tmpUserCouponId;
-        }
-        else {
-            LitemallCoupon coupon = couponVerifyService.checkCoupon(userId, couponId, userCouponId, checkedGoodsPrice, checkedGoodsList);
-            // 用户选择的优惠券有问题，则选择合适优惠券，否则使用用户选择的优惠券
-            if(coupon == null){
-                couponPrice = tmpCouponPrice;
-                couponId = tmpCouponId;
-                userCouponId = tmpUserCouponId;
-            }
-            else {
-                couponPrice = coupon.getDiscount();
-            }
-        }
-
         // 根据订单商品总价计算运费，满88则免运费，否则8元；
         BigDecimal freightPrice = new BigDecimal(0.00);
         if (checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
             freightPrice = SystemConfig.getFreight();
         }
 
-        // 可以使用的其他钱，例如用户积分
-        BigDecimal integralPrice = new BigDecimal(0.00);
-
         // 订单费用
-        BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).subtract(couponPrice).max(new BigDecimal(0.00));
+        BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).max(new BigDecimal(0.00));
+
+        LitemallUser user = userService.findById(userId);
+        Integer points = user == null || user.getPoints() == null ? 0 : user.getPoints();
+        boolean usePointsValue = usePoints == null ? points > 0 : usePoints;
+        BigDecimal integralPrice = new BigDecimal(0.00);
+        if (usePointsValue && points > 0) {
+            integralPrice = orderTotalPrice.min(new BigDecimal(points));
+        }
 
         BigDecimal actualPrice = orderTotalPrice.subtract(integralPrice);
 
         Map<String, Object> data = new HashMap<>();
         data.put("addressId", addressId);
-        data.put("couponId", couponId);
-        data.put("userCouponId", userCouponId);
         data.put("cartId", cartId);
         data.put("grouponRulesId", grouponRulesId);
         data.put("grouponPrice", grouponPrice);
         data.put("checkedAddress", checkedAddress);
-        data.put("availableCouponLength", availableCouponLength);
         data.put("goodsTotalPrice", checkedGoodsPrice);
         data.put("freightPrice", freightPrice);
-        data.put("couponPrice", couponPrice);
+        data.put("points", points);
+        data.put("usePoints", usePointsValue);
+        data.put("pointsPrice", integralPrice);
         data.put("orderTotalPrice", orderTotalPrice);
         data.put("actualPrice", actualPrice);
         data.put("checkedGoodsList", checkedGoodsList);

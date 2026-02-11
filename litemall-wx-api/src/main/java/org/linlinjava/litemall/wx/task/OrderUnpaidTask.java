@@ -65,8 +65,7 @@ public class OrderUnpaidTask extends Task {
             }
         }
 
-        //返还优惠券
-        wxOrderService.releaseCoupon(orderId);
+        wxOrderService.releasePoints(order);
 
         logger.info("系统结束处理延时任务---订单超时未付款---" + this.orderId);
     }

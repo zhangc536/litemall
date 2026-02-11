@@ -36,7 +36,7 @@
   <van-cell-group title="订单明细">
     <van-cell title="商品总价" value=" ￥{{order.goodsPrice}}元" />
     <van-cell title="    运费" value=" ￥{{order.freightPrice}}元" />
-    <van-cell title="    优惠" value="-￥{{order.couponPrice}}元" />
+    <van-cell title="    积分抵扣" value="-￥{{order.pointsPrice}}元" />
     <van-cell title="订单实付" value=" ￥{{order.actualPrice}}元" />
   </van-cell-group>
 </view>

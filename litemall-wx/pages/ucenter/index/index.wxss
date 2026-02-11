@@ -41,6 +41,14 @@ page {
   margin-bottom: 10rpx;
 }
 
+.profile-info .points {
+  display: block;
+  height: 30rpx;
+  line-height: 30rpx;
+  color: #f4f4f4;
+  font-size: 26rpx;
+}
+
 .profile-info .level {
   display: block;
   height: 30rpx;

@@ -185,12 +185,6 @@
           "query": "orderId=2&type=0&valueId=1116011"
         },
         {
-          "id": 22,
-          "name": "我的优惠券",
-          "pathName": "pages/ucenter/couponList/couponList",
-          "query": ""
-        },
-        {
           "id": -1,
           "name": "我的收藏",
           "pathName": "pages/ucenter/collect/collect",
@@ -254,24 +248,6 @@
           "id": -1,
           "name": "团购专区",
           "pathName": "pages/groupon/grouponList/grouponList",
-          "query": ""
-        },
-        {
-          "id": -1,
-          "name": "选择优惠券",
-          "pathName": "pages/ucenter/couponSelect/couponSelect",
-          "query": ""
-        },
-        {
-          "id": -1,
-          "name": "我的优惠券列表",
-          "pathName": "pages/ucenter/couponList/couponList",
-          "query": ""
-        },
-        {
-          "id": -1,
-          "name": "优惠券列表",
-          "pathName": "pages/coupon/coupon",
           "query": ""
         },
         {

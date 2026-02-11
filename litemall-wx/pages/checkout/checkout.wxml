@@ -23,22 +23,14 @@
     </view>
   </view>
 
-  <view class="coupon-box">
-    <view class="coupon-item" bindtap="selectCoupon">
-      <view class="l" wx:if="{{couponId == 0}}">
-        <text class="name">没有可用的优惠券</text>
-        <text class="txt">0张</text>
+  <view class="points-box">
+    <view class="points-item">
+      <view class="l">
+        <text class="name">积分抵扣</text>
+        <text class="txt">可用{{points}}积分</text>
       </view>
-      <view class="l" wx:elif="{{couponId == -1}}">
-        <text class="name">优惠券</text>
-        <text class="txt">{{availableCouponLength}}张</text>
-      </view>
-      <view class="l" wx:else>
-        <text class="name">优惠券</text>
-        <text class="txt">-￥{{couponPrice}}元</text>
-      </view>      
       <view class="r">
-        <van-icon name="arrow" />      
+        <switch checked="{{usePoints}}" bindchange="togglePoints" />
       </view>
     </view>
   </view>
@@ -66,10 +58,10 @@
     </view>
     <view class="order-item no-border">
       <view class="l">
-        <text class="name">优惠券</text>
+        <text class="name">积分抵扣</text>
       </view>
       <view class="r">
-        <text class="txt">-￥{{couponPrice}}元</text>
+        <text class="txt">-￥{{pointsPrice}}元</text>
       </view>
     </view>
   </view>

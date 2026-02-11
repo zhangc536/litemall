@@ -102,7 +102,12 @@ public class WxAftersaleController {
 
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("aftersale", aftersale);
-        data.put("order", order);
+        Map<String, Object> orderVo = new HashMap<>();
+        orderVo.put("goodsPrice", order.getGoodsPrice());
+        orderVo.put("freightPrice", order.getFreightPrice());
+        orderVo.put("pointsPrice", order.getIntegralPrice());
+        orderVo.put("actualPrice", order.getActualPrice());
+        data.put("order", orderVo);
         data.put("orderGoods", orderGoodsList);
         return ResponseUtil.ok(data);
     }

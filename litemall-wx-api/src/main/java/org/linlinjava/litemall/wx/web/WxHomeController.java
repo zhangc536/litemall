@@ -50,9 +50,6 @@ public class WxHomeController {
     @Autowired
     private WxGrouponRuleService grouponService;
 
-    @Autowired
-    private LitemallCouponService couponService;
-
     private final static ArrayBlockingQueue<Runnable> WORK_QUEUE = new ArrayBlockingQueue<>(9);
 
     private final static RejectedExecutionHandler HANDLER = new ThreadPoolExecutor.CallerRunsPolicy();
@@ -88,14 +85,6 @@ public class WxHomeController {
 
         Callable<List> channelListCallable = () -> categoryService.queryChannel();
 
-        Callable<List> couponListCallable;
-        if(userId == null){
-            couponListCallable = () -> couponService.queryList(0, 3);
-        } else {
-            couponListCallable = () -> couponService.queryAvailableList(userId,0, 3);
-        }
-
-
         Callable<List> newGoodsListCallable = () -> goodsService.queryByNew(0, SystemConfig.getNewLimit());
 
         Callable<List> hotGoodsListCallable = () -> goodsService.queryByHot(0, SystemConfig.getHotLimit());
@@ -111,7 +100,6 @@ public class WxHomeController {
 
         FutureTask<List> bannerTask = new FutureTask<>(bannerListCallable);
         FutureTask<List> channelTask = new FutureTask<>(channelListCallable);
-        FutureTask<List> couponListTask = new FutureTask<>(couponListCallable);
         FutureTask<List> newGoodsListTask = new FutureTask<>(newGoodsListCallable);
         FutureTask<List> hotGoodsListTask = new FutureTask<>(hotGoodsListCallable);
         FutureTask<List> brandListTask = new FutureTask<>(brandListCallable);
@@ -121,7 +109,6 @@ public class WxHomeController {
 
         executorService.submit(bannerTask);
         executorService.submit(channelTask);
-        executorService.submit(couponListTask);
         executorService.submit(newGoodsListTask);
         executorService.submit(hotGoodsListTask);
         executorService.submit(brandListTask);
@@ -133,7 +120,6 @@ public class WxHomeController {
         try {
             entity.put("banner", bannerTask.get());
             entity.put("channel", channelTask.get());
-            entity.put("couponList", couponListTask.get());
             entity.put("newGoodsList", newGoodsListTask.get());
             entity.put("hotGoodsList", hotGoodsListTask.get());
             entity.put("brandList", brandListTask.get());
