@@ -35,6 +35,13 @@ public class LitemallSearchHistoryService {
         searchHistoryMapper.logicalDeleteByExample(example);
     }
 
+    public void deleteById(Integer id) {
+        if (id == null) {
+            return;
+        }
+        searchHistoryMapper.logicalDeleteByPrimaryKey(id);
+    }
+
     public List<LitemallSearchHistory> querySelective(String userId, String keyword, Integer page, Integer size, String sort, String order) {
         LitemallSearchHistoryExample example = new LitemallSearchHistoryExample();
         LitemallSearchHistoryExample.Criteria criteria = example.createCriteria();

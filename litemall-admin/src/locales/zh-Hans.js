@@ -194,7 +194,8 @@ export default {
       id: '搜索ID',
       user_id: '用户ID',
       keyword: '关键字',
-      add_time: '添加时间'
+      add_time: '添加时间',
+      actions: '操作'
     },
     placeholder: {
       filter_user_id: '请输入用户ID',

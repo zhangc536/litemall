@@ -3,8 +3,8 @@
 
     <!-- 查询和其他操作 -->
     <div class="filter-container">
-      <el-input v-model="listQuery.userId" clearable class="filter-item" style="width: 200px;" :placeholder="$t('user_history.placeholder.filter_user_id')"/>
-      <el-input v-model="listQuery.keyword" clearable class="filter-item" style="width: 200px;" :placeholder="$t('user_history.placeholder.filter_keyword')"/>
+      <el-input v-model="listQuery.userId" clearable class="filter-item" style="width: 200px;" :placeholder="$t('user_history.placeholder.filter_user_id')" />
+      <el-input v-model="listQuery.keyword" clearable class="filter-item" style="width: 200px;" :placeholder="$t('user_history.placeholder.filter_keyword')" />
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('app.button.search') }}</el-button>
       <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">{{ $t('app.button.download') }}</el-button>
     </div>
@@ -18,6 +18,11 @@
       <el-table-column align="center" min-width="100px" :label="$t('user_history.table.keyword')" prop="keyword" />
 
       <el-table-column align="center" min-width="100px" :label="$t('user_history.table.add_time')" prop="addTime" />
+      <el-table-column align="center" min-width="100px" :label="$t('user_history.table.actions')">
+        <template slot-scope="scope">
+          <el-button v-permission="['POST /admin/history/delete']" type="danger" size="mini" @click="handleDelete(scope.row)">{{ $t('app.button.delete') }}</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
@@ -26,7 +31,7 @@
 </template>
 
 <script>
-import { listHistory } from '@/api/history'
+import { listHistory, deleteHistory } from '@/api/history'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
@@ -82,6 +87,20 @@ export default {
           '用户搜索历史信息'
         )
         this.downloadLoading = false
+      })
+    },
+    handleDelete(row) {
+      deleteHistory(row).then(() => {
+        this.$notify.success({
+          title: '成功',
+          message: '删除搜索历史成功'
+        })
+        this.getList()
+      }).catch(response => {
+        this.$notify.error({
+          title: '失败',
+          message: response.data.errmsg
+        })
       })
     }
   }

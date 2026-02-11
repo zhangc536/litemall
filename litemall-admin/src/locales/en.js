@@ -194,7 +194,8 @@ export default {
       id: 'ID',
       user_id: 'User ID',
       keyword: 'Keyword',
-      add_time: 'Time added'
+      add_time: 'Time added',
+      actions: 'Actions'
     },
     placeholder: {
       filter_user_id: 'User ID',

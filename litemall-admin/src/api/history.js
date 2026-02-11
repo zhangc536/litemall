@@ -7,3 +7,11 @@ export function listHistory(query) {
     params: query
   })
 }
+
+export function deleteHistory(data) {
+  return request({
+    url: '/history/delete',
+    method: 'post',
+    data
+  })
+}

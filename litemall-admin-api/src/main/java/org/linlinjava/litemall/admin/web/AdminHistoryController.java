@@ -10,6 +10,8 @@ import org.linlinjava.litemall.core.validator.Sort;
 import org.linlinjava.litemall.db.domain.LitemallSearchHistory;
 import org.linlinjava.litemall.db.service.LitemallSearchHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,5 +38,17 @@ public class AdminHistoryController {
         List<LitemallSearchHistory> historyList = searchHistoryService.querySelective(userId, keyword, page, limit,
                 sort, order);
         return ResponseUtil.okList(historyList);
+    }
+
+    @RequiresPermissions("admin:history:delete")
+    @RequiresPermissionsDesc(menu = {"用户管理", "搜索历史"}, button = "删除")
+    @PostMapping("/delete")
+    public Object delete(@RequestBody LitemallSearchHistory history) {
+        Integer id = history.getId();
+        if (id == null) {
+            return ResponseUtil.badArgument();
+        }
+        searchHistoryService.deleteById(id);
+        return ResponseUtil.ok();
     }
 }
