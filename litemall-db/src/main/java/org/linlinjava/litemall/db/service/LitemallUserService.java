@@ -142,7 +142,7 @@ public class LitemallUserService {
     }
 
     public void deleteById(Integer id) {
-        userMapper.logicalDeleteByPrimaryKey(id);
+        userMapper.deleteByPrimaryKey(id);
     }
 
     private Integer randomEightDigitNumber() {
