@@ -213,10 +213,12 @@ public class WxAuthController {
             }
             LocalDateTime lastLoginTime = user.getLastLoginTime();
             boolean requiresProfile = lastLoginTime == null || lastLoginTime.isBefore(now.minusDays(7));
+            boolean hasIncomingProfile = userInfo != null && (!StringUtils.isEmpty(userInfo.getAvatarUrl()) || !StringUtils.isEmpty(userInfo.getNickName()));
+            boolean needsProfileSupplement = StringUtils.isEmpty(user.getAvatar()) || StringUtils.isEmpty(user.getNickname());
             if (requiresProfile && userInfo == null) {
                 return ResponseUtil.fail(AUTH_INVALID_ACCOUNT, "请先选择头像和昵称");
             }
-            if (requiresProfile && userInfo != null) {
+            if ((requiresProfile || needsProfileSupplement) && hasIncomingProfile) {
                 useUserInfoResponse = true;
                 if (!StringUtils.isEmpty(userInfo.getAvatarUrl())) {
                     user.setAvatar(userInfo.getAvatarUrl());
