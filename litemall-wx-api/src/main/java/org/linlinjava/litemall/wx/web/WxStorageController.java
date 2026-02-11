@@ -65,20 +65,18 @@ public class WxStorageController {
      */
     @GetMapping("/fetch/{key:.+}")
     public ResponseEntity<Resource> fetch(@PathVariable String key) {
-        LitemallStorage litemallStorage = litemallStorageService.findByKey(key);
-        if (litemallStorage==null||key == null) {
+        if (key == null) {
             return ResponseEntity.notFound().build();
         }
         if (key.contains("../")) {
             return ResponseEntity.badRequest().build();
         }
-        String type = litemallStorage.getType();
-        MediaType mediaType = MediaType.parseMediaType(type);
-
+        LitemallStorage litemallStorage = litemallStorageService.findByKey(key);
         Resource file = storageService.loadAsResource(key);
         if (file == null) {
             return ResponseEntity.notFound().build();
         }
+        MediaType mediaType = resolveMediaType(litemallStorage, key);
         return ResponseEntity.ok().contentType(mediaType).body(file);
     }
 
@@ -90,23 +88,37 @@ public class WxStorageController {
      */
     @GetMapping("/download/{key:.+}")
     public ResponseEntity<Resource> download(@PathVariable String key) {
-        LitemallStorage litemallStorage = litemallStorageService.findByKey(key);
-        if (litemallStorage==null||key == null) {
+        if (key == null) {
             return ResponseEntity.notFound().build();
         }
         if (key.contains("../")) {
             return ResponseEntity.badRequest().build();
         }
-
-        String type = litemallStorage.getType();
-        MediaType mediaType = MediaType.parseMediaType(type);
-
+        LitemallStorage litemallStorage = litemallStorageService.findByKey(key);
         Resource file = storageService.loadAsResource(key);
         if (file == null) {
             return ResponseEntity.notFound().build();
         }
+        MediaType mediaType = resolveMediaType(litemallStorage, key);
         return ResponseEntity.ok().contentType(mediaType).header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    }
+
+    private MediaType resolveMediaType(LitemallStorage litemallStorage, String key) {
+        if (litemallStorage != null && litemallStorage.getType() != null && !litemallStorage.getType().isEmpty()) {
+            return MediaType.parseMediaType(litemallStorage.getType());
+        }
+        String lowerKey = key.toLowerCase();
+        if (lowerKey.endsWith(".png")) {
+            return MediaType.IMAGE_PNG;
+        }
+        if (lowerKey.endsWith(".jpg") || lowerKey.endsWith(".jpeg")) {
+            return MediaType.IMAGE_JPEG;
+        }
+        if (lowerKey.endsWith(".gif")) {
+            return MediaType.IMAGE_GIF;
+        }
+        return MediaType.APPLICATION_OCTET_STREAM;
     }
 
 }
