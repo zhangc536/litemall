@@ -104,7 +104,7 @@ public class QCodeService {
             return exist.getUrl();
         }
         try {
-            File file = wxMaService.getQrcodeService().createWxaCodeUnlimit("invite," + userId, "pages/groupon/myGroupon/myGroupon");
+            File file = wxMaService.getQrcodeService().createWxaCode("pages/index/index?inviteCode=" + userId);
             FileInputStream inputStream = new FileInputStream(file);
             LitemallStorage storageInfo = storageService.store(inputStream, file.length(), "image/png",
                     fileName);
