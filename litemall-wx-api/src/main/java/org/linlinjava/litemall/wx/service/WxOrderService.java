@@ -338,13 +338,7 @@ public class WxOrderService {
             freightPrice = SystemConfig.getFreight();
         }
 
-        LitemallUser user = userService.findById(userId);
-        Integer points = user == null || user.getPoints() == null ? 0 : user.getPoints();
-        boolean usePointsValue = usePoints != null && usePoints;
         BigDecimal integralPrice = new BigDecimal(0);
-        if (usePointsValue && points > 0) {
-            integralPrice = checkedGoodsPrice.add(freightPrice).min(new BigDecimal(points));
-        }
 
         // 订单费用
         BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).max(new BigDecimal(0));
@@ -418,13 +412,6 @@ public class WxOrderService {
             if (productService.reduceStock(productId, checkGoods.getNumber()) == 0) {
                 throw new RuntimeException("商品货品库存减少失败");
             }
-        }
-
-        if (usePointsValue && points > 0 && integralPrice.compareTo(new BigDecimal(0)) > 0) {
-            LitemallUser updateUser = new LitemallUser();
-            updateUser.setId(userId);
-            updateUser.setPoints(points - integralPrice.intValue());
-            userService.updateById(updateUser);
         }
 
         //如果是团购项目，添加团购信息

@@ -461,15 +461,7 @@ public class WxCartController {
         // 订单费用
         BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).max(new BigDecimal(0.00));
 
-        LitemallUser user = userService.findById(userId);
-        Integer points = user == null || user.getPoints() == null ? 0 : user.getPoints();
-        boolean usePointsValue = usePoints == null ? points > 0 : usePoints;
-        BigDecimal integralPrice = new BigDecimal(0.00);
-        if (usePointsValue && points > 0) {
-            integralPrice = orderTotalPrice.min(new BigDecimal(points));
-        }
-
-        BigDecimal actualPrice = orderTotalPrice.subtract(integralPrice);
+        BigDecimal actualPrice = orderTotalPrice;
 
         Map<String, Object> data = new HashMap<>();
         data.put("addressId", addressId);
@@ -479,9 +471,6 @@ public class WxCartController {
         data.put("checkedAddress", checkedAddress);
         data.put("goodsTotalPrice", checkedGoodsPrice);
         data.put("freightPrice", freightPrice);
-        data.put("points", points);
-        data.put("usePoints", usePointsValue);
-        data.put("pointsPrice", integralPrice);
         data.put("orderTotalPrice", orderTotalPrice);
         data.put("actualPrice", actualPrice);
         data.put("checkedGoodsList", checkedGoodsList);

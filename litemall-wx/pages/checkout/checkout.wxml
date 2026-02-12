@@ -23,18 +23,6 @@
     </view>
   </view>
 
-  <view class="points-box">
-    <view class="points-item">
-      <view class="l">
-        <text class="name">积分抵扣</text>
-        <text class="txt">可用{{points}}积分</text>
-      </view>
-      <view class="r">
-        <switch checked="{{usePoints}}" bindchange="togglePoints" />
-      </view>
-    </view>
-  </view>
-
   <view class="message-box">
     <input class="message-item" bindinput="bindMessageInput" placeholder="如需要，请输入留言" value="{{message}}" />
   </view>
@@ -54,14 +42,6 @@
       </view>
       <view class="r">
         <text class="txt">￥{{freightPrice}}元</text>
-      </view>
-    </view>
-    <view class="order-item no-border">
-      <view class="l">
-        <text class="name">积分抵扣</text>
-      </view>
-      <view class="r">
-        <text class="txt">-￥{{pointsPrice}}元</text>
       </view>
     </view>
   </view>

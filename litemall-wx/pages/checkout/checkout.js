@@ -9,9 +9,6 @@ Page({
     checkedAddress: {},
     goodsTotalPrice: 0.00, //商品总价
     freightPrice: 0.00, //快递费
-    points: 0,
-    usePoints: false,
-    pointsPrice: 0.00,
     grouponPrice: 0.00, //团购优惠价格
     orderTotalPrice: 0.00, //订单总价
     actualPrice: 0.00, //实际需要支付的总价
@@ -31,7 +28,6 @@ Page({
     util.request(api.CartCheckout, {
       cartId: that.data.cartId,
       addressId: that.data.addressId,
-      usePoints: that.data.usePoints,
       grouponRulesId: that.data.grouponRulesId
     }).then(function(res) {
       if (res.errno === 0) {
@@ -39,9 +35,6 @@ Page({
           checkedGoodsList: res.data.checkedGoodsList,
           checkedAddress: res.data.checkedAddress,
           actualPrice: res.data.actualPrice,
-          points: res.data.points,
-          usePoints: res.data.usePoints,
-          pointsPrice: res.data.pointsPrice,
           grouponPrice: res.data.grouponPrice,
           freightPrice: res.data.freightPrice,
           goodsTotalPrice: res.data.goodsTotalPrice,
@@ -57,12 +50,6 @@ Page({
     wx.navigateTo({
       url: '/pages/ucenter/address/address',
     })
-  },
-  togglePoints(e) {
-    this.setData({
-      usePoints: e.detail.value
-    });
-    this.getCheckoutInfo();
   },
   bindMessageInput: function(e) {
     this.setData({
@@ -126,7 +113,6 @@ Page({
     util.request(api.OrderSubmit, {
       cartId: this.data.cartId,
       addressId: this.data.addressId,
-      usePoints: this.data.usePoints,
       message: this.data.message,
       grouponRulesId: this.data.grouponRulesId,
       grouponLinkId: this.data.grouponLinkId

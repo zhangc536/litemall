@@ -69,10 +69,6 @@
           <text class="txt">￥{{orderInfo.freightPrice}}元</text>
         </view>
         <view class="t">
-          <text class="label">积分抵扣：</text>
-          <text class="txt">-￥{{orderInfo.pointsPrice}}元</text>
-        </view>
-        <view class="t">
           <text class="label">订单实付：</text>
           <text class="txt">￥{{orderInfo.actualPrice}}元</text>
         </view>        

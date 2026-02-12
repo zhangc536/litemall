@@ -139,7 +139,7 @@ Page({
   goPoints() {
     if (this.data.hasLogin) {
       wx.showToast({
-        title: `当前积分：${this.data.points}`,
+        title: `积分可用于兑换商品，当前积分：${this.data.points}`,
         icon: 'none',
         duration: 2000
       });

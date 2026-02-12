@@ -56,7 +56,7 @@
     </view>
     <view class='user_column_item' bindtap='goPoints'>
       <image class='user_column_item_image' src='/static/images/coupon.png'></image>
-      <view class='user_column_item_text'>积分</view>
+      <view class='user_column_item_text'>积分兑换</view>
     </view>
     <view class='user_column_item' bindtap='goFootprint'>
       <image class='user_column_item_image' src='/static/images/footprint.png'></image>
