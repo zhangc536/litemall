@@ -5,7 +5,7 @@ import { getToken } from '@/utils/auth'
 
 axios.defaults.withCredentials = false
 
-const resolvedBaseURL = 'https://www.zhangcde.asia/admin'
+const resolvedBaseURL = process.env.VUE_APP_BASE_API || 'https://www.zhangcde.asia/admin'
 
 const service = axios.create({
   baseURL: resolvedBaseURL,

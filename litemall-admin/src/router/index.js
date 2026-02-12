@@ -68,6 +68,28 @@ export const constantRoutes = [
         meta: { title: 'app.menu.dashboard', icon: 'dashboard', affix: true }
       }
     ]
+  },
+  {
+    path: '/points',
+    component: Layout,
+    redirect: 'noredirect',
+    alwaysShow: true,
+    name: 'pointsManage',
+    meta: {
+      title: 'app.menu.user_points',
+      icon: 'chart'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/user/points'),
+        name: 'pointsList',
+        meta: {
+          title: 'app.menu.user_points',
+          noCache: true
+        }
+      }
+    ]
   }
 ]
 
@@ -115,7 +137,6 @@ export const asyncRoutes = [
       }
     ]
   },
-
   {
     path: '/goods',
     component: Layout,

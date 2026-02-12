@@ -13,6 +13,7 @@ export default {
       user_collect: '会员收藏',
       user_footprint: '会员足迹',
       user_feedback: '意见反馈',
+      user_points: '积分管理',
       mall: '商场管理',
       mall_region: '行政区域',
       mall_brand: '品牌制造商',
@@ -147,6 +148,11 @@ export default {
       filter_mobile: '请输入手机号',
       user_level: '请选择',
       status: '请选择'
+    }
+  },
+  user_points: {
+    table: {
+      points: '积分'
     }
   },
   user_address: {

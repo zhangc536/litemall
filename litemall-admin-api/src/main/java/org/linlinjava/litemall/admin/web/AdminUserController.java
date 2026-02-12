@@ -67,6 +67,7 @@ public class AdminUserController {
             item.put("mobile", user.getMobile());
             item.put("userLevel", user.getUserLevel());
             item.put("status", user.getStatus());
+            item.put("points", user.getPoints() == null ? 0 : user.getPoints());
             item.put("inviterUserId", user.getInviterUserId());
             LitemallUser inviter = inviterMap.get(user.getInviterUserId());
             if (inviter != null) {

@@ -13,6 +13,7 @@ export default {
       user_collect: 'Favorites',
       user_footprint: 'Footprints',
       user_feedback: 'Feedbacks',
+      user_points: 'Points',
       mall: 'Mall',
       mall_region: 'Regions',
       mall_brand: 'Brands',
@@ -147,6 +148,11 @@ export default {
       filter_mobile: 'Mobile',
       user_level: 'Please choose',
       status: 'Please choose'
+    }
+  },
+  user_points: {
+    table: {
+      points: 'Points'
     }
   },
   user_address: {
