@@ -47,7 +47,9 @@ public class LitemallUserService {
     }
 
     public LitemallUser queryByInviteCode(String inviteCode) {
-        return userMapper.selectByInviteCode(inviteCode);
+        LitemallUserExample example = new LitemallUserExample();
+        example.or().andInviteCodeEqualTo(inviteCode).andDeletedEqualTo(false);
+        return userMapper.selectOneByExample(example);
     }
 
     public Integer generateUniqueUserId() {
@@ -60,9 +62,12 @@ public class LitemallUserService {
 
     public String generateUniqueInviteCode() {
         String inviteCode;
+        LitemallUserExample example;
         do {
             inviteCode = String.valueOf(randomEightDigitNumber());
-        } while (userMapper.countByInviteCode(inviteCode) > 0);
+            example = new LitemallUserExample();
+            example.or().andInviteCodeEqualTo(inviteCode);
+        } while (userMapper.countByExample(example) > 0);
         return inviteCode;
     }
 

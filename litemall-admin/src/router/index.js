@@ -88,6 +88,16 @@ export const constantRoutes = [
           title: 'app.menu.user_points',
           noCache: true
         }
+      },
+      {
+        path: 'goods',
+        component: () => import('@/views/promotion/pointGoods'),
+        name: 'pointGoods',
+        meta: {
+          perms: ['GET /admin/pointGoods/list', 'POST /admin/pointGoods/create', 'POST /admin/pointGoods/update', 'POST /admin/pointGoods/delete'],
+          title: '积分商品',
+          noCache: true
+        }
       }
     ]
   }
