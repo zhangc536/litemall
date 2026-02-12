@@ -20,18 +20,18 @@ Page({
   },
   getGoodsList() {
     let that = this;
-    util.request(api.GoodsList, {
+    util.request(api.PointGoodsList, {
       page: that.data.page,
-      limit: that.data.limit,
-      order: 'desc',
-      sort: 'add_time'
+      limit: that.data.limit
     }).then(function(res) {
       if (res.errno === 0) {
-        const goodsList = res.data.list.map(item => {
-          const price = parseFloat(item.retailPrice || 0);
-          return Object.assign({}, item, {
-            pointsRequired: Math.ceil(price)
-          });
+        const goodsList = res.data.items.map(item => {
+          return {
+            id: item.goodsId,
+            name: item.goodsName,
+            picUrl: item.picUrl,
+            pointsRequired: item.points
+          };
         });
         that.setData({
           goodsList: goodsList
