@@ -1,15 +1,27 @@
 .header {
-  padding: 24rpx 31.25rpx;
+  padding: 32rpx 31.25rpx;
   background: #fff;
 }
 
-.header .points {
-  font-size: 32rpx;
+.header .points-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16rpx;
+}
+
+.header .label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.header .value {
+  font-size: 40rpx;
+  font-weight: 600;
   color: #333;
 }
 
 .header .tip {
-  margin-top: 8rpx;
+  margin-top: 12rpx;
   font-size: 26rpx;
   color: #999;
 }
