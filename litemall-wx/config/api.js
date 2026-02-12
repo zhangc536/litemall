@@ -82,7 +82,7 @@ module.exports = {
 
   PointGoodsList: WxApiRoot + 'pointGoods/list', //积分商品列表
 
-  StorageUpload: WxApiRoot + 'storage/upload' //图片上传,
+  StorageUpload: WxApiRoot + 'storage/upload', //图片上传,
 
   UserIndex: WxApiRoot + 'user/index', //个人页面用户相关信息
   IssueList: WxApiRoot + 'issue/list', //帮助信息
