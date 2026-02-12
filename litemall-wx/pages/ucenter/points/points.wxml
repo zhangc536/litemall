@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="header">
+    <view class="points">当前积分：{{points}}</view>
+    <view class="tip">积分仅用于兑换商品</view>
+  </view>
+  <view class="list" wx:if="{{goodsList.length > 0}}">
+    <block wx:for="{{goodsList}}" wx:key="id">
+      <navigator class="item" url="/pages/goods/goods?id={{item.id}}">
+        <image class="img" src="{{item.picUrl}}"></image>
+        <view class="info">
+          <view class="name">{{item.name}}</view>
+          <view class="points-needed">需{{item.pointsRequired}}积分</view>
+        </view>
+      </navigator>
+    </block>
+  </view>
+  <view class="empty" wx:else>暂无可兑换商品</view>
+</view>

@@ -1,0 +1,64 @@
+.header {
+  padding: 24rpx 31.25rpx;
+  background: #fff;
+}
+
+.header .points {
+  font-size: 32rpx;
+  color: #333;
+}
+
+.header .tip {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #999;
+}
+
+.list {
+  margin-top: 20rpx;
+  background: #fff;
+}
+
+.item {
+  display: flex;
+  padding: 24rpx 31.25rpx;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item .img {
+  width: 140rpx;
+  height: 140rpx;
+  margin-right: 20rpx;
+}
+
+.item .info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.item .name {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.4;
+}
+
+.item .points-needed {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #ab956d;
+}
+
+.empty {
+  margin-top: 20rpx;
+  padding: 40rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+  background: #fff;
+}
