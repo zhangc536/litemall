@@ -33,6 +33,9 @@ module.exports = {
       '/admin': {
         target: 'http://localhost:8080'
       },
+      '/wx': {
+        target: 'http://localhost:8082'
+      },
     },
     port: port,
     open: true,

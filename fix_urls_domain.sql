@@ -1,0 +1,11 @@
+UPDATE litemall_storage SET url = REPLACE(url, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_user SET avatar = REPLACE(avatar, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_goods SET pic_url = REPLACE(pic_url, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_goods SET gallery = REPLACE(gallery, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_goods SET detail = REPLACE(detail, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_topic SET pic_url = REPLACE(pic_url, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_topic SET content = REPLACE(content, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_brand SET pic_url = REPLACE(pic_url, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_category SET pic_url = REPLACE(pic_url, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_category SET icon_url = REPLACE(icon_url, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
+UPDATE litemall_admin SET avatar = REPLACE(avatar, '/wx/storage/fetch/', 'https://www.zhangcde.asia/wx/storage/fetch/');
