@@ -14,7 +14,7 @@
 
       <el-table-column align="center" min-width="120px" :label="$t('user_user.table.avatar')" prop="avatar">
         <template slot-scope="scope">
-          <img v-if="scope.row.avatar" :src="scope.row.avatar" width="40">
+          <img v-if="scope.row.avatar" :src="resolveAvatar(scope.row.avatar)" width="40">
         </template>
       </el-table-column>
 
@@ -104,6 +104,21 @@ export default {
     },
     formatStatusType(status) {
       return statusTypeMap[status] || statusTypeMap[0]
+    },
+    resolveAvatar(avatar) {
+      if (!avatar) {
+        return avatar
+      }
+      const marker = '/wx/storage/fetch/'
+      const index = avatar.indexOf(marker)
+      if (index === -1) {
+        return avatar
+      }
+      const baseApi = process.env.VUE_APP_BASE_API || 'https://www.zhangcde.asia/admin'
+      const base = baseApi.replace(/\/admin\/?$/, '')
+      const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base
+      const key = avatar.substring(index + marker.length)
+      return normalizedBase + marker + key
     },
     getList() {
       this.listLoading = true

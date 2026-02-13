@@ -98,6 +98,15 @@ export const constantRoutes = [
           title: '积分商品',
           noCache: true
         }
+      },
+      {
+        path: 'config',
+        component: () => import('@/views/promotion/pointConfig'),
+        name: 'pointConfig',
+        meta: {
+          title: '积分配置',
+          noCache: true
+        }
       }
     ]
   }

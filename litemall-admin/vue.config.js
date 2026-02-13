@@ -31,10 +31,10 @@ module.exports = {
   devServer: {
     proxy: {
       '/admin': {
-        target: 'http://localhost:8080'
+        target: 'https://www.zhangcde.asia'
       },
       '/wx': {
-        target: 'http://localhost:8082'
+        target: 'https://www.zhangcde.asia'
       },
     },
     port: port,

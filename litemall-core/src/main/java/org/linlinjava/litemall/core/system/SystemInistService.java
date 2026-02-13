@@ -44,6 +44,9 @@ class SystemInistService {
         // 运费相关配置默认值
         DEFAULT_CONFIGS.put(SystemConfig.LITEMALL_EXPRESS_FREIGHT_VALUE, "8");
         DEFAULT_CONFIGS.put(SystemConfig.LITEMALL_EXPRESS_FREIGHT_MIN, "88");
+        // 积分相关配置默认值
+        DEFAULT_CONFIGS.put(SystemConfig.LITEMALL_POINT_ENABLE, "true");
+        DEFAULT_CONFIGS.put(SystemConfig.LITEMALL_POINT_REWARD_TIERS, "[]");
         // 订单相关配置默认值
         DEFAULT_CONFIGS.put(SystemConfig.LITEMALL_ORDER_UNPAID, "30");
         DEFAULT_CONFIGS.put(SystemConfig.LITEMALL_ORDER_UNCONFIRM, "7");

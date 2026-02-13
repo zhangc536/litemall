@@ -400,7 +400,7 @@ public class WxCartController {
      * @return 购物车操作结果
      */
     @GetMapping("checkout")
-    public Object checkout(@LoginUser Integer userId, Integer cartId, Integer addressId, Boolean usePoints, Integer grouponRulesId) {
+    public Object checkout(@LoginUser Integer userId, Integer cartId, Integer addressId, Integer grouponRulesId) {
         if (userId == null) {
             return ResponseUtil.unlogin();
         }

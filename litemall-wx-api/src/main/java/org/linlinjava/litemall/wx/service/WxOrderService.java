@@ -247,7 +247,6 @@ public class WxOrderService {
         }
         Integer cartId = JacksonUtil.parseInteger(body, "cartId");
         Integer addressId = JacksonUtil.parseInteger(body, "addressId");
-        Boolean usePoints = JacksonUtil.parseBoolean(body, "usePoints");
         String message = JacksonUtil.parseString(body, "message");
         Integer grouponRulesId = JacksonUtil.parseInteger(body, "grouponRulesId");
         Integer grouponLinkId = JacksonUtil.parseInteger(body, "grouponLinkId");
@@ -338,12 +337,10 @@ public class WxOrderService {
             freightPrice = SystemConfig.getFreight();
         }
 
-        BigDecimal integralPrice = new BigDecimal(0);
-
         // 订单费用
         BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).max(new BigDecimal(0));
         // 最终支付费用
-        BigDecimal actualPrice = orderTotalPrice.subtract(integralPrice);
+        BigDecimal actualPrice = orderTotalPrice;
 
         Integer orderId = null;
         LitemallOrder order = null;
@@ -360,7 +357,7 @@ public class WxOrderService {
         order.setGoodsPrice(checkedGoodsPrice);
         order.setFreightPrice(freightPrice);
         order.setCouponPrice(new BigDecimal(0));
-        order.setIntegralPrice(integralPrice);
+        order.setIntegralPrice(new BigDecimal(0));
         order.setOrderPrice(orderTotalPrice);
         order.setActualPrice(actualPrice);
 
@@ -875,6 +872,62 @@ public class WxOrderService {
         if (orderService.updateWithOptimisticLocker(order) == 0) {
             return ResponseUtil.updatedDateExpired();
         }
+
+        // 增加积分
+        if (SystemConfig.getPointEnable()) {
+            Integer points = 0;
+            String tierConfig = SystemConfig.getPointRewardTiers();
+            boolean tierMatched = false;
+
+            if (tierConfig != null && !tierConfig.isEmpty()) {
+                try {
+                    List<Map> tiers = JacksonUtil.toList(tierConfig, Map.class);
+                    if (tiers != null) {
+                        BigDecimal orderAmount = order.getActualPrice();
+                        BigDecimal maxRate = BigDecimal.ZERO;
+
+                        for (Map tier : tiers) {
+                            Object amountObj = tier.get("amount");
+                            Object rateObj = tier.get("rate");
+                            if (amountObj != null && rateObj != null) {
+                                BigDecimal minAmount = new BigDecimal(amountObj.toString());
+                                BigDecimal rate = new BigDecimal(rateObj.toString());
+
+                                if (orderAmount.compareTo(minAmount) >= 0) {
+                                    if (rate.compareTo(maxRate) > 0) {
+                                        maxRate = rate;
+                                    }
+                                    tierMatched = true;
+                                }
+                            }
+                        }
+
+                        if (tierMatched) {
+                            // Calculate points: Amount * (Rate / 100)
+                            points = orderAmount.multiply(maxRate).divide(new BigDecimal(100), 0, BigDecimal.ROUND_FLOOR).intValue();
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("Error parsing point tiers", e);
+                }
+            }
+
+            if (!tierMatched) {
+                BigDecimal defaultRate = new BigDecimal("10");
+                points = order.getActualPrice().multiply(defaultRate).divide(new BigDecimal(100), 0, BigDecimal.ROUND_FLOOR).intValue();
+            }
+
+            if (points > 0) {
+                LitemallUser user = userService.findById(userId);
+                Integer userPoints = user.getPoints();
+                if(userPoints == null){
+                    userPoints = 0;
+                }
+                user.setPoints(userPoints + points);
+                userService.updateById(user);
+            }
+        }
+
         return ResponseUtil.ok();
     }
 

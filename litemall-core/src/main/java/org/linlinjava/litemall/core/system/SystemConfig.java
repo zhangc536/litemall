@@ -19,6 +19,14 @@ public class SystemConfig {
     // 运费相关配置
     public final static String LITEMALL_EXPRESS_FREIGHT_VALUE = "litemall_express_freight_value";
     public final static String LITEMALL_EXPRESS_FREIGHT_MIN = "litemall_express_freight_min";
+    // 积分相关配置
+    public final static String LITEMALL_POINT_ENABLE = "litemall_point_enable"; // 是否开启积分功能
+    public final static String LITEMALL_POINT_REWARD_TIERS = "litemall_point_reward_tiers"; // 积分奖励阶梯配置
+
+    public static String getPointRewardTiers() {
+        return getConfig(LITEMALL_POINT_REWARD_TIERS);
+    }
+
     // 订单相关配置
     public final static String LITEMALL_ORDER_UNPAID = "litemall_order_unpaid";
     public final static String LITEMALL_ORDER_UNCONFIRM = "litemall_order_unconfirm";
@@ -120,6 +128,11 @@ public class SystemConfig {
 
     public static String getMallLatitude() {
         return getConfig(LITEMALL_MALL_Latitude);
+    }
+
+    public static Boolean getPointEnable() {
+        String enable = getConfig(LITEMALL_POINT_ENABLE);
+        return enable != null && Boolean.parseBoolean(enable);
     }
 
     public static void setConfigs(Map<String, String> configs) {

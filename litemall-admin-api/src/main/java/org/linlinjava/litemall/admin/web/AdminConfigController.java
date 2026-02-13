@@ -93,4 +93,22 @@ public class AdminConfigController {
         SystemConfig.updateConfigs(data);
         return ResponseUtil.ok();
     }
+
+    @RequiresPermissions("admin:config:point:list")
+    @RequiresPermissionsDesc(menu = {"积分管理", "积分配置"}, button = "详情")
+    @GetMapping("/point")
+    public Object listPoint() {
+        Map<String, String> data = systemConfigService.listPoint();
+        return ResponseUtil.ok(data);
+    }
+
+    @RequiresPermissions("admin:config:point:updateConfigs")
+    @RequiresPermissionsDesc(menu = {"积分管理", "积分配置"}, button = "编辑")
+    @PostMapping("/point")
+    public Object updatePoint(@RequestBody String body) {
+        Map<String, String> data = JacksonUtil.toMap(body);
+        systemConfigService.updateConfig(data);
+        SystemConfig.updateConfigs(data);
+        return ResponseUtil.ok();
+    }
 }

@@ -73,6 +73,17 @@ public class LitemallSystemConfigService {
         return data;
     }
 
+    public Map<String, String> listPoint() {
+        LitemallSystemExample example = new LitemallSystemExample();
+        example.or().andKeyNameLike("litemall_point_%").andDeletedEqualTo(false);
+        List<LitemallSystem> systemList = systemMapper.selectByExample(example);
+        Map<String, String> data = new HashMap<>();
+        for(LitemallSystem system : systemList){
+            data.put(system.getKeyName(), system.getKeyValue());
+        }
+        return data;
+    }
+
     public void updateConfig(Map<String, String> data) {
         for (Map.Entry<String, String> entry : data.entrySet()) {
             LitemallSystemExample example = new LitemallSystemExample();
@@ -82,9 +93,11 @@ public class LitemallSystemConfigService {
             system.setKeyName(entry.getKey());
             system.setKeyValue(entry.getValue());
             system.setUpdateTime(LocalDateTime.now());
-            systemMapper.updateByExampleSelective(system, example);
+            int update = systemMapper.updateByExampleSelective(system, example);
+            if (update == 0) {
+                addConfig(entry.getKey(), entry.getValue());
+            }
         }
-
     }
 
     public void addConfig(String key, String value) {

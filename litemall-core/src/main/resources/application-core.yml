@@ -89,6 +89,6 @@ litemall:
     active: local
     # 本地对象存储配置信息
     local:
-      storagePath: storage
+      storagePath: /root/litemall/storage
       # 这个地方应该是wx模块的WxStorageController的fetch方法对应的地址
       address: https://www.zhangcde.asia/wx/storage/fetch/

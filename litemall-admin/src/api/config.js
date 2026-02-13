@@ -59,3 +59,18 @@ export function updateWx(data) {
     data
   })
 }
+
+export function listPoint() {
+  return request({
+    url: '/config/point',
+    method: 'get'
+  })
+}
+
+export function updatePoint(data) {
+  return request({
+    url: '/config/point',
+    method: 'post',
+    data
+  })
+}

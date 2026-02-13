@@ -177,4 +177,14 @@ public class JacksonUtil {
         }
         return null;
     }
+
+    public static <T> List<T> toList(String body, Class<T> clazz) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(body, mapper.getTypeFactory().constructCollectionType(List.class, clazz));
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
 }
