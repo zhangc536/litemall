@@ -42,8 +42,15 @@
     <!-- 添加或修改对话框 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="1100px">
       <div v-if="dialogStatus === 'create'">
-        <goods-create ref="goodsCreate" :embedded="true" :hide-actions="true" />
+        <el-radio-group v-model="goodsSource" size="small" style="margin: 0 0 10px 0;">
+          <el-radio-button label="select">从商品列表选择</el-radio-button>
+          <el-radio-button label="create">新建商品</el-radio-button>
+        </el-radio-group>
+        <goods-create v-if="goodsSource === 'create'" ref="goodsCreate" :embedded="true" :hide-actions="true" />
         <el-form ref="pointForm" :rules="pointRules" :model="dataForm" status-icon label-position="left" label-width="100px" style="width: 400px; margin: 20px 0 0 50px;">
+          <el-form-item v-if="goodsSource === 'select'" label="选择商品">
+            <el-button type="primary" size="mini" @click="openGoodsDialog">从商品列表选择</el-button>
+          </el-form-item>
           <el-form-item label="商品ID">
             <el-input v-model="dataForm.goodsId" disabled />
           </el-form-item>
@@ -98,6 +105,28 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="选择商品" :visible.sync="goodsDialogVisible" width="900px">
+      <div class="filter-container">
+        <el-input v-model="goodsQuery.name" clearable class="filter-item" style="width: 200px;" placeholder="请输入商品名称" />
+        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleGoodsFilter">查找</el-button>
+      </div>
+      <el-table v-loading="goodsLoading" :data="goodsList" element-loading-text="正在查询中..." border fit highlight-current-row>
+        <el-table-column align="center" label="ID" prop="id" sortable />
+        <el-table-column align="center" label="商品名称" prop="name" />
+        <el-table-column align="center" label="商品图片" prop="picUrl">
+          <template slot-scope="scope">
+            <img v-if="scope.row.picUrl" :src="scope.row.picUrl" width="40">
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="操作" width="120">
+          <template slot-scope="scope">
+            <el-button type="primary" size="mini" @click="selectGoods(scope.row)">选择</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <pagination v-show="goodsTotal>0" :total="goodsTotal" :page.sync="goodsQuery.page" :limit.sync="goodsQuery.limit" @pagination="getGoodsList" />
+    </el-dialog>
+
   </div>
 </template>
 
@@ -129,7 +158,7 @@
 
 <script>
 import { listPointGoods, createPointGoods, updatePointGoods, deletePointGoods } from '@/api/pointGoods'
-import { detailGoods } from '@/api/goods'
+import { detailGoods, listGoods } from '@/api/goods'
 import { uploadPath } from '@/api/storage'
 import Pagination from '@/components/Pagination'
 import GoodsCreate from '@/views/goods/create'
@@ -143,6 +172,20 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
+      goodsSource: 'select',
+      goodsDialogVisible: false,
+      goodsList: null,
+      goodsTotal: 0,
+      goodsLoading: false,
+      goodsQuery: {
+        page: 1,
+        limit: 10,
+        goodsId: undefined,
+        goodsSn: undefined,
+        name: undefined,
+        sort: 'add_time',
+        order: 'desc'
+      },
       listQuery: {
         page: 1,
         limit: 20,
@@ -217,6 +260,7 @@ export default {
     },
     handleCreate() {
       this.resetForm()
+      this.goodsSource = 'select'
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -242,6 +286,29 @@ export default {
       if (this.dialogStatus === 'create') {
         this.$refs['pointForm'].validate((valid) => {
           if (valid) {
+            if (this.goodsSource === 'select') {
+              if (!this.dataForm.goodsId) {
+                this.$notify.error({
+                  title: '失败',
+                  message: '请选择商品'
+                })
+                return
+              }
+              createPointGoods(this.dataForm).then(response => {
+                this.list.unshift(response.data.data)
+                this.dialogFormVisible = false
+                this.$notify.success({
+                  title: '成功',
+                  message: '创建成功'
+                })
+              }).catch(response => {
+                this.$notify.error({
+                  title: '失败',
+                  message: response.data.errmsg
+                })
+              })
+              return
+            }
             this.$refs.goodsCreate.submit().then(goods => {
               this.dataForm.goodsId = goods.id
               this.dataForm.goodsName = goods.name
@@ -329,6 +396,32 @@ export default {
           message: response.data.errmsg
         })
       })
+    },
+    openGoodsDialog() {
+      this.goodsDialogVisible = true
+      this.getGoodsList()
+    },
+    handleGoodsFilter() {
+      this.goodsQuery.page = 1
+      this.getGoodsList()
+    },
+    getGoodsList() {
+      this.goodsLoading = true
+      listGoods(this.goodsQuery).then(response => {
+        this.goodsList = response.data.data.list
+        this.goodsTotal = response.data.data.total
+        this.goodsLoading = false
+      }).catch(() => {
+        this.goodsList = []
+        this.goodsTotal = 0
+        this.goodsLoading = false
+      })
+    },
+    selectGoods(row) {
+      this.dataForm.goodsId = row.id
+      this.dataForm.goodsName = row.name
+      this.dataForm.picUrl = row.picUrl
+      this.goodsDialogVisible = false
     }
   }
 }
