@@ -8,7 +8,7 @@
   </view>
   <view class="list" wx:if="{{goodsList.length > 0}}">
     <block wx:for="{{goodsList}}" wx:key="id">
-      <navigator class="item" url="/pages/goods/goods?id={{item.id}}">
+      <navigator class="item" url="/pages/goods/goods?id={{item.id}}&point=1">
         <image class="img" src="{{item.picUrl}}"></image>
         <view class="info">
           <view class="name">{{item.name}}</view>

@@ -32,6 +32,10 @@ Page({
     isGroupon: false, //标识是否是一个参团购买
     soldout: false,
     canWrite: false, //用户是否获取了保存相册的权限
+    isPointGoods: false,
+    pointGoods: null,
+    pointGoodsPoints: 0,
+    pointGoodsPrice: 0,
   },
 
   // 页面分享
@@ -205,6 +209,20 @@ Page({
         WxParse.wxParse('goodsDetail', 'html', res.data.info.detail, that);
         //获取推荐商品
         that.getGoodsRelated();
+      }
+    });
+  },
+  getPointGoodsInfo: function() {
+    let that = this;
+    util.request(api.PointGoodsDetail, {
+      goodsId: that.data.id
+    }).then(function(res) {
+      if (res.errno === 0) {
+        that.setData({
+          pointGoods: res.data,
+          pointGoodsPoints: res.data.points || 0,
+          pointGoodsPrice: res.data.price || 0
+        });
       }
     });
   },
@@ -416,11 +434,19 @@ Page({
 
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
+    if (options.point) {
+      this.setData({
+        isPointGoods: options.point == '1'
+      });
+    }
     if (options.id) {
       this.setData({
         id: parseInt(options.id)
       });
       this.getGoodsInfo();
+      if (this.data.isPointGoods) {
+        this.getPointGoodsInfo();
+      }
     }
 
     if (options.grouponId) {

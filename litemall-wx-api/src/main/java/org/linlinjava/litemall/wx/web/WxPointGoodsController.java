@@ -60,4 +60,17 @@ public class WxPointGoodsController {
 
         return ResponseUtil.ok(data);
     }
+
+    @GetMapping("detail")
+    public Object detail(@NotNull Integer goodsId) {
+        LitemallGoods goods = goodsService.findByIdVO(goodsId);
+        if (goods == null) {
+            return ResponseUtil.badArgumentValue();
+        }
+        LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(goodsId);
+        if (pointGoods == null) {
+            return ResponseUtil.badArgumentValue();
+        }
+        return ResponseUtil.ok(pointGoods);
+    }
 }

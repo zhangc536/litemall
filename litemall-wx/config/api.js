@@ -81,6 +81,7 @@ module.exports = {
   GroupOnJoin: WxApiRoot + 'groupon/join', //团购API-详情
 
   PointGoodsList: WxApiRoot + 'pointGoods/list', //积分商品列表
+  PointGoodsDetail: WxApiRoot + 'pointGoods/detail', //积分商品详情
 
   StorageUpload: WxApiRoot + 'storage/upload', //图片上传,
 

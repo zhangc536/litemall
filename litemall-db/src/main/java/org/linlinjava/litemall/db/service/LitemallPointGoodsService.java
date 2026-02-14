@@ -55,4 +55,15 @@ public class LitemallPointGoodsService {
     public LitemallPointGoods findById(Integer id) {
         return pointGoodsMapper.selectByPrimaryKey(id);
     }
+
+    public LitemallPointGoods findByGoodsId(Integer goodsId) {
+        LitemallPointGoodsExample example = new LitemallPointGoodsExample();
+        example.or().andGoodsIdEqualTo(goodsId).andDeletedEqualTo(false);
+        example.setOrderByClause("add_time desc");
+        List<LitemallPointGoods> list = pointGoodsMapper.selectByExample(example);
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+        return list.get(0);
+    }
 }
