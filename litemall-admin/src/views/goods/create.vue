@@ -283,7 +283,7 @@
       </el-dialog>
     </el-card>
 
-    <div class="op-container">
+    <div class="op-container" v-if="!hideActions">
       <el-button @click="handleCancel">{{ $t('app.button.cancel') }}</el-button>
       <el-button type="primary" @click="handlePublish">{{ $t('goods_edit.button.publish') }}</el-button>
     </div>
@@ -346,6 +346,16 @@ import { getToken } from '@/utils/auth'
 export default {
   name: 'GoodsCreate',
   components: { Editor },
+  props: {
+    embedded: {
+      type: Boolean,
+      default: false
+    },
+    hideActions: {
+      type: Boolean,
+      default: false
+    }
+  },
 
   data() {
     return {
@@ -410,28 +420,42 @@ export default {
       this.goods.categoryId = value[value.length - 1]
     },
     handleCancel: function() {
+      if (this.embedded) {
+        this.$emit('cancel')
+        return
+      }
       this.$store.dispatch('tagsView/delView', this.$route)
       this.$router.push({ path: '/goods/list' })
     },
     handlePublish: function() {
+      this.submit().then(() => {
+        if (!this.embedded) {
+          this.$store.dispatch('tagsView/delView', this.$route)
+          this.$router.push({ path: '/goods/list' })
+        }
+      })
+    },
+    submit() {
       const finalGoods = {
         goods: this.goods,
         specifications: this.specifications,
         products: this.products,
         attributes: this.attributes
       }
-      publishGoods(finalGoods).then(response => {
+      return publishGoods(finalGoods).then(response => {
         this.$notify.success({
           title: '成功',
           message: '创建成功'
         })
-        this.$store.dispatch('tagsView/delView', this.$route)
-        this.$router.push({ path: '/goods/list' })
+        const data = response.data.data || this.goods
+        this.$emit('published', data)
+        return data
       }).catch(response => {
         MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
           confirmButtonText: '确定',
           type: 'error'
         })
+        return Promise.reject(response)
       })
     },
     handleClose(tag) {

@@ -210,7 +210,7 @@ public class AdminGoodsService {
             cartService.updateProduct(product.getId(), goods.getGoodsSn(), goods.getName(), product.getPrice(), product.getUrl());
         }
 
-        return ResponseUtil.ok();
+        return ResponseUtil.ok(goods);
     }
 
     @Transactional

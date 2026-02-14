@@ -40,8 +40,28 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <!-- 添加或修改对话框 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="dataForm" status-icon label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="1100px">
+      <div v-if="dialogStatus === 'create'">
+        <goods-create ref="goodsCreate" :embedded="true" :hide-actions="true" />
+        <el-form ref="pointForm" :rules="pointRules" :model="dataForm" status-icon label-position="left" label-width="100px" style="width: 400px; margin: 20px 0 0 50px;">
+          <el-form-item label="商品ID">
+            <el-input v-model="dataForm.goodsId" disabled />
+          </el-form-item>
+          <el-form-item label="商品名称">
+            <el-input v-model="dataForm.goodsName" disabled />
+          </el-form-item>
+          <el-form-item label="所需积分" prop="points">
+            <el-input v-model="dataForm.points" />
+          </el-form-item>
+          <el-form-item label="所需金额" prop="price">
+            <el-input v-model="dataForm.price" />
+          </el-form-item>
+          <el-form-item label="库存" prop="amount">
+            <el-input v-model="dataForm.amount" />
+          </el-form-item>
+        </el-form>
+      </div>
+      <el-form v-else ref="dataForm" :rules="rules" :model="dataForm" status-icon label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
         <el-form-item label="商品ID" prop="goodsId">
           <el-input v-model="dataForm.goodsId" placeholder="请输入商品ID" @blur="fetchGoodsInfo" />
         </el-form-item>
@@ -112,11 +132,12 @@ import { listPointGoods, createPointGoods, updatePointGoods, deletePointGoods } 
 import { detailGoods } from '@/api/goods'
 import { uploadPath } from '@/api/storage'
 import Pagination from '@/components/Pagination'
+import GoodsCreate from '@/views/goods/create'
 import { getToken } from '@/utils/auth'
 
 export default {
   name: 'PointGoods',
-  components: { Pagination },
+  components: { Pagination, GoodsCreate },
   data() {
     return {
       list: null,
@@ -147,6 +168,10 @@ export default {
       },
       rules: {
         goodsId: [{ required: true, message: '商品ID不能为空', trigger: 'blur' }],
+        points: [{ required: true, message: '所需积分不能为空', trigger: 'blur' }],
+        amount: [{ required: true, message: '库存不能为空', trigger: 'blur' }]
+      },
+      pointRules: {
         points: [{ required: true, message: '所需积分不能为空', trigger: 'blur' }],
         amount: [{ required: true, message: '库存不能为空', trigger: 'blur' }]
       }
@@ -195,7 +220,9 @@ export default {
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        if (this.$refs['pointForm']) {
+          this.$refs['pointForm'].clearValidate()
+        }
       })
     },
     fetchGoodsInfo() {
@@ -212,6 +239,31 @@ export default {
       this.dataForm.picUrl = response.data.url
     },
     createData() {
+      if (this.dialogStatus === 'create') {
+        this.$refs['pointForm'].validate((valid) => {
+          if (valid) {
+            this.$refs.goodsCreate.submit().then(goods => {
+              this.dataForm.goodsId = goods.id
+              this.dataForm.goodsName = goods.name
+              this.dataForm.picUrl = goods.picUrl
+              createPointGoods(this.dataForm).then(response => {
+                this.list.unshift(response.data.data)
+                this.dialogFormVisible = false
+                this.$notify.success({
+                  title: '成功',
+                  message: '创建成功'
+                })
+              }).catch(response => {
+                this.$notify.error({
+                  title: '失败',
+                  message: response.data.errmsg
+                })
+              })
+            })
+          }
+        })
+        return
+      }
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           createPointGoods(this.dataForm).then(response => {
