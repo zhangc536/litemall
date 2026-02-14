@@ -7,7 +7,9 @@ import org.linlinjava.litemall.admin.annotation.RequiresPermissionsDesc;
 import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.core.validator.Order;
 import org.linlinjava.litemall.core.validator.Sort;
+import org.linlinjava.litemall.db.domain.LitemallGoods;
 import org.linlinjava.litemall.db.domain.LitemallPointGoods;
+import org.linlinjava.litemall.db.service.LitemallGoodsService;
 import org.linlinjava.litemall.db.service.LitemallPointGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +25,9 @@ public class AdminPointGoodsController {
 
     @Autowired
     private LitemallPointGoodsService pointGoodsService;
+
+    @Autowired
+    private LitemallGoodsService goodsService;
 
     @RequiresPermissions("admin:pointGoods:list")
     @RequiresPermissionsDesc(menu = {"积分管理", "积分商品"}, button = "查询")
@@ -40,6 +45,10 @@ public class AdminPointGoodsController {
     @RequiresPermissionsDesc(menu = {"积分管理", "积分商品"}, button = "添加")
     @PostMapping("/create")
     public Object create(@RequestBody LitemallPointGoods pointGoods) {
+        Object error = validate(pointGoods);
+        if (error != null) {
+            return error;
+        }
         pointGoodsService.add(pointGoods);
         return ResponseUtil.ok(pointGoods);
     }
@@ -48,6 +57,10 @@ public class AdminPointGoodsController {
     @RequiresPermissionsDesc(menu = {"积分管理", "积分商品"}, button = "编辑")
     @PostMapping("/update")
     public Object update(@RequestBody LitemallPointGoods pointGoods) {
+        Object error = validate(pointGoods);
+        if (error != null) {
+            return error;
+        }
         if (pointGoodsService.updateById(pointGoods) == 0) {
             return ResponseUtil.updatedDataFailed();
         }
@@ -60,5 +73,26 @@ public class AdminPointGoodsController {
     public Object delete(@RequestBody LitemallPointGoods pointGoods) {
         pointGoodsService.deleteById(pointGoods.getId());
         return ResponseUtil.ok();
+    }
+
+    private Object validate(LitemallPointGoods pointGoods) {
+        Integer goodsId = pointGoods.getGoodsId();
+        if (goodsId == null) {
+            return ResponseUtil.badArgument();
+        }
+        LitemallGoods goods = goodsService.findByIdVO(goodsId);
+        if (goods == null) {
+            return ResponseUtil.fail(402, "商品已下架或不存在");
+        }
+        if (pointGoods.getGoodsName() == null) {
+            pointGoods.setGoodsName(goods.getName());
+        }
+        if (pointGoods.getGoodsBrief() == null) {
+            pointGoods.setGoodsBrief(goods.getBrief());
+        }
+        if (pointGoods.getPicUrl() == null) {
+            pointGoods.setPicUrl(goods.getPicUrl());
+        }
+        return null;
     }
 }
