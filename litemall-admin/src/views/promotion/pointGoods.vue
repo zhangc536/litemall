@@ -49,8 +49,17 @@
           <el-input v-model="dataForm.goodsName" placeholder="自动获取或手动输入" />
         </el-form-item>
         <el-form-item label="商品图片" prop="picUrl">
-          <el-input v-model="dataForm.picUrl" placeholder="图片URL" />
-          <img v-if="dataForm.picUrl" :src="dataForm.picUrl" width="40" style="margin-top: 10px;">
+          <el-upload
+            :headers="headers"
+            :action="uploadPath"
+            :show-file-list="false"
+            :on-success="uploadPicUrl"
+            class="avatar-uploader"
+            accept=".jpg,.jpeg,.png,.gif"
+          >
+            <img v-if="dataForm.picUrl" :src="dataForm.picUrl" class="avatar">
+            <i v-else class="el-icon-plus avatar-uploader-icon" />
+          </el-upload>
         </el-form-item>
         <el-form-item label="所需积分" prop="points">
           <el-input v-model="dataForm.points" />
@@ -72,10 +81,38 @@
   </div>
 </template>
 
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #20a0ff;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 120px;
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+}
+.avatar {
+  width: 145px;
+  height: 145px;
+  display: block;
+}
+</style>
+
 <script>
 import { listPointGoods, createPointGoods, updatePointGoods, deletePointGoods } from '@/api/pointGoods'
 import { detailGoods } from '@/api/goods'
+import { uploadPath } from '@/api/storage'
 import Pagination from '@/components/Pagination'
+import { getToken } from '@/utils/auth'
 
 export default {
   name: 'PointGoods',
@@ -92,6 +129,7 @@ export default {
         sort: 'add_time',
         order: 'desc'
       },
+      uploadPath,
       dataForm: {
         id: undefined,
         goodsId: undefined,
@@ -111,6 +149,13 @@ export default {
         goodsId: [{ required: true, message: '商品ID不能为空', trigger: 'blur' }],
         points: [{ required: true, message: '所需积分不能为空', trigger: 'blur' }],
         amount: [{ required: true, message: '库存不能为空', trigger: 'blur' }]
+      }
+    }
+  },
+  computed: {
+    headers() {
+      return {
+        'X-Litemall-Admin-Token': getToken()
       }
     }
   },
@@ -162,6 +207,9 @@ export default {
       }).catch(err => {
         console.error(err)
       })
+    },
+    uploadPicUrl(response) {
+      this.dataForm.picUrl = response.data.url
     },
     createData() {
       this.$refs['dataForm'].validate((valid) => {

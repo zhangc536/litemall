@@ -26,7 +26,11 @@ public class LitemallPointGoodsService {
         criteria.andDeletedEqualTo(false);
 
         if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {
-            example.setOrderByClause(sort + " " + order);
+            if ("add_time".equalsIgnoreCase(sort)) {
+                example.setOrderByClause(sort + " " + order + ", id " + order);
+            } else {
+                example.setOrderByClause(sort + " " + order);
+            }
         }
 
         PageHelper.startPage(page, limit);
