@@ -245,7 +245,7 @@ Page({
           const userPoints = res.data.userInfo.points || 0;
           const requiredPoints = that.data.pointGoodsPoints * that.data.number;
           if (userPoints < requiredPoints) {
-            util.showErrorToast('积分不足');
+            util.showErrorToast('积分不足无法兑换');
             reject(false);
             return;
           }
