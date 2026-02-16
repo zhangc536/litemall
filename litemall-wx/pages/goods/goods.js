@@ -218,10 +218,12 @@ Page({
       goodsId: that.data.id
     }).then(function(res) {
       if (res.errno === 0) {
+        const hasPoints = res.data && res.data.points !== null && res.data.points !== undefined;
+        const hasPrice = res.data && res.data.price !== null && res.data.price !== undefined;
         that.setData({
           pointGoods: res.data,
-          pointGoodsPoints: res.data.points || 0,
-          pointGoodsPrice: res.data.price || 0
+          pointGoodsPoints: hasPoints ? res.data.points : that.data.pointGoodsPoints,
+          pointGoodsPrice: hasPrice ? res.data.price : that.data.pointGoodsPrice
         });
       }
     });
@@ -437,6 +439,12 @@ Page({
     if (options.point) {
       this.setData({
         isPointGoods: options.point == '1'
+      });
+    }
+    if (options.points) {
+      const pointsValue = parseInt(options.points);
+      this.setData({
+        pointGoodsPoints: isNaN(pointsValue) ? 0 : pointsValue
       });
     }
     if (options.id) {
