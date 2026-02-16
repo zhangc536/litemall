@@ -228,6 +228,38 @@ Page({
       }
     });
   },
+  ensurePointPurchaseAllowed: function() {
+    let that = this;
+    return new Promise(function(resolve, reject) {
+      if (!that.data.isPointGoods) {
+        resolve(true);
+        return;
+      }
+      if (!that.data.pointGoodsPoints || that.data.pointGoodsPoints <= 0) {
+        util.showErrorToast('积分商品信息异常');
+        reject(false);
+        return;
+      }
+      util.request(api.UserIndex).then(function(res) {
+        if (res.errno === 0) {
+          const userPoints = res.data.userInfo.points || 0;
+          const requiredPoints = that.data.pointGoodsPoints * that.data.number;
+          if (userPoints < requiredPoints) {
+            util.showErrorToast('积分不足');
+            reject(false);
+            return;
+          }
+          resolve(true);
+        } else {
+          util.showErrorToast(res.errmsg || '积分校验失败');
+          reject(false);
+        }
+      }).catch(function() {
+        util.showErrorToast('积分校验失败');
+        reject(false);
+      });
+    });
+  },
 
   // 获取推荐商品
   getGoodsRelated: function() {
@@ -561,28 +593,33 @@ Page({
       let checkedGroupon = this.getCheckedGrouponValue();
 
       //立即购买
-      util.request(api.CartFastAdd, {
-          goodsId: this.data.goods.id,
-          number: this.data.number,
-          productId: checkedProduct.id
-        }, "POST")
-        .then(function(res) {
-          if (res.errno == 0) {
+      let doFastAdd = function() {
+        util.request(api.CartFastAdd, {
+            goodsId: that.data.goods.id,
+            number: that.data.number,
+            productId: checkedProduct.id
+          }, "POST")
+          .then(function(res) {
+            if (res.errno == 0) {
 
-            // 如果storage中设置了cartId，则是立即购买，否则是购物车购买
-            try {
-              wx.setStorageSync('cartId', res.data);
-              wx.setStorageSync('grouponRulesId', checkedGroupon.id);
-              wx.setStorageSync('grouponLinkId', that.data.grouponLink.id);
-              wx.navigateTo({
-                url: '/pages/checkout/checkout'
-              })
-            } catch (e) {}
+              // 如果storage中设置了cartId，则是立即购买，否则是购物车购买
+              try {
+                wx.setStorageSync('cartId', res.data);
+                wx.setStorageSync('grouponRulesId', checkedGroupon.id);
+                wx.setStorageSync('grouponLinkId', that.data.grouponLink.id);
+                wx.navigateTo({
+                  url: '/pages/checkout/checkout'
+                })
+              } catch (e) {}
 
-          } else {
-            util.showErrorToast(res.errmsg);
-          }
-        });
+            } else {
+              util.showErrorToast(res.errmsg);
+            }
+          });
+      };
+      this.ensurePointPurchaseAllowed().then(function() {
+        doFastAdd();
+      });
     }
 
 
@@ -620,35 +657,40 @@ Page({
       }
 
       //添加到购物车
-      util.request(api.CartAdd, {
-          goodsId: this.data.goods.id,
-          number: this.data.number,
-          productId: checkedProduct.id
-        }, "POST")
-        .then(function(res) {
-          let _res = res;
-          if (_res.errno == 0) {
-            wx.showToast({
-              title: '添加成功'
-            });
-            that.setData({
-              openAttr: !that.data.openAttr,
-              cartGoodsCount: _res.data
-            });
-            if (that.data.userHasCollect == 1) {
-              that.setData({
-                collect: true
+      let doAddToCart = function() {
+        util.request(api.CartAdd, {
+            goodsId: that.data.goods.id,
+            number: that.data.number,
+            productId: checkedProduct.id
+          }, "POST")
+          .then(function(res) {
+            let _res = res;
+            if (_res.errno == 0) {
+              wx.showToast({
+                title: '添加成功'
               });
+              that.setData({
+                openAttr: !that.data.openAttr,
+                cartGoodsCount: _res.data
+              });
+              if (that.data.userHasCollect == 1) {
+                that.setData({
+                  collect: true
+                });
+              } else {
+                that.setData({
+                  collect: false
+                });
+              }
             } else {
-              that.setData({
-                collect: false
-              });
+              util.showErrorToast(_res.errmsg);
             }
-          } else {
-            util.showErrorToast(_res.errmsg);
-          }
 
-        });
+          });
+      };
+      this.ensurePointPurchaseAllowed().then(function() {
+        doAddToCart();
+      });
     }
 
   },
