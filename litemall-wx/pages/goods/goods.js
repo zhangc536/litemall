@@ -242,7 +242,9 @@ Page({
       }
       util.request(api.UserIndex).then(function(res) {
         if (res.errno === 0) {
-          const userPoints = res.data.userInfo.points || 0;
+          const userPoints = (res.data && res.data.points !== undefined && res.data.points !== null)
+            ? res.data.points
+            : ((res.data && res.data.userInfo && res.data.userInfo.points) ? res.data.userInfo.points : 0);
           const requiredPoints = that.data.pointGoodsPoints * that.data.number;
           if (userPoints < requiredPoints) {
             util.showErrorToast('积分不足无法兑换');
