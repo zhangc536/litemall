@@ -22,6 +22,19 @@
 
       <el-table-column align="center" min-width="140px" :label="$t('user_user.table.mobile')" prop="mobile" />
 
+      <el-table-column align="center" min-width="100px" label="真实姓名" prop="realName">
+        <template slot-scope="scope">
+          {{ scope.row.realName || '-' }}
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" min-width="180px" label="身份证号" prop="idCard">
+        <template slot-scope="scope">
+          <span v-if="scope.row.idCard">{{ maskIdCard(scope.row.idCard) }}</span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+
       <el-table-column align="center" min-width="140px" :label="$t('user_user.table.inviter')" prop="inviterName">
         <template slot-scope="scope">
           {{ scope.row.inviterName || scope.row.inviterUserId || '-' }}
@@ -105,6 +118,10 @@ export default {
     formatStatusType(status) {
       return statusTypeMap[status] || statusTypeMap[0]
     },
+    maskIdCard(idCard) {
+      if (!idCard || idCard.length < 8) return idCard
+      return idCard.substring(0, 4) + '**********' + idCard.substring(idCard.length - 4)
+    },
     resolveAvatar(avatar) {
       if (!avatar) {
         return avatar
@@ -153,10 +170,12 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['用户ID', '用户名', '昵称', '手机号码', '推荐人', '用户等级', '状态']
-        const filterVal = ['id', 'username', 'nickname', 'mobile', 'inviterName', 'userLevel', 'status']
+        const tHeader = ['用户ID', '用户名', '昵称', '手机号码', '真实姓名', '身份证号', '推荐人', '用户等级', '状态']
+        const filterVal = ['id', 'username', 'nickname', 'mobile', 'realName', 'idCard', 'inviterName', 'userLevel', 'status']
         const list = this.list.map(item => ({
           ...item,
+          realName: item.realName || '-',
+          idCard: item.idCard ? this.maskIdCard(item.idCard) : '-',
           inviterName: item.inviterName || item.inviterUserId || '-',
           userLevel: this.formatUserLevel(item.userLevel),
           status: this.formatStatus(item.status)

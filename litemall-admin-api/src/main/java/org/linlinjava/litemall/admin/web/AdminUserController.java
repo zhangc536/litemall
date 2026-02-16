@@ -65,6 +65,8 @@ public class AdminUserController {
             item.put("nickname", user.getNickname());
             item.put("avatar", user.getAvatar());
             item.put("mobile", user.getMobile());
+            item.put("realName", user.getRealName());
+            item.put("idCard", user.getIdCard());
             item.put("userLevel", user.getUserLevel());
             item.put("status", user.getStatus());
             item.put("points", user.getPoints() == null ? 0 : user.getPoints());
