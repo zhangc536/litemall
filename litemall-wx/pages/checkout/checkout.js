@@ -7,16 +7,17 @@ Page({
   data: {
     checkedGoodsList: [],
     checkedAddress: {},
-    goodsTotalPrice: 0.00, //商品总价
-    freightPrice: 0.00, //快递费
-    grouponPrice: 0.00, //团购优惠价格
-    orderTotalPrice: 0.00, //订单总价
-    actualPrice: 0.00, //实际需要支付的总价
+    goodsTotalPrice: 0.00,
+    freightPrice: 0.00,
+    grouponPrice: 0.00,
+    orderTotalPrice: 0.00,
+    actualPrice: 0.00,
     cartId: 0,
     addressId: 0,
     message: '',
-    grouponLinkId: 0, //参与的团购
-    grouponRulesId: 0 //团购规则ID
+    grouponLinkId: 0,
+    grouponRulesId: 0,
+    hasIdCard: false
   },
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
@@ -44,6 +45,23 @@ Page({
         });
       }
       wx.hideLoading();
+    });
+  },
+  checkIdCard: function() {
+    let that = this;
+    return new Promise(function(resolve, reject) {
+      util.request(api.UserIdCard).then(function(res) {
+        if (res.errno === 0 && res.data && res.data.idCard) {
+          that.setData({ hasIdCard: true });
+          resolve(true);
+        } else {
+          that.setData({ hasIdCard: false });
+          resolve(false);
+        }
+      }).catch(function() {
+        that.setData({ hasIdCard: false });
+        resolve(false);
+      });
     });
   },
   selectAddress() {
@@ -106,16 +124,39 @@ Page({
 
   },
   submitOrder: function() {
+    let that = this;
     if (this.data.addressId <= 0) {
       util.showErrorToast('请选择收货地址');
       return false;
     }
+    this.checkIdCard().then(function(hasIdCard) {
+      if (!hasIdCard) {
+        wx.showModal({
+          title: '提示',
+          content: '购买商品前需要先完成实名认证，是否立即前往？',
+          confirmText: '去认证',
+          cancelText: '取消',
+          success: function(res) {
+            if (res.confirm) {
+              wx.navigateTo({
+                url: '/pages/ucenter/idcard/idcard'
+              });
+            }
+          }
+        });
+        return;
+      }
+      that.doSubmitOrder();
+    });
+  },
+  doSubmitOrder: function() {
+    let that = this;
     util.request(api.OrderSubmit, {
-      cartId: this.data.cartId,
-      addressId: this.data.addressId,
-      message: this.data.message,
-      grouponRulesId: this.data.grouponRulesId,
-      grouponLinkId: this.data.grouponLinkId
+      cartId: that.data.cartId,
+      addressId: that.data.addressId,
+      message: that.data.message,
+      grouponRulesId: that.data.grouponRulesId,
+      grouponLinkId: that.data.grouponLinkId
     }, 'POST').then(res => {
       if (res.errno === 0) {
 

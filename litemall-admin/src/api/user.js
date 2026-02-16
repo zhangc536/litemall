@@ -15,3 +15,11 @@ export function deleteUser(data) {
     data
   })
 }
+
+export function unbindIdCard(data) {
+  return request({
+    url: '/user/unbindidcard',
+    method: 'post',
+    data
+  })
+}

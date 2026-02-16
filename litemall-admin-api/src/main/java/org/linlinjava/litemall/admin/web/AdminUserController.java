@@ -91,4 +91,20 @@ public class AdminUserController {
         userService.deleteById(id);
         return ResponseUtil.ok();
     }
+
+    @RequiresPermissions("admin:user:unbindidcard")
+    @RequiresPermissionsDesc(menu = {"用户管理", "会员管理"}, button = "解绑实名")
+    @PostMapping("/unbindidcard")
+    public Object unbindIdCard(@RequestBody LitemallUser user) {
+        Integer id = user.getId();
+        if (id == null) {
+            return ResponseUtil.badArgument();
+        }
+        LitemallUser updateUser = new LitemallUser();
+        updateUser.setId(id);
+        updateUser.setRealName("");
+        updateUser.setIdCard("");
+        userService.updateById(updateUser);
+        return ResponseUtil.ok();
+    }
 }

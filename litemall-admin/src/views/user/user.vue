@@ -53,8 +53,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" min-width="120px" :label="$t('user_user.table.actions')" class-name="small-padding fixed-width">
+      <el-table-column align="center" min-width="160px" :label="$t('user_user.table.actions')" class-name="small-padding fixed-width">
         <template slot-scope="scope">
+          <el-button v-if="scope.row.idCard" v-permission="['POST /admin/user/unbindidcard']" type="warning" size="mini" @click="handleUnbindIdCard(scope.row)">解绑实名</el-button>
           <el-button v-permission="['POST /admin/user/delete']" type="danger" size="mini" @click="handleDelete(scope.row)">{{ $t('app.button.delete') }}</el-button>
         </template>
       </el-table-column>
@@ -65,7 +66,7 @@
 </template>
 
 <script>
-import { listUser, deleteUser } from '@/api/user'
+import { listUser, deleteUser, unbindIdCard } from '@/api/user'
 import Pagination from '@/components/Pagination'
 
 const userLevelMap = {
@@ -166,6 +167,26 @@ export default {
           message: response.data.errmsg
         })
       })
+    },
+    handleUnbindIdCard(row) {
+      this.$confirm('确定要解绑该用户的实名认证信息吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        unbindIdCard({ id: row.id }).then(() => {
+          this.$notify.success({
+            title: '成功',
+            message: '解绑实名认证成功'
+          })
+          this.getList()
+        }).catch(response => {
+          this.$notify.error({
+            title: '失败',
+            message: response.data.errmsg
+          })
+        })
+      }).catch(() => {})
     },
     handleDownload() {
       this.downloadLoading = true
