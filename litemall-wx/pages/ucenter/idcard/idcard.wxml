@@ -1,0 +1,33 @@
+<view class="container">
+  <view class="tips" wx:if="{{!bound}}">
+    <text>为保障您的账户安全，请完成实名认证</text>
+  </view>
+
+  <view class="form" wx:if="{{!bound}}">
+    <view class="form-item">
+      <text class="label">真实姓名</text>
+      <input class="input" placeholder="请输入真实姓名" value="{{realName}}" bindinput="onRealNameInput" />
+    </view>
+    <view class="form-item">
+      <text class="label">身份证号</text>
+      <input class="input" placeholder="请输入身份证号" value="{{idCard}}" bindinput="onIdCardInput" maxlength="18" />
+    </view>
+    <button class="submit-btn" bindtap="submit" loading="{{loading}}">提交认证</button>
+  </view>
+
+  <view class="bound-info" wx:if="{{bound}}">
+    <view class="success-icon">
+      <text class="iconfont icon-success"></text>
+    </view>
+    <text class="success-text">已完成实名认证</text>
+    <view class="info-item">
+      <text class="info-label">真实姓名</text>
+      <text class="info-value">{{realName}}</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">身份证号</text>
+      <text class="info-value">{{idCard}}</text>
+    </view>
+    <text class="tips-text">如需修改，请联系客服</text>
+  </view>
+</view>

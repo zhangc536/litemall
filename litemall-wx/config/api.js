@@ -86,5 +86,6 @@ module.exports = {
   StorageUpload: WxApiRoot + 'storage/upload', //图片上传,
 
   UserIndex: WxApiRoot + 'user/index', //个人页面用户相关信息
+  UserIdCard: WxApiRoot + 'user/idcard', //身份证绑定
   IssueList: WxApiRoot + 'issue/list', //帮助信息
 };

@@ -228,7 +228,18 @@ Page({
     wx.navigateTo({
       url: '/pages/help/help'
     });
-  },  
+  },
+  goIdCard: function() {
+    if (this.data.hasLogin) {
+      wx.navigateTo({
+        url: "/pages/ucenter/idcard/idcard"
+      });
+    } else {
+      wx.navigateTo({
+        url: "/pages/auth/login/login"
+      });
+    };
+  },
   exitLogin: function() {
     wx.showModal({
       title: '',

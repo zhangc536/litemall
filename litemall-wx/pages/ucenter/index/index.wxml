@@ -83,6 +83,10 @@
       <image class='user_column_item_image' src='/static/images/mobile.png'></image>
       <view class='user_column_item_text'>绑定手机</view>
     </button>
+    <view class='user_column_item' bindtap='goIdCard'>
+      <image class='user_column_item_image' src='/static/images/idcard.png'></image>
+      <view class='user_column_item_text'>实名认证</view>
+    </view>
     <view class='user_column_item' bindtap='goHelp'>
       <image class='user_column_item_image' src='/static/images/help.png'></image>
       <view class='user_column_item_text'>帮助中心</view>
