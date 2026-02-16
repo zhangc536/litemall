@@ -40,6 +40,9 @@
       </view>
       <view class="b">
         <view class="l">实付：￥{{item.actualPrice}}</view>
+        <view class="r">
+          <view class="btn" wx:if="{{item.handleOption.cancel}}" catchtap="cancelOrder" data-orderid="{{item.id}}">取消订单</view>
+        </view>
       </view>
     </navigator>
   </view>

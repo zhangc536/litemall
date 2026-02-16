@@ -70,6 +70,35 @@ Page({
     // 页面显示
     this.getOrderList();
   },
+  cancelOrder: function(event) {
+    let that = this;
+    let orderId = event.currentTarget.dataset.orderid;
+    wx.showModal({
+      title: '',
+      content: '确定要取消此订单？',
+      success: function(res) {
+        if (res.confirm) {
+          util.request(api.OrderCancel, {
+            orderId: orderId
+          }, 'POST').then(function(res) {
+            if (res.errno === 0) {
+              wx.showToast({
+                title: '取消订单成功'
+              });
+              that.setData({
+                orderList: [],
+                page: 1,
+                totalPages: 1
+              });
+              that.getOrderList();
+            } else {
+              util.showErrorToast(res.errmsg);
+            }
+          });
+        }
+      }
+    });
+  },
   onHide: function() {
     // 页面隐藏
   },
