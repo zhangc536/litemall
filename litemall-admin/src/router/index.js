@@ -135,6 +135,16 @@ export const asyncRoutes = [
         }
       },
       {
+        path: 'tree',
+        component: () => import('@/views/user/userTree'),
+        name: 'userTree',
+        meta: {
+          perms: ['GET /admin/user/list'],
+          title: '用户树',
+          noCache: true
+        }
+      },
+      {
         path: 'address',
         component: () => import('@/views/user/address'),
         name: 'address',

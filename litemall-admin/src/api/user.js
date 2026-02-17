@@ -23,3 +23,19 @@ export function unbindIdCard(data) {
     data
   })
 }
+
+export function getUserTree(query) {
+  return request({
+    url: '/user/tree',
+    method: 'get',
+    params: query
+  })
+}
+
+export function getUserChildren(query) {
+  return request({
+    url: '/user/children',
+    method: 'get',
+    params: query
+  })
+}

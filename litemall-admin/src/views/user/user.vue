@@ -5,6 +5,7 @@
       <el-input v-model="listQuery.mobile" clearable class="filter-item" style="width: 200px;" :placeholder="$t('user_user.placeholder.filter_mobile')" />
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('app.button.search') }}</el-button>
       <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">{{ $t('app.button.download') }}</el-button>
+      <el-button class="filter-item" type="success" icon="el-icon-share" @click="goUserTree">用户树</el-button>
     </div>
 
     <el-table v-loading="listLoading" :data="list" :element-loading-text="$t('app.message.list_loading')" border fit highlight-current-row>
@@ -153,6 +154,9 @@ export default {
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
+    },
+    goUserTree() {
+      this.$router.push({ path: '/user/tree' })
     },
     handleDelete(row) {
       deleteUser(row).then(() => {

@@ -107,4 +107,57 @@ public class AdminUserController {
         userService.updateById(updateUser);
         return ResponseUtil.ok();
     }
+
+    @RequiresPermissions("admin:user:list")
+    @RequiresPermissionsDesc(menu = {"用户管理", "会员管理"}, button = "查询")
+    @GetMapping("/tree")
+    public Object tree(String type, Integer userId) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        
+        if (userId != null && userId > 0) {
+            LitemallUser user = userService.findById(userId);
+            if (user != null) {
+                list.add(buildUserTreeNode(user));
+            }
+        } else if ("root".equals(type)) {
+            List<LitemallUser> rootUsers = userService.queryRootUsers(50);
+            for (LitemallUser user : rootUsers) {
+                list.add(buildUserTreeNode(user));
+            }
+        }
+        
+        return ResponseUtil.okList(list);
+    }
+
+    @RequiresPermissions("admin:user:list")
+    @RequiresPermissionsDesc(menu = {"用户管理", "会员管理"}, button = "查询")
+    @GetMapping("/children")
+    public Object children(@RequestParam Integer parentId) {
+        List<LitemallUser> children = userService.queryByInviterId(parentId);
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (LitemallUser user : children) {
+            list.add(buildUserTreeNode(user));
+        }
+        return ResponseUtil.okList(list);
+    }
+
+    private Map<String, Object> buildUserTreeNode(LitemallUser user) {
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", user.getId());
+        item.put("username", user.getUsername());
+        item.put("nickname", user.getNickname());
+        item.put("avatar", user.getAvatar());
+        item.put("mobile", user.getMobile());
+        item.put("userLevel", user.getUserLevel());
+        item.put("inviteCode", user.getInviteCode());
+        item.put("inviterUserId", user.getInviterUserId());
+        item.put("points", user.getPoints() == null ? 0 : user.getPoints());
+        item.put("addTime", user.getAddTime());
+        
+        int childCount = userService.countByInviterId(user.getId());
+        item.put("teamCount", childCount);
+        item.put("isLeaf", childCount == 0);
+        
+        return item;
+    }
 }

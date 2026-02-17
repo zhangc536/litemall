@@ -150,6 +150,27 @@ public class LitemallUserService {
         userMapper.deleteByPrimaryKey(id);
     }
 
+    public List<LitemallUser> queryRootUsers(int limit) {
+        LitemallUserExample example = new LitemallUserExample();
+        example.or().andInviterUserIdIsNull().andDeletedEqualTo(false);
+        example.setOrderByClause("add_time DESC");
+        PageHelper.startPage(1, limit);
+        return userMapper.selectByExample(example);
+    }
+
+    public List<LitemallUser> queryByInviterId(Integer inviterId) {
+        LitemallUserExample example = new LitemallUserExample();
+        example.or().andInviterUserIdEqualTo(inviterId).andDeletedEqualTo(false);
+        example.setOrderByClause("add_time DESC");
+        return userMapper.selectByExample(example);
+    }
+
+    public int countByInviterId(Integer inviterId) {
+        LitemallUserExample example = new LitemallUserExample();
+        example.or().andInviterUserIdEqualTo(inviterId).andDeletedEqualTo(false);
+        return (int) userMapper.countByExample(example);
+    }
+
     private Integer randomEightDigitNumber() {
         return ThreadLocalRandom.current().nextInt(10000000, 100000000);
     }
