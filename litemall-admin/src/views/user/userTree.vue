@@ -26,7 +26,10 @@
             <el-tag v-if="data.levelName" type="info" size="mini">{{ data.levelName }}</el-tag>
             <span class="user-mobile">{{ data.mobile || '-' }}</span>
             <span v-if="data.inviteCode" class="invite-code">邀请码: {{ data.inviteCode }}</span>
-            <span v-if="data.teamCount !== undefined" class="team-count">团队: {{ data.teamCount }}人</span>
+            <span v-if="data.teamCount > 0" class="team-count">
+              <el-button type="text" size="mini" class="team-count-button" @click="viewTeamMembers(data)">团队: {{ data.teamCount }}人</el-button>
+            </span>
+            <span v-else-if="data.teamCount !== undefined" class="team-count">团队: 0人</span>
           </span>
         </span>
         <span class="node-actions">
@@ -36,6 +39,42 @@
     </el-tree>
 
     <el-empty v-else description="暂无数据" />
+    <el-dialog :visible.sync="teamDialogVisible" :title="teamDialogTitle" width="900px">
+      <el-table v-loading="teamLoading" :data="teamList" border fit>
+        <el-table-column align="center" width="100px" label="用户ID" prop="id" />
+        <el-table-column align="center" min-width="140px" label="昵称" prop="nickname">
+          <template slot-scope="scope">
+            {{ scope.row.nickname || scope.row.username || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column align="center" min-width="120px" label="手机号" prop="mobile">
+          <template slot-scope="scope">
+            {{ scope.row.mobile || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column align="center" min-width="100px" label="等级" prop="levelName">
+          <template slot-scope="scope">
+            {{ scope.row.levelName || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column align="center" min-width="80px" label="积分" prop="points">
+          <template slot-scope="scope">
+            {{ scope.row.points || 0 }}
+          </template>
+        </el-table-column>
+        <el-table-column align="center" min-width="80px" label="经验值" prop="experience">
+          <template slot-scope="scope">
+            {{ scope.row.experience || 0 }}
+          </template>
+        </el-table-column>
+        <el-table-column align="center" min-width="160px" label="注册时间" prop="addTime" />
+        <el-table-column align="center" width="100px" label="操作">
+          <template slot-scope="scope">
+            <el-button type="text" size="mini" @click="viewUserDetail(scope.row)">详情</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -48,6 +87,10 @@ export default {
     return {
       searchUserId: '',
       treeData: [],
+      teamDialogVisible: false,
+      teamDialogTitle: '',
+      teamLoading: false,
+      teamList: [],
       defaultProps: {
         label: 'nickname',
         children: 'children',
@@ -122,6 +165,19 @@ export default {
         dangerouslyUseHTMLString: true,
         confirmButtonText: '确定'
       })
+    },
+    viewTeamMembers(user) {
+      this.teamDialogVisible = true
+      this.teamDialogTitle = `团队成员 - ${user.nickname || user.username || user.id}`
+      this.teamLoading = true
+      this.teamList = []
+      getUserChildren({ parentId: user.id }).then(response => {
+        this.teamList = response.data.data.list || []
+        this.teamLoading = false
+      }).catch(() => {
+        this.teamList = []
+        this.teamLoading = false
+      })
     }
   }
 }
@@ -163,6 +219,11 @@ export default {
 .team-count {
   color: #67C23A;
   font-size: 12px;
+}
+.team-count-button {
+  padding: 0;
+  font-size: 12px;
+  color: #67C23A;
 }
 .node-actions {
   margin-left: 20px;
