@@ -34,7 +34,8 @@ Page({
     ],
     regionType: 1,
     regionList: [],
-    selectRegionDone: false
+    selectRegionDone: false,
+    from: ''
   },
   bindinputMobile(event) {
     let address = this.data.address;
@@ -153,6 +154,9 @@ Page({
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
     console.log(options)
+    this.setData({
+      from: options.from || ''
+    });
     if (options.id && options.id != 0) {
       this.setData({
         addressId: options.id
@@ -335,7 +339,15 @@ Page({
       isDefault: address.isDefault
     }, 'POST').then(function(res) {
       if (res.errno === 0) {
-        //返回之前，先取出上一页对象，并设置addressId
+        if (that.data.from === 'checkout') {
+          try {
+            wx.setStorageSync('addressId', res.data);
+          } catch (e) {}
+          wx.navigateBack({
+            delta: 2
+          });
+          return;
+        }
         var pages = getCurrentPages();
         var prevPage = pages[pages.length - 2];
         console.log(prevPage);
