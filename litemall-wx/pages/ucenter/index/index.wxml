@@ -4,6 +4,7 @@
     <view class="info">
       <text class="name">{{userInfo.nickName}}</text>
       <text class="points">积分：{{points}}</text>
+      <text class="level">等级：{{levelName || '-'}}</text>
     </view>
   </view>
 

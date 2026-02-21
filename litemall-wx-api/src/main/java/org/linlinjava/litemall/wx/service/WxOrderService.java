@@ -72,6 +72,8 @@ public class WxOrderService {
     @Autowired
     private LitemallUserService userService;
     @Autowired
+    private LitemallUserLevelService userLevelService;
+    @Autowired
     private LitemallOrderService orderService;
     @Autowired
     private LitemallOrderGoodsService orderGoodsService;
@@ -1051,6 +1053,25 @@ public class WxOrderService {
                 }
                 user.setPoints(userPoints + points);
                 userService.updateById(user);
+            }
+        }
+
+        if (order.getActualPrice() != null) {
+            int addExperience = order.getActualPrice().divide(new BigDecimal("10"), 0, BigDecimal.ROUND_FLOOR).intValue();
+            if (addExperience > 0) {
+                LitemallUser user = userService.findById(userId);
+                if (user != null) {
+                    int currentExp = user.getExperience() == null ? 0 : user.getExperience();
+                    int totalExp = currentExp + addExperience;
+                    LitemallUser updateUser = new LitemallUser();
+                    updateUser.setId(userId);
+                    updateUser.setExperience(totalExp);
+                    LitemallUserLevel level = userLevelService.findByExperience(totalExp);
+                    if (level != null && level.getId() != null) {
+                        updateUser.setUserLevel(level.getId().byteValue());
+                    }
+                    userService.updateById(updateUser);
+                }
             }
         }
 

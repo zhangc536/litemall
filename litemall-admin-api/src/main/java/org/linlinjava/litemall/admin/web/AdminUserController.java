@@ -8,6 +8,8 @@ import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.core.validator.Order;
 import org.linlinjava.litemall.core.validator.Sort;
 import org.linlinjava.litemall.db.domain.LitemallUser;
+import org.linlinjava.litemall.db.domain.LitemallUserLevel;
+import org.linlinjava.litemall.db.service.LitemallUserLevelService;
 import org.linlinjava.litemall.db.service.LitemallUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +35,8 @@ public class AdminUserController {
 
     @Autowired
     private LitemallUserService userService;
+    @Autowired
+    private LitemallUserLevelService userLevelService;
 
     @RequiresPermissions("admin:user:list")
     @RequiresPermissionsDesc(menu = {"用户管理", "会员管理"}, button = "查询")
@@ -57,9 +61,11 @@ public class AdminUserController {
                 inviterMap.put(inviter.getId(), inviter);
             }
         }
+        List<LitemallUserLevel> levels = userLevelService.findAll();
         List<Map<String, Object>> list = new ArrayList<>(userList.size());
         for (LitemallUser user : userList) {
             Map<String, Object> item = new HashMap<>();
+            Integer experience = user.getExperience() == null ? 0 : user.getExperience();
             item.put("id", user.getId());
             item.put("username", user.getUsername());
             item.put("nickname", user.getNickname());
@@ -70,6 +76,8 @@ public class AdminUserController {
             item.put("userLevel", user.getUserLevel());
             item.put("status", user.getStatus());
             item.put("points", user.getPoints() == null ? 0 : user.getPoints());
+            item.put("experience", experience);
+            item.put("levelName", resolveLevelName(levels, experience));
             item.put("inviterUserId", user.getInviterUserId());
             LitemallUser inviter = inviterMap.get(user.getInviterUserId());
             if (inviter != null) {
@@ -114,15 +122,16 @@ public class AdminUserController {
     public Object tree(String type, Integer userId) {
         List<Map<String, Object>> list = new ArrayList<>();
         
+        List<LitemallUserLevel> levels = userLevelService.findAll();
         if (userId != null && userId > 0) {
             LitemallUser user = userService.findById(userId);
             if (user != null) {
-                list.add(buildUserTreeNode(user));
+                list.add(buildUserTreeNode(user, levels));
             }
         } else if ("root".equals(type)) {
             List<LitemallUser> rootUsers = userService.queryRootUsers(50);
             for (LitemallUser user : rootUsers) {
-                list.add(buildUserTreeNode(user));
+                list.add(buildUserTreeNode(user, levels));
             }
         }
         
@@ -134,14 +143,16 @@ public class AdminUserController {
     @GetMapping("/children")
     public Object children(@RequestParam Integer parentId) {
         List<LitemallUser> children = userService.queryByInviterId(parentId);
+        List<LitemallUserLevel> levels = userLevelService.findAll();
         List<Map<String, Object>> list = new ArrayList<>();
         for (LitemallUser user : children) {
-            list.add(buildUserTreeNode(user));
+            list.add(buildUserTreeNode(user, levels));
         }
         return ResponseUtil.okList(list);
     }
 
-    private Map<String, Object> buildUserTreeNode(LitemallUser user) {
+    private Map<String, Object> buildUserTreeNode(LitemallUser user, List<LitemallUserLevel> levels) {
+        Integer experience = user.getExperience() == null ? 0 : user.getExperience();
         Map<String, Object> item = new HashMap<>();
         item.put("id", user.getId());
         item.put("username", user.getUsername());
@@ -152,6 +163,8 @@ public class AdminUserController {
         item.put("inviteCode", user.getInviteCode());
         item.put("inviterUserId", user.getInviterUserId());
         item.put("points", user.getPoints() == null ? 0 : user.getPoints());
+        item.put("experience", experience);
+        item.put("levelName", resolveLevelName(levels, experience));
         item.put("addTime", user.getAddTime());
         
         int childCount = userService.countByInviterId(user.getId());
@@ -159,5 +172,18 @@ public class AdminUserController {
         item.put("isLeaf", childCount == 0);
         
         return item;
+    }
+
+    private String resolveLevelName(List<LitemallUserLevel> levels, Integer experience) {
+        if (levels == null || levels.isEmpty()) {
+            return null;
+        }
+        LitemallUserLevel selected = null;
+        for (LitemallUserLevel level : levels) {
+            if (experience >= level.getMinExperience()) {
+                selected = level;
+            }
+        }
+        return selected == null ? null : selected.getLevelName();
     }
 }

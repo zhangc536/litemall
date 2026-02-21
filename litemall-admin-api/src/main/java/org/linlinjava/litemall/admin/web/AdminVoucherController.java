@@ -26,7 +26,7 @@ public class AdminVoucherController {
     @Autowired
     private LitemallStorageService storageServiceDb;
 
-    @GetMapping("/list")
+    @GetMapping("/storage/list")
     public Object list(@RequestParam Integer orderId) {
         if (orderId == null || orderId <= 0) {
             return ResponseUtil.badArgument();

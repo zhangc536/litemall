@@ -16,18 +16,17 @@
       :expand-on-click-node="false"
       default-expand-all
     >
-      <span class="custom-tree-node" slot-scope="{ node, data }">
+      <span slot-scope="{ node, data }" class="custom-tree-node">
         <span class="node-content">
           <el-avatar v-if="data.avatar" :src="resolveAvatar(data.avatar)" :size="30" style="margin-right: 8px;" />
           <el-avatar v-else icon="el-icon-user-solid" :size="30" style="margin-right: 8px;" />
           <span class="user-info">
             <span class="user-id">ID: {{ data.id }}</span>
             <span class="user-name">{{ data.nickname || data.username || '未命名' }}</span>
-            <el-tag v-if="data.userLevel === 1" type="warning" size="mini">VIP</el-tag>
-            <el-tag v-else-if="data.userLevel === 2" type="danger" size="mini">高级VIP</el-tag>
+            <el-tag v-if="data.levelName" type="info" size="mini">{{ data.levelName }}</el-tag>
             <span class="user-mobile">{{ data.mobile || '-' }}</span>
-            <span class="invite-code" v-if="data.inviteCode">邀请码: {{ data.inviteCode }}</span>
-            <span class="team-count" v-if="data.teamCount !== undefined">团队: {{ data.teamCount }}人</span>
+            <span v-if="data.inviteCode" class="invite-code">邀请码: {{ data.inviteCode }}</span>
+            <span v-if="data.teamCount !== undefined" class="team-count">团队: {{ data.teamCount }}人</span>
           </span>
         </span>
         <span class="node-actions">
@@ -116,6 +115,8 @@ export default {
         <p><strong>邀请码:</strong> ${user.inviteCode || '-'}</p>
         <p><strong>推荐人ID:</strong> ${user.inviterUserId || '-'}</p>
         <p><strong>积分:</strong> ${user.points || 0}</p>
+        <p><strong>经验值:</strong> ${user.experience || 0}</p>
+        <p><strong>等级:</strong> ${user.levelName || '-'}</p>
         <p><strong>注册时间:</strong> ${user.addTime || '-'}</p>
       `, '用户详情', {
         dangerouslyUseHTMLString: true,

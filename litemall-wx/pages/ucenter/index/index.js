@@ -16,6 +16,7 @@ Page({
       uncomment: 0
     },
     points: 0,
+    levelName: '',
     hasLogin: false
   },
   onLoad: function(options) {
@@ -39,7 +40,8 @@ Page({
         if (res.errno === 0) {
           that.setData({
             order: res.data.order,
-            points: res.data.points || 0
+            points: res.data.points || 0,
+            levelName: res.data.levelName || ''
           });
         }
       });
@@ -50,6 +52,7 @@ Page({
       this.setData({
         hasLogin: false,
         points: 0,
+        levelName: '',
         userInfo: {
           nickName: '点击登录',
           avatarUrl: '/static/images/my.png'

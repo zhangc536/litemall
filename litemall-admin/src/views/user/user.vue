@@ -42,9 +42,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" min-width="120px" :label="$t('user_user.table.user_level')" prop="userLevel">
+      <el-table-column align="center" min-width="120px" :label="$t('user_user.table.user_level')">
         <template slot-scope="scope">
-          {{ formatUserLevel(scope.row.userLevel) }}
+          {{ formatUserLevel(scope.row) }}
         </template>
       </el-table-column>
 
@@ -111,8 +111,10 @@ export default {
     this.getList()
   },
   methods: {
-    formatUserLevel(level) {
-      return userLevelMap[level] || userLevelMap[0]
+    formatUserLevel(row) {
+      if (!row) return userLevelMap[0]
+      if (row.levelName) return row.levelName
+      return userLevelMap[row.userLevel] || userLevelMap[0]
     },
     formatStatus(status) {
       return statusMap[status] || statusMap[0]
@@ -196,13 +198,13 @@ export default {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = ['用户ID', '用户名', '昵称', '手机号码', '真实姓名', '身份证号', '推荐人', '用户等级', '状态']
-        const filterVal = ['id', 'username', 'nickname', 'mobile', 'realName', 'idCard', 'inviterName', 'userLevel', 'status']
+        const filterVal = ['id', 'username', 'nickname', 'mobile', 'realName', 'idCard', 'inviterName', 'userLevelName', 'status']
         const list = this.list.map(item => ({
           ...item,
           realName: item.realName || '-',
           idCard: item.idCard ? this.maskIdCard(item.idCard) : '-',
           inviterName: item.inviterName || item.inviterUserId || '-',
-          userLevel: this.formatUserLevel(item.userLevel),
+          userLevelName: this.formatUserLevel(item),
           status: this.formatStatus(item.status)
         }))
         excel.export_json_to_excel2(tHeader, list, filterVal, '用户信息')

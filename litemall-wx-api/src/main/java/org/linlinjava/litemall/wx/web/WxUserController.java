@@ -4,7 +4,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.db.domain.LitemallUser;
+import org.linlinjava.litemall.db.domain.LitemallUserLevel;
 import org.linlinjava.litemall.db.service.LitemallOrderService;
+import org.linlinjava.litemall.db.service.LitemallUserLevelService;
 import org.linlinjava.litemall.db.service.LitemallUserService;
 import org.linlinjava.litemall.wx.annotation.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,8 @@ public class WxUserController {
     private LitemallOrderService orderService;
     @Autowired
     private LitemallUserService userService;
+    @Autowired
+    private LitemallUserLevelService userLevelService;
 
     /**
      * 用户个人页面数据
@@ -55,6 +59,10 @@ public class WxUserController {
         data.put("order", orderService.orderInfo(userId));
         LitemallUser user = userService.findById(userId);
         data.put("points", user == null ? 0 : user.getPoints());
+        Integer experience = user == null ? 0 : (user.getExperience() == null ? 0 : user.getExperience());
+        data.put("experience", experience);
+        LitemallUserLevel level = userLevelService.findByExperience(experience);
+        data.put("levelName", level == null ? null : level.getLevelName());
         return ResponseUtil.ok(data);
     }
 
