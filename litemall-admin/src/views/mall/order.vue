@@ -47,9 +47,9 @@
       </el-table-column>
       <el-table-column align="center" label="支付凭证" width="100">
         <template slot-scope="scope">
-          <el-image 
-            v-if="scope.row.payVoucher" 
-            :src="scope.row.payVoucher" 
+          <el-image
+            v-if="scope.row.payVoucher"
+            :src="scope.row.payVoucher"
             :preview-src-list="[scope.row.payVoucher]"
             style="width: 60px; height: 60px; cursor: pointer;"
             fit="cover"
@@ -78,7 +78,7 @@
     <pagination v-show="total > 0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="loadOrders" />
 
     <el-dialog title="订单详情" :visible.sync="detailDialogVisible" width="700px">
-      <el-descriptions :column="2" border v-if="currentOrder">
+      <el-descriptions v-if="currentOrder" :column="2" border>
         <el-descriptions-item label="订单编号">{{ currentOrder.orderSn }}</el-descriptions-item>
         <el-descriptions-item label="订单状态">
           <el-tag v-if="currentOrder.orderStatus === 101" type="warning">待付款</el-tag>
@@ -102,7 +102,7 @@
         <el-descriptions-item label="用户留言" :span="2">{{ currentOrder.message || '无' }}</el-descriptions-item>
         <el-descriptions-item label="物流公司">{{ currentOrder.shipChannel || '-' }}</el-descriptions-item>
         <el-descriptions-item label="物流单号">{{ currentOrder.shipSn || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="支付凭证" :span="2" v-if="currentOrder.payVoucher">
+        <el-descriptions-item v-if="currentOrder.payVoucher" label="支付凭证" :span="2">
           <el-image :src="currentOrder.payVoucher" :preview-src-list="[currentOrder.payVoucher]" style="width: 150px; height: 150px;" fit="cover" />
         </el-descriptions-item>
       </el-descriptions>

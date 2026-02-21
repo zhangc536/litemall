@@ -21,9 +21,9 @@
       </el-table-column>
       <el-table-column align="center" label="支付凭证" width="120">
         <template slot-scope="scope">
-          <el-image 
-            v-if="scope.row.payVoucher" 
-            :src="scope.row.payVoucher" 
+          <el-image
+            v-if="scope.row.payVoucher"
+            :src="scope.row.payVoucher"
             :preview-src-list="[scope.row.payVoucher]"
             style="width: 80px; height: 80px; cursor: pointer;"
             fit="cover"

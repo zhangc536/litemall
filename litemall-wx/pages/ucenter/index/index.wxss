@@ -53,9 +53,8 @@ page {
   display: block;
   height: 30rpx;
   line-height: 30rpx;
-  margin-bottom: 10rpx;
-  color: #7f7f7f;
-  font-size: 30rpx;
+  color: #f4f4f4;
+  font-size: 26rpx;
 }
 
 .user_area {

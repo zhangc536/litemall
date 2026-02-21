@@ -283,7 +283,7 @@
       </el-dialog>
     </el-card>
 
-    <div class="op-container" v-if="!hideActions">
+    <div v-if="!hideActions" class="op-container">
       <el-button @click="handleCancel">{{ $t('app.button.cancel') }}</el-button>
       <el-button type="primary" @click="handlePublish">{{ $t('goods_edit.button.publish') }}</el-button>
     </div>
