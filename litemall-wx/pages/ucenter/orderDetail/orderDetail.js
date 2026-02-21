@@ -29,6 +29,43 @@ Page({
       flag: !that.data.flag
     })
   },
+  viewExpress: function() {
+    let that = this;
+    if (!that.data.orderInfo || !that.data.orderInfo.expNo) {
+      util.showErrorToast('暂无物流信息');
+      return;
+    }
+    wx.showLoading({
+      title: '加载中',
+    });
+    util.request(api.ExpressQuery, {
+      orderId: that.data.orderId
+    }, 'POST').then(function(res) {
+      if (res.errno === 0) {
+        let expressInfo = res.data || {};
+        if (!expressInfo.Traces) {
+          expressInfo = {
+            Traces: []
+          };
+        }
+        that.setData({
+          expressInfo: expressInfo,
+          flag: true
+        });
+        if (!expressInfo.Traces || expressInfo.Traces.length === 0) {
+          wx.showToast({
+            title: '暂无物流信息',
+            icon: 'none'
+          });
+        }
+      } else {
+        util.showErrorToast(res.errmsg);
+      }
+      wx.hideLoading();
+    }).catch(function() {
+      wx.hideLoading();
+    });
+  },
   getOrderDetail: function() {
     wx.showLoading({
       title: '加载中',

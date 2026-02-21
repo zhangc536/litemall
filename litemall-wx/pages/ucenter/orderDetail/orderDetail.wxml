@@ -82,7 +82,10 @@
         <view class="t">快递公司：{{orderInfo.expName}}</view>
         <view class="b">物流单号：{{orderInfo.expNo}}</view>
       </view>
-      <van-icon class="ti" name="arrow" />      
+      <view class="express-actions">
+        <view class="btn active" catchtap="viewExpress">查看物流</view>
+        <van-icon class="ti" name="arrow" />
+      </view>
     </view>
     <view class="traces" wx:for="{{expressInfo.Traces}}" wx:key="item" wx:for-item="iitem" wx:if="{{ flag }}">
       <view class="trace">
