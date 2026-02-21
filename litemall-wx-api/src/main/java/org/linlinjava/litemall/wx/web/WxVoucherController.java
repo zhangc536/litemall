@@ -59,6 +59,9 @@ public class WxVoucherController {
         }
         String originalFilename = "voucher_" + orderId + "_" + file.getOriginalFilename();
         LitemallStorage info = storageService.store(file.getInputStream(), file.getSize(), file.getContentType(), originalFilename);
+        order.setPayVoucher(info.getUrl());
+        order.setVoucherStatus((short) 0);
+        orderService.updateSelective(order);
         return ResponseUtil.ok(info);
     }
 }
