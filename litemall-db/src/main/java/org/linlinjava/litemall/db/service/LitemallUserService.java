@@ -175,4 +175,22 @@ public class LitemallUserService {
     private Integer randomEightDigitNumber() {
         return ThreadLocalRandom.current().nextInt(10000000, 100000000);
     }
+
+    public void addExperience(Integer userId, Integer experience) {
+        LitemallUser user = findById(userId);
+        if (user != null) {
+            int currentExp = user.getExperience() != null ? user.getExperience() : 0;
+            user.setExperience(currentExp + experience);
+            user.setUpdateTime(LocalDateTime.now());
+            userMapper.updateByPrimaryKeySelective(user);
+        }
+    }
+
+    public void updateUserLevel(Integer userId, Byte level) {
+        LitemallUser user = new LitemallUser();
+        user.setId(userId);
+        user.setUserLevel(level);
+        user.setUpdateTime(LocalDateTime.now());
+        userMapper.updateByPrimaryKeySelective(user);
+    }
 }

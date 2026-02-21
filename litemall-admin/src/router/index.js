@@ -163,6 +163,16 @@ export const asyncRoutes = [
           title: 'app.menu.user_feedback',
           noCache: true
         }
+      },
+      {
+        path: 'level',
+        component: () => import('@/views/user/level'),
+        name: 'userLevel',
+        meta: {
+          perms: ['GET /admin/userLevel/list'],
+          title: '等级配置',
+          noCache: true
+        }
       }
     ]
   },
