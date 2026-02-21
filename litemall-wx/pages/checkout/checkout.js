@@ -21,6 +21,24 @@ Page({
   },
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
+    if (options) {
+      const cartId = options.cartId ? parseInt(options.cartId) : 0;
+      const addressId = options.addressId ? parseInt(options.addressId) : 0;
+      const grouponRulesId = options.grouponRulesId ? parseInt(options.grouponRulesId) : 0;
+      const grouponLinkId = options.grouponLinkId ? parseInt(options.grouponLinkId) : 0;
+      this.setData({
+        cartId: isNaN(cartId) ? 0 : cartId,
+        addressId: isNaN(addressId) ? 0 : addressId,
+        grouponRulesId: isNaN(grouponRulesId) ? 0 : grouponRulesId,
+        grouponLinkId: isNaN(grouponLinkId) ? 0 : grouponLinkId
+      });
+      try {
+        wx.setStorageSync('cartId', this.data.cartId);
+        wx.setStorageSync('addressId', this.data.addressId);
+        wx.setStorageSync('grouponRulesId', this.data.grouponRulesId);
+        wx.setStorageSync('grouponLinkId', this.data.grouponLinkId);
+      } catch (e) {}
+    }
   },
 
   //获取checkou信息

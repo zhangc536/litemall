@@ -610,7 +610,7 @@ Page({
                 wx.setStorageSync('grouponRulesId', checkedGroupon.id);
                 wx.setStorageSync('grouponLinkId', that.data.grouponLink.id);
                 wx.navigateTo({
-                  url: '/pages/checkout/checkout'
+                  url: '/pages/checkout/checkout?cartId=' + res.data + '&grouponRulesId=' + checkedGroupon.id + '&grouponLinkId=' + (that.data.grouponLink.id || 0)
                 })
               } catch (e) {}
 
