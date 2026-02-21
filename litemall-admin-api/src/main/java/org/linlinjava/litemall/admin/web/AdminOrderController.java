@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,10 @@ public class AdminOrderController {
             } else {
                 return ResponseUtil.badArgument();
             }
-            orderService.updateWithOptimisticLocker(order);
+            order.setUpdateTime(LocalDateTime.now());
+            if (orderService.updateSelective(order) == 0) {
+                return ResponseUtil.updatedDataFailed();
+            }
             return ResponseUtil.ok();
         } catch (Exception e) {
             logger.error("Order audit error", e);
