@@ -265,12 +265,22 @@ public class LitemallOrderService {
         LitemallOrderExample example = new LitemallOrderExample();
         example.setOrderByClause(LitemallOrder.Column.addTime.desc());
         LitemallOrderExample.Criteria criteria = example.or();
-        
         if (!StringUtils.isEmpty(orderSn)) {
             criteria.andOrderSnLike("%" + orderSn + "%");
         }
         if (voucherStatus != null) {
-            criteria.andVoucherStatusEqualTo(voucherStatus);
+            if (voucherStatus == 0) {
+                criteria.andVoucherStatusEqualTo(voucherStatus);
+                LitemallOrderExample.Criteria nullCriteria = example.or();
+                if (!StringUtils.isEmpty(orderSn)) {
+                    nullCriteria.andOrderSnLike("%" + orderSn + "%");
+                }
+                nullCriteria.andVoucherStatusIsNull();
+                nullCriteria.andPayVoucherIsNotNull();
+                nullCriteria.andDeletedEqualTo(false);
+            } else {
+                criteria.andVoucherStatusEqualTo(voucherStatus);
+            }
         }
         criteria.andPayVoucherIsNotNull();
         criteria.andDeletedEqualTo(false);
@@ -282,12 +292,22 @@ public class LitemallOrderService {
     public int countVoucherList(String orderSn, Short voucherStatus) {
         LitemallOrderExample example = new LitemallOrderExample();
         LitemallOrderExample.Criteria criteria = example.or();
-        
         if (!StringUtils.isEmpty(orderSn)) {
             criteria.andOrderSnLike("%" + orderSn + "%");
         }
         if (voucherStatus != null) {
-            criteria.andVoucherStatusEqualTo(voucherStatus);
+            if (voucherStatus == 0) {
+                criteria.andVoucherStatusEqualTo(voucherStatus);
+                LitemallOrderExample.Criteria nullCriteria = example.or();
+                if (!StringUtils.isEmpty(orderSn)) {
+                    nullCriteria.andOrderSnLike("%" + orderSn + "%");
+                }
+                nullCriteria.andVoucherStatusIsNull();
+                nullCriteria.andPayVoucherIsNotNull();
+                nullCriteria.andDeletedEqualTo(false);
+            } else {
+                criteria.andVoucherStatusEqualTo(voucherStatus);
+            }
         }
         criteria.andPayVoucherIsNotNull();
         criteria.andDeletedEqualTo(false);
