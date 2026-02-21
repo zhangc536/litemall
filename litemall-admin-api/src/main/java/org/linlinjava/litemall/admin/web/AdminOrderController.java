@@ -34,6 +34,35 @@ public class AdminOrderController {
     private LitemallStorageService storageService;
 
     @RequiresPermissions("admin:order:list")
+    @RequiresPermissionsDesc(menu = {"订单管理", "订单列表"}, button = "查询")
+    @GetMapping("/list")
+    public Object list(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "20") Integer limit,
+            String orderSn,
+            Short orderStatus,
+            String startTime,
+            String endTime) {
+        List<LitemallOrder> orderList = orderService.queryOrderList(orderSn, orderStatus, startTime, endTime, page, limit);
+        int total = orderService.countOrderList(orderSn, orderStatus, startTime, endTime);
+        return ResponseUtil.okList(orderList, total);
+    }
+
+    @RequiresPermissions("admin:order:list")
+    @RequiresPermissionsDesc(menu = {"订单管理", "订单列表"}, button = "详情")
+    @GetMapping("/detail")
+    public Object detail(@RequestParam Integer id) {
+        if (id == null || id <= 0) {
+            return ResponseUtil.badArgument();
+        }
+        LitemallOrder order = orderService.findById(id);
+        if (order == null) {
+            return ResponseUtil.badArgument();
+        }
+        return ResponseUtil.ok(order);
+    }
+
+    @RequiresPermissions("admin:order:list")
     @RequiresPermissionsDesc(menu = {"商品管理", "凭证审核"}, button = "查询")
     @GetMapping("/voucher/list")
     public Object voucherList(

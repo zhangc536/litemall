@@ -135,10 +135,25 @@ export default {
         type: 'warning'
       }).then(() => {
         auditOrder(row.id, status, '').then(() => {
-          this.$notify.success({
-            title: '成功',
-            message: status === 'APPROVED' ? '审核通过，订单已进入待发货状态' : '已驳回该凭证'
-          })
+          if (status === 'APPROVED') {
+            this.$confirm('审核通过！是否立即发货？', '提示', {
+              confirmButtonText: '立即发货',
+              cancelButtonText: '稍后发货',
+              type: 'success'
+            }).then(() => {
+              this.shipForm = {
+                orderId: row.id,
+                logisticsCompany: '',
+                trackingNo: ''
+              }
+              this.shipDialogVisible = true
+            }).catch(() => {})
+          } else {
+            this.$notify.success({
+              title: '成功',
+              message: '已驳回该凭证'
+            })
+          }
           this.loadVouchers()
         }).catch(() => {
           this.$alert('系统内部错误，请联系管理员维护', '错误', { type: 'error' })
