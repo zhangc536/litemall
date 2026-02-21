@@ -64,6 +64,7 @@ Page({
 
   submitVoucher: function() {
     let that = this;
+    let token = wx.getStorageSync('token');
     
     if (!that.data.hasVoucher) {
       wx.showToast({
@@ -80,10 +81,19 @@ Page({
       filePath: that.data.payVoucher,
       name: 'file',
       formData: {
-        orderId: that.data.orderId
+        orderId: that.data.orderId,
+        token: token
+      },
+      header: {
+        'X-Litemall-Token': token
       },
       success: function(res) {
-        const data = JSON.parse(res.data);
+        let data = {};
+        try {
+          data = JSON.parse(res.data);
+        } catch (e) {
+          data = { errno: -1, errmsg: '提交失败' };
+        }
         if (data.errno === 0) {
           wx.showToast({
             title: '提交成功',
