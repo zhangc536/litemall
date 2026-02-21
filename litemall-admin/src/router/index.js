@@ -335,16 +335,6 @@ export const asyncRoutes = [
           title: 'app.menu.config_wx',
           noCache: true
         }
-      },
-      {
-        path: 'voucher',
-        component: () => import('@/views/mall/voucher'),
-        name: 'voucherAudit',
-        meta: {
-          perms: ['GET /admin/order/voucher/list'],
-          title: '凭证审核',
-          noCache: true
-        }
       }
     ]
   },
