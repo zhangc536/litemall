@@ -4269,6 +4269,56 @@ public class LitemallOrderExample {
             addCriterion("deleted not between", value1, value2, "deleted");
             return (Criteria) this;
         }
+
+        public Criteria andPayVoucherIsNull() {
+            addCriterion("pay_voucher is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayVoucherIsNotNull() {
+            addCriterion("pay_voucher is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayVoucherEqualTo(String value) {
+            addCriterion("pay_voucher =", value, "payVoucher");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayVoucherNotEqualTo(String value) {
+            addCriterion("pay_voucher <>", value, "payVoucher");
+            return (Criteria) this;
+        }
+
+        public Criteria andPayVoucherLike(String value) {
+            addCriterion("pay_voucher like", value, "payVoucher");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoucherStatusIsNull() {
+            addCriterion("voucher_status is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoucherStatusIsNotNull() {
+            addCriterion("voucher_status is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoucherStatusEqualTo(Short value) {
+            addCriterion("voucher_status =", value, "voucherStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoucherStatusNotEqualTo(Short value) {
+            addCriterion("voucher_status <>", value, "voucherStatus");
+            return (Criteria) this;
+        }
+
+        public Criteria andVoucherStatusIn(List<Short> values) {
+            addCriterion("voucher_status in", values, "voucherStatus");
+            return (Criteria) this;
+        }
     }
 
     /**

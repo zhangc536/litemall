@@ -1,0 +1,44 @@
+<view class="container">
+  <view class="order-info">
+    <view class="title">订单信息</view>
+    <view class="info-item">
+      <text class="label">订单编号：</text>
+      <text class="value">{{orderInfo.orderSn}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">订单金额：</text>
+      <text class="value price">￥{{orderInfo.actualPrice}}</text>
+    </view>
+  </view>
+
+  <view class="upload-section">
+    <view class="title">上传支付凭证</view>
+    <view class="tips">
+      <view class="tip-item">请将款项转账至以下账户：</view>
+      <view class="tip-item">开户行：XXX银行XXX支行</view>
+      <view class="tip-item">账号：XXXXXXXXXXXXXXXXXXX</view>
+      <view class="tip-item">户名：XXXXXXXXXX</view>
+    </view>
+    
+    <view class="upload-area" wx:if="{{!hasVoucher}}">
+      <view class="upload-btn" bindtap="chooseImage">
+        <image class="upload-icon" src="/static/images/camera.png"></image>
+        <text>点击上传凭证</text>
+      </view>
+    </view>
+
+    <view class="preview-area" wx:if="{{hasVoucher}}">
+      <image class="voucher-image" src="{{payVoucher}}" bindtap="previewImage" mode="aspectFit"></image>
+      <view class="btn-group">
+        <view class="btn rechoose" bindtap="chooseImage">重新选择</view>
+        <view class="btn delete" bindtap="deleteImage">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="submit-section">
+    <button class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="submitVoucher" disabled="{{submitting || !hasVoucher}}">
+      {{submitting ? '提交中...' : '提交凭证'}}
+    </button>
+  </view>
+</view>

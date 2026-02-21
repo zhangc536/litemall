@@ -38,7 +38,8 @@
     "pages/ucenter/aftersale/aftersale",
     "pages/ucenter/aftersaleList/aftersaleList",
     "pages/ucenter/aftersaleDetail/aftersaleDetail",
-    "pages/ucenter/idcard/idcard"
+    "pages/ucenter/idcard/idcard",
+    "pages/payVoucher/payVoucher"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FFFFFF",
