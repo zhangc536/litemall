@@ -1,16 +1,18 @@
 <view class="container">
   <view class="address-list" wx:if="{{ addressList.length > 0 }}">
-    <view class="item" wx:for="{{addressList}}" wx:key="id" bindtap="addressAddOrUpdate" data-address-id="{{item.id}}">
-      <view class="l">
-        <view class="name">{{item.name}}</view>
-        <view class="default" wx:if="{{item.isDefault}}">默认</view>
+    <view class="item" wx:for="{{addressList}}" wx:key="id">
+      <view class="item-content" bindtap="addressAddOrUpdate" data-address-id="{{item.id}}">
+        <view class="l">
+          <view class="name">{{item.name}}</view>
+          <view class="default" wx:if="{{item.isDefault}}">默认</view>
+        </view>
+        <view class="c">
+          <view class="mobile">{{item.tel}}</view>
+          <view class="address">{{item.addressDetail}}</view>
+        </view>
       </view>
-      <view class="c">
-        <view class="mobile">{{item.tel}}</view>
-        <view class="address">{{item.addressDetail}}</view>
-      </view>
-      <view class="r">
-        <van-icon catchtap="deleteAddress" data-address-id="{{item.id}}" class="del" name="delete"/>
+      <view class="r" catchtap="deleteAddress" data-address-id="{{item.id}}">
+        <van-icon class="del" name="delete"/>
       </view>
     </view>
   </view>
