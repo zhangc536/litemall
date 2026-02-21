@@ -89,5 +89,5 @@ module.exports = {
   UserIdCard: WxApiRoot + 'user/idcard', //身份证绑定
   IssueList: WxApiRoot + 'issue/list', //帮助信息
 
-  UploadPayVoucher: WxApiRoot + 'order/uploadVoucher', //上传支付凭证
+  UploadPayVoucher: WxApiRoot + 'order/voucher/upload', //上传支付凭证
 };
