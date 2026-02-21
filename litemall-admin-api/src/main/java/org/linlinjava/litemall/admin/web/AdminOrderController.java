@@ -44,8 +44,7 @@ public class AdminOrderController {
             String startTime,
             String endTime) {
         List<LitemallOrder> orderList = orderService.queryOrderList(orderSn, orderStatus, startTime, endTime, page, limit);
-        int total = orderService.countOrderList(orderSn, orderStatus, startTime, endTime);
-        return ResponseUtil.okList(orderList, total);
+        return ResponseUtil.okList(orderList);
     }
 
     @RequiresPermissions("admin:order:list")
