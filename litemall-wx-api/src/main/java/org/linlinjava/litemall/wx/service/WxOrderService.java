@@ -225,6 +225,131 @@ public class WxOrderService {
 
     }
 
+    public Object expressQuery(Integer userId, String body) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        Integer orderId = JacksonUtil.parseInteger(body, "orderId");
+        if (orderId == null) {
+            return ResponseUtil.badArgument();
+        }
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (null == order) {
+            return ResponseUtil.fail(ORDER_UNKNOWN, "订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.fail(ORDER_INVALID, "不是当前用户的订单");
+        }
+        if (!order.getOrderStatus().equals(OrderUtil.STATUS_SHIP)) {
+            return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单未发货");
+        }
+        if (order.getShipChannel() == null || order.getShipSn() == null) {
+            return ResponseUtil.badArgumentValue();
+        }
+        ExpressInfo ei = expressService.getExpressInfo(order.getShipChannel(), order.getShipSn());
+        if (ei == null) {
+            return ResponseUtil.ok(new HashMap<>());
+        }
+        return ResponseUtil.ok(ei);
+    }
+
+    public Object expressMonitor(Integer userId, String body) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        Integer orderId = JacksonUtil.parseInteger(body, "orderId");
+        if (orderId == null) {
+            return ResponseUtil.badArgument();
+        }
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (null == order) {
+            return ResponseUtil.fail(ORDER_UNKNOWN, "订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.fail(ORDER_INVALID, "不是当前用户的订单");
+        }
+        if (!order.getOrderStatus().equals(OrderUtil.STATUS_SHIP)) {
+            return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单未发货");
+        }
+        if (order.getShipChannel() == null || order.getShipSn() == null) {
+            return ResponseUtil.badArgumentValue();
+        }
+        Map<String, Object> info = expressService.getMonitorInfo(order.getShipChannel(), order.getShipSn());
+        if (info == null) {
+            return ResponseUtil.ok(new HashMap<>());
+        }
+        return ResponseUtil.ok(info);
+    }
+
+    public Object expressMap(Integer userId, String body) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        Integer orderId = JacksonUtil.parseInteger(body, "orderId");
+        if (orderId == null) {
+            return ResponseUtil.badArgument();
+        }
+        String senderCityName = JacksonUtil.parseString(body, "senderCityName");
+        String receiverCityName = JacksonUtil.parseString(body, "receiverCityName");
+        Integer isReturnCoordinates = JacksonUtil.parseInteger(body, "isReturnCoordinates");
+        Integer isReturnRouteMap = JacksonUtil.parseInteger(body, "isReturnRouteMap");
+        if (senderCityName == null || receiverCityName == null) {
+            return ResponseUtil.badArgumentValue();
+        }
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (null == order) {
+            return ResponseUtil.fail(ORDER_UNKNOWN, "订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.fail(ORDER_INVALID, "不是当前用户的订单");
+        }
+        if (!order.getOrderStatus().equals(OrderUtil.STATUS_SHIP)) {
+            return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单未发货");
+        }
+        if (order.getShipChannel() == null || order.getShipSn() == null) {
+            return ResponseUtil.badArgumentValue();
+        }
+        Map<String, Object> info = expressService.getMapInfo(order.getShipChannel(), order.getShipSn(), senderCityName, receiverCityName, isReturnCoordinates, isReturnRouteMap);
+        if (info == null) {
+            return ResponseUtil.ok(new HashMap<>());
+        }
+        return ResponseUtil.ok(info);
+    }
+
+    public Object expressTruck(Integer userId, String body) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        Integer orderId = JacksonUtil.parseInteger(body, "orderId");
+        String requestType = JacksonUtil.parseString(body, "requestType");
+        String requestTarget = JacksonUtil.parseString(body, "requestTarget");
+        Map<String, Object> requestData = JacksonUtil.parseObject(body, "requestData", Map.class);
+        if (orderId == null || requestType == null) {
+            return ResponseUtil.badArgument();
+        }
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (null == order) {
+            return ResponseUtil.fail(ORDER_UNKNOWN, "订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.fail(ORDER_INVALID, "不是当前用户的订单");
+        }
+        if (requestData == null) {
+            requestData = new HashMap<>();
+        }
+        if (order.getShipChannel() != null && !requestData.containsKey("ShipperCode")) {
+            requestData.put("ShipperCode", order.getShipChannel());
+        }
+        if (order.getShipSn() != null && !requestData.containsKey("LogisticCode")) {
+            requestData.put("LogisticCode", order.getShipSn());
+        }
+        Map<String, Object> info = expressService.requestCustom(requestType, requestData, requestTarget);
+        if (info == null) {
+            return ResponseUtil.ok(new HashMap<>());
+        }
+        return ResponseUtil.ok(info);
+    }
+
     /**
      * 提交订单
      * <p>
