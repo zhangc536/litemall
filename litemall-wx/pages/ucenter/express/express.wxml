@@ -1,0 +1,31 @@
+<view class="container">
+  <view class="top">
+    <view class="header">
+      <view class="status">{{stateText}}</view>
+      <view class="desc" wx:if="{{latestTrace}}">{{latestTrace.AcceptStation}}</view>
+      <view class="time" wx:if="{{latestTrace}}">{{latestTrace.AcceptTime}}</view>
+    </view>
+    <view class="timeline" wx:if="{{traces.length}}">
+      <view class="node {{index === 0 ? 'active' : ''}}" wx:for="{{traces}}" wx:key="index">
+        <view class="dot"></view>
+        <view class="line" wx:if="{{index !== traces.length - 1}}"></view>
+        <view class="content">
+          <view class="station">{{item.AcceptStation}}</view>
+          <view class="time">{{item.AcceptTime}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{!loading && traces.length === 0}}">暂无物流信息</view>
+    <view class="loading" wx:if="{{loading}}">加载中</view>
+  </view>
+  <view class="card">
+    <view class="row">
+      <view class="label">快递公司</view>
+      <view class="value">{{expName}}</view>
+    </view>
+    <view class="row">
+      <view class="label">物流单号</view>
+      <view class="value">{{expNo}}</view>
+    </view>
+  </view>
+</view>

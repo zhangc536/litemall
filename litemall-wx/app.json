@@ -11,6 +11,7 @@
     "pages/ucenter/footprint/footprint",
     "pages/ucenter/order/order",
     "pages/ucenter/orderDetail/orderDetail",
+    "pages/ucenter/express/express",
     "pages/ucenter/collect/collect",
     "pages/auth/login/login",
     "pages/auth/wxProfile/wxProfile",

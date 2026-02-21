@@ -9,6 +9,7 @@
     "pages/ucenter/addressAdd/addressAdd",
     "pages/ucenter/order/order",
     "pages/ucenter/orderDetail/orderDetail",
+    "pages/ucenter/express/express",
     "pages/ucenter/coupon/coupon",
     "pages/auth/login/login",
     "pages/payResult/payResult",

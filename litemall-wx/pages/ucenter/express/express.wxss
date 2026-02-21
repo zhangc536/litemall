@@ -1,0 +1,114 @@
+.container {
+  min-height: 100%;
+  background: #f5f6f7;
+  padding-bottom: 30rpx;
+}
+
+.top {
+  margin: 20rpx 20rpx 0;
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx 10rpx;
+}
+
+.header {
+  padding: 10rpx 8rpx 20rpx;
+}
+
+.header .status {
+  font-size: 34rpx;
+  color: #07c160;
+  font-weight: 600;
+}
+
+.header .desc {
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.header .time {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.card {
+  margin: 20rpx 20rpx 0;
+  padding: 20rpx 24rpx;
+  background: #fff;
+  border-radius: 12rpx;
+}
+
+.card .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8rpx 0;
+  font-size: 26rpx;
+  color: #333;
+}
+
+.card .label {
+  color: #999;
+}
+
+.card .value {
+  color: #333;
+}
+
+.timeline {
+  padding: 0 8rpx 10rpx;
+}
+
+.node {
+  position: relative;
+  padding: 20rpx 0 20rpx 46rpx;
+}
+
+.node .dot {
+  position: absolute;
+  left: 10rpx;
+  top: 30rpx;
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: #d8d8d8;
+}
+
+.node.active .dot {
+  background: #07c160;
+  box-shadow: 0 0 0 6rpx rgba(7, 193, 96, 0.15);
+}
+
+.node .line {
+  position: absolute;
+  left: 18rpx;
+  top: 48rpx;
+  width: 2rpx;
+  height: calc(100% - 36rpx);
+  background: #e5e5e5;
+}
+
+.node .content .station {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.node .content .time {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.node.active .content .station {
+  color: #07c160;
+  font-weight: 600;
+}
+
+.empty,
+.loading {
+  margin: 10rpx 0 20rpx;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}
