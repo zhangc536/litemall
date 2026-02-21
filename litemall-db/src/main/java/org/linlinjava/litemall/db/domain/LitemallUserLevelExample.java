@@ -120,27 +120,34 @@ public class LitemallUserLevelExample {
             addCriterion("min_experience <=", value, "minExperience");
             return (Criteria) this;
         }
+
+        protected abstract void addCriterion(String condition);
+        protected abstract void addCriterion(String condition, Object value, String property);
+        protected abstract void addCriterion(String condition, List<?> values, String property);
     }
 
     public static class Criteria extends GeneratedCriteria {
         protected Criteria() {}
-    }
 
-    protected void addCriterion(String condition) {
-        if (condition == null) {
-            throw new RuntimeException("Value for condition cannot be null");
+        @Override
+        protected void addCriterion(String condition) {
+            if (condition == null) {
+                throw new RuntimeException("Value for condition cannot be null");
+            }
         }
-    }
 
-    protected void addCriterion(String condition, Object value, String property) {
-        if (value == null) {
-            throw new RuntimeException("Value for " + property + " cannot be null");
+        @Override
+        protected void addCriterion(String condition, Object value, String property) {
+            if (value == null) {
+                throw new RuntimeException("Value for " + property + " cannot be null");
+            }
         }
-    }
 
-    protected void addCriterion(String condition, List<?> values, String property) {
-        if (values == null || values.size() == 0) {
-            throw new RuntimeException("Value list for " + property + " cannot be null or empty");
+        @Override
+        protected void addCriterion(String condition, List<?> values, String property) {
+            if (values == null || values.size() == 0) {
+                throw new RuntimeException("Value list for " + property + " cannot be null or empty");
+            }
         }
     }
 }
