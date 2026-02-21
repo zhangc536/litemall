@@ -38,9 +38,7 @@ public class AdminOrderController {
             String orderSn,
             Short voucherStatus) {
         List<LitemallOrder> orderList = orderService.queryVoucherList(orderSn, voucherStatus, page, limit);
-        int total = orderService.countVoucherList(orderSn, voucherStatus);
-        
-        return ResponseUtil.okList(orderList, total);
+        return ResponseUtil.okList(orderList);
     }
 
     @RequiresPermissions("admin:order:audit")
