@@ -66,7 +66,7 @@ Page({
   },
   selectAddress() {
     wx.navigateTo({
-      url: '/pages/ucenter/address/address',
+      url: '/pages/ucenter/address/address?from=checkout',
     })
   },
   bindMessageInput: function(e) {
