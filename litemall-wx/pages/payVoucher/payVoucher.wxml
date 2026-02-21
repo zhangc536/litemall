@@ -22,7 +22,7 @@
     
     <view class="upload-area" wx:if="{{!hasVoucher}}">
       <view class="upload-btn" bindtap="chooseImage">
-        <image class="upload-icon" src="/static/images/camera.png"></image>
+        <image class="upload-icon" src="/static/images/receive.png"></image>
         <text>点击上传凭证</text>
       </view>
     </view>
