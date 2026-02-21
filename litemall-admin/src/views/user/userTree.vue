@@ -26,10 +26,9 @@
             <el-tag v-if="data.levelName" type="info" size="mini">{{ data.levelName }}</el-tag>
             <span class="user-mobile">{{ data.mobile || '-' }}</span>
             <span v-if="data.inviteCode" class="invite-code">邀请码: {{ data.inviteCode }}</span>
-            <span v-if="data.teamCount > 0" class="team-count">
+            <span v-if="data.teamCount !== undefined" class="team-count">
               <el-button type="text" size="mini" class="team-count-button" @click="viewTeamMembers(data)">团队: {{ data.teamCount }}人</el-button>
             </span>
-            <span v-else-if="data.teamCount !== undefined" class="team-count">团队: 0人</span>
           </span>
         </span>
         <span class="node-actions">
