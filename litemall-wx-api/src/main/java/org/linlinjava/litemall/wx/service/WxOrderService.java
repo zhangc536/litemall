@@ -17,6 +17,7 @@ import org.linlinjava.litemall.core.express.dao.ExpressInfo;
 import org.linlinjava.litemall.core.notify.NotifyService;
 import org.linlinjava.litemall.core.notify.NotifyType;
 import org.linlinjava.litemall.core.qcode.QCodeService;
+import org.linlinjava.litemall.core.storage.StorageService;
 import org.linlinjava.litemall.core.system.SystemConfig;
 import org.linlinjava.litemall.core.task.TaskService;
 import org.linlinjava.litemall.core.util.DateTimeUtil;
@@ -1101,7 +1102,7 @@ public class WxOrderService {
     }
 
     @Autowired
-    private LitemallStorageService storageService;
+    private StorageService storageService;
 
     public Object uploadVoucher(Integer userId, Integer orderId, org.springframework.web.multipart.MultipartFile file) {
         if (userId == null) {
@@ -1127,7 +1128,7 @@ public class WxOrderService {
             
             order.setPayVoucher(storage.getUrl());
             order.setVoucherStatus((short) 0);
-            orderService.updateById(order);
+            orderService.updateSelective(order);
 
             Map<String, Object> result = new HashMap<>();
             result.put("voucherUrl", storage.getUrl());
