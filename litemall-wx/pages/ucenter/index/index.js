@@ -77,6 +77,32 @@ Page({
       });
     }
   },
+  onAvatarError() {
+    if (!this.data.hasLogin) {
+      return;
+    }
+    const userInfo = Object.assign({}, this.data.userInfo || {});
+    if (userInfo.avatarUrl && userInfo.avatarUrl !== '/static/images/my.png') {
+      userInfo.avatarUrl = '/static/images/my.png';
+      this.setData({
+        userInfo: userInfo
+      });
+      wx.setStorageSync('userInfo', userInfo);
+    }
+    wx.showModal({
+      title: '头像失效',
+      content: '头像文件已不存在，请重新上传',
+      confirmText: '去上传',
+      cancelText: '取消',
+      success: function(res) {
+        if (res.confirm) {
+          wx.navigateTo({
+            url: '/pages/auth/wxProfile/wxProfile?mode=update'
+          });
+        }
+      }
+    });
+  },
   goOrder() {
     if (this.data.hasLogin) {
       try {

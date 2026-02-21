@@ -9,10 +9,19 @@ Page({
     isUploadingAvatar: false,
     avatarPreviewUrl: '',
     avatarUrl: '',
-    nickName: ''
+    nickName: '',
+    isUpdateMode: false
   },
-  onLoad: function() {
-    app.globalData.hasLogin = false;
+  onLoad: function(options) {
+    const isUpdateMode = options && options.mode === 'update';
+    if (!isUpdateMode) {
+      app.globalData.hasLogin = false;
+    }
+    const userInfo = wx.getStorageSync('userInfo') || {};
+    this.setData({
+      isUpdateMode: isUpdateMode,
+      nickName: isUpdateMode ? (userInfo.nickName || '') : ''
+    });
   },
   onChooseAvatar: function(e) {
     const avatarUrl = e && e.detail ? e.detail.avatarUrl : '';
@@ -74,6 +83,10 @@ Page({
       util.showErrorToast('头像上传中');
       return;
     }
+    if (this.data.isUpdateMode) {
+      this.updateProfile();
+      return;
+    }
     const nickName = (this.data.nickName || '').trim();
     const avatarUrl = this.data.avatarUrl || '';
     const avatarPreviewUrl = this.data.avatarPreviewUrl || '';
@@ -89,6 +102,50 @@ Page({
       nickName: nickName,
       avatarUrl: avatarUrl
     })
+  },
+  updateProfile: function() {
+    const avatarUrl = this.data.avatarUrl || '';
+    const avatarPreviewUrl = this.data.avatarPreviewUrl || '';
+    const nickName = (this.data.nickName || '').trim();
+    if (!avatarPreviewUrl) {
+      util.showErrorToast('请先选择头像');
+      return;
+    }
+    if (!avatarUrl) {
+      util.showErrorToast('头像上传失败，请重新选择');
+      return;
+    }
+    this.setData({
+      isLoggingIn: true
+    });
+    const payload = {
+      avatar: avatarUrl
+    };
+    if (nickName) {
+      payload.nickname = nickName;
+    }
+    util.request(api.AuthProfile, payload, 'POST').then(res => {
+      if (res.errno === 0) {
+        const userInfo = wx.getStorageSync('userInfo') || {};
+        userInfo.avatarUrl = avatarUrl;
+        if (nickName) {
+          userInfo.nickName = nickName;
+        }
+        wx.setStorageSync('userInfo', userInfo);
+        app.globalData.hasLogin = true;
+        wx.reLaunch({
+          url: '/pages/ucenter/index/index'
+        });
+      } else {
+        util.showErrorToast(res.errmsg || '更新失败');
+      }
+    }).catch(() => {
+      util.showErrorToast('更新失败');
+    }).finally(() => {
+      this.setData({
+        isLoggingIn: false
+      });
+    });
   },
   doLogin: function(userInfo) {
     this.setData({
