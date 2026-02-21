@@ -68,6 +68,12 @@ Page({
   goLogin() {
     const userInfo = wx.getStorageSync('userInfo');
     const hasProfile = userInfo && userInfo.nickName && userInfo.avatarUrl;
+    if (this.data.hasLogin && hasProfile) {
+      wx.navigateTo({
+        url: "/pages/auth/wxProfile/wxProfile?mode=update"
+      });
+      return;
+    }
     if (!this.data.hasLogin || !hasProfile) {
       app.globalData.hasLogin = false;
       wx.removeStorageSync('token');
