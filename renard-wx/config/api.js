@@ -49,6 +49,8 @@ module.exports = {
   AddressSave: WxApiRoot + 'address/save', //保存收货地址
   AddressDelete: WxApiRoot + 'address/delete', //保存收货地址
 
+  ExpressQuery: WxApiRoot + 'express/query', //物流查询
+
   OrderSubmit: WxApiRoot + 'order/submit', // 提交订单
   OrderPrepay: WxApiRoot + 'order/prepay', // 订单的预支付会话
   OrderList: WxApiRoot + 'order/list', //订单列表
