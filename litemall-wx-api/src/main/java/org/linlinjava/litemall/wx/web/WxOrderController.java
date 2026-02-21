@@ -180,4 +180,9 @@ public class WxOrderController {
         return wxOrderService.comment(userId, body);
     }
 
+    @PostMapping("uploadVoucher")
+    public Object uploadVoucher(@LoginUser Integer userId, @RequestParam Integer orderId, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        return wxOrderService.uploadVoucher(userId, orderId, file);
+    }
+
 }

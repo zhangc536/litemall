@@ -260,4 +260,38 @@ public class LitemallOrderService {
         data.put("pages", list1.getPages());
         return data;
     }
+
+    public List<LitemallOrder> queryVoucherList(String orderSn, Short voucherStatus, Integer page, Integer limit) {
+        LitemallOrderExample example = new LitemallOrderExample();
+        example.setOrderByClause(LitemallOrder.Column.addTime.desc());
+        LitemallOrderExample.Criteria criteria = example.or();
+        
+        if (!StringUtils.isEmpty(orderSn)) {
+            criteria.andOrderSnLike("%" + orderSn + "%");
+        }
+        if (voucherStatus != null) {
+            criteria.andVoucherStatusEqualTo(voucherStatus);
+        }
+        criteria.andPayVoucherIsNotNull();
+        criteria.andDeletedEqualTo(false);
+        
+        PageHelper.startPage(page, limit);
+        return litemallOrderMapper.selectByExample(example);
+    }
+
+    public int countVoucherList(String orderSn, Short voucherStatus) {
+        LitemallOrderExample example = new LitemallOrderExample();
+        LitemallOrderExample.Criteria criteria = example.or();
+        
+        if (!StringUtils.isEmpty(orderSn)) {
+            criteria.andOrderSnLike("%" + orderSn + "%");
+        }
+        if (voucherStatus != null) {
+            criteria.andVoucherStatusEqualTo(voucherStatus);
+        }
+        criteria.andPayVoucherIsNotNull();
+        criteria.andDeletedEqualTo(false);
+        
+        return (int) litemallOrderMapper.countByExample(example);
+    }
 }

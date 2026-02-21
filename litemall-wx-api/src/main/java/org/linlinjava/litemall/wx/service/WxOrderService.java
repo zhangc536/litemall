@@ -1099,4 +1099,42 @@ public class WxOrderService {
         updateUser.setPoints(points + integralPrice.intValue());
         userService.updateById(updateUser);
     }
+
+    @Autowired
+    private LitemallStorageService storageService;
+
+    public Object uploadVoucher(Integer userId, Integer orderId, org.springframework.web.multipart.MultipartFile file) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        if (file == null || file.isEmpty()) {
+            return ResponseUtil.fail(400, "请上传支付凭证");
+        }
+
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (order == null) {
+            return ResponseUtil.fail(ORDER_UNKNOWN, "订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.fail(ORDER_INVALID, "不是当前用户的订单");
+        }
+        if (!OrderUtil.isPayStatus(order) && !OrderUtil.isCreateStatus(order)) {
+            return ResponseUtil.fail(ORDER_INVALID, "订单状态不支持上传凭证");
+        }
+
+        try {
+            LitemallStorage storage = storageService.store(file.getInputStream(), file.getSize(), file.getContentType(), file.getOriginalFilename());
+            
+            order.setPayVoucher(storage.getUrl());
+            order.setVoucherStatus((short) 0);
+            orderService.updateById(order);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("voucherUrl", storage.getUrl());
+            return ResponseUtil.ok(result);
+        } catch (IOException e) {
+            logger.error("上传支付凭证失败", e);
+            return ResponseUtil.fail(500, "上传失败");
+        }
+    }
 }

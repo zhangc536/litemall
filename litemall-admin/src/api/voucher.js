@@ -1,10 +1,10 @@
 import request from '@/utils/request'
 
-export function listVouchers(orderId) {
+export function listVouchers(query) {
   return request({
     url: '/order/voucher/list',
     method: 'get',
-    params: { orderId }
+    params: query
   })
 }
 
