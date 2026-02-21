@@ -36,21 +36,19 @@ Page({
     var prevPage = pages[pages.length - 2];
 
     if (prevPage.route == "pages/checkout/checkout") {
-      try {
-        wx.setStorageSync('addressId', event.currentTarget.dataset.addressId);
-      } catch (e) {
-
-      }
-
       let addressId = event.currentTarget.dataset.addressId;
       if (addressId && addressId != 0) {
+        try {
+          wx.setStorageSync('addressId', addressId);
+        } catch (e) {
+          console.log(e);
+        }
         wx.navigateBack();
       } else {
         wx.navigateTo({
-          url: '/pages/ucenter/addressAdd/addressAdd?id=' + addressId
+          url: '/pages/ucenter/addressAdd/addressAdd'
         })
       }
-
     } else {
       wx.navigateTo({
         url: '/pages/ucenter/addressAdd/addressAdd?id=' + event.currentTarget.dataset.addressId
@@ -58,14 +56,14 @@ Page({
     }
   },
   deleteAddress(event) {
-    console.log(event.target)
+    console.log(event)
     let that = this;
     wx.showModal({
       title: '',
       content: '确定要删除地址？',
       success: function(res) {
         if (res.confirm) {
-          let addressId = event.target.dataset.addressId;
+          let addressId = event.currentTarget.dataset.addressId;
           util.request(api.AddressDelete, {
             id: addressId
           }, 'POST').then(function(res) {
