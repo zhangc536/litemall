@@ -1,0 +1,6 @@
+litemall:
+  db:
+    backup:
+      cron: "0 0 5,17 * * ?"
+      path: backup
+      keep-days: 7

@@ -16,10 +16,14 @@ spring:
       pool-prepared-statements:  true
       max-pool-prepared-statement-per-connection-size:  20
       validation-query:  SELECT 1 FROM DUAL
-      test-on-borrow:  false
+      validation-query-timeout:  2
+      test-on-borrow:  true
       test-on-return:  false
       test-while-idle:  true
       time-between-eviction-runs-millis:  60000
+      min-evictable-idle-time-millis:  180000
+      max-evictable-idle-time-millis:  900000
+      keep-alive:  true
       filters:  stat,wall
 
 server:

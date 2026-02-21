@@ -153,6 +153,7 @@ public class LitemallUserService {
     public List<LitemallUser> queryRootUsers(int limit) {
         LitemallUserExample example = new LitemallUserExample();
         example.or().andInviterUserIdIsNull().andDeletedEqualTo(false);
+        example.or().andInviterUserIdEqualTo(0).andDeletedEqualTo(false);
         example.setOrderByClause("add_time DESC");
         PageHelper.startPage(1, limit);
         return userMapper.selectByExample(example);

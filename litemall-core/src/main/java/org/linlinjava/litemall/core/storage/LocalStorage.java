@@ -97,7 +97,7 @@ public class LocalStorage implements Storage {
     public void delete(String filename) {
         Path file = load(filename);
         try {
-            Files.delete(file);
+            Files.deleteIfExists(file);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
