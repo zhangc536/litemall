@@ -53,7 +53,7 @@ module.exports = {
   AddressSave: WxApiRoot + 'address/save', //保存收货地址
   AddressDelete: WxApiRoot + 'address/delete', //保存收货地址
 
-  ExpressQuery: WxApiRoot + 'express/query', //物流查询
+  ExpressQuery: WxApiRoot + 'order/express/query', //物流查询
 
   RegionList: WxApiRoot + 'region/list', //获取区域列表
 
