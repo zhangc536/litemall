@@ -314,4 +314,48 @@ public class LitemallOrderService {
         
         return (int) litemallOrderMapper.countByExample(example);
     }
+
+    public List<LitemallOrder> queryOrderList(String orderSn, Short orderStatus, String startTime, String endTime, Integer page, Integer limit) {
+        LitemallOrderExample example = new LitemallOrderExample();
+        example.setOrderByClause(LitemallOrder.Column.addTime.desc());
+        LitemallOrderExample.Criteria criteria = example.or();
+        
+        if (!StringUtils.isEmpty(orderSn)) {
+            criteria.andOrderSnLike("%" + orderSn + "%");
+        }
+        if (orderStatus != null) {
+            criteria.andOrderStatusEqualTo(orderStatus);
+        }
+        if (!StringUtils.isEmpty(startTime)) {
+            criteria.andAddTimeGreaterThanOrEqualTo(LocalDateTime.parse(startTime + "T00:00:00"));
+        }
+        if (!StringUtils.isEmpty(endTime)) {
+            criteria.andAddTimeLessThanOrEqualTo(LocalDateTime.parse(endTime + "T23:59:59"));
+        }
+        criteria.andDeletedEqualTo(false);
+        
+        PageHelper.startPage(page, limit);
+        return litemallOrderMapper.selectByExample(example);
+    }
+
+    public int countOrderList(String orderSn, Short orderStatus, String startTime, String endTime) {
+        LitemallOrderExample example = new LitemallOrderExample();
+        LitemallOrderExample.Criteria criteria = example.or();
+        
+        if (!StringUtils.isEmpty(orderSn)) {
+            criteria.andOrderSnLike("%" + orderSn + "%");
+        }
+        if (orderStatus != null) {
+            criteria.andOrderStatusEqualTo(orderStatus);
+        }
+        if (!StringUtils.isEmpty(startTime)) {
+            criteria.andAddTimeGreaterThanOrEqualTo(LocalDateTime.parse(startTime + "T00:00:00"));
+        }
+        if (!StringUtils.isEmpty(endTime)) {
+            criteria.andAddTimeLessThanOrEqualTo(LocalDateTime.parse(endTime + "T23:59:59"));
+        }
+        criteria.andDeletedEqualTo(false);
+        
+        return (int) litemallOrderMapper.countByExample(example);
+    }
 }
