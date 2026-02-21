@@ -139,7 +139,7 @@ export const asyncRoutes = [
         component: () => import('@/views/user/userTree'),
         name: 'userTree',
         meta: {
-          perms: ['GET /admin/user/list'],
+          perms: ['GET /admin/user/list', 'GET /admin/user/tree', 'GET /admin/user/children'],
           title: '用户树',
           noCache: true
         }
