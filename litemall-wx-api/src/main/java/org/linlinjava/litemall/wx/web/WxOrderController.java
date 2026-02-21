@@ -56,6 +56,26 @@ public class WxOrderController {
         return wxOrderService.detail(userId, orderId);
     }
 
+    @PostMapping("express/query")
+    public Object expressQuery(@LoginUser Integer userId, @RequestBody String body) {
+        return wxOrderService.expressQuery(userId, body);
+    }
+
+    @PostMapping("express/monitor")
+    public Object expressMonitor(@LoginUser Integer userId, @RequestBody String body) {
+        return wxOrderService.expressMonitor(userId, body);
+    }
+
+    @PostMapping("express/map")
+    public Object expressMap(@LoginUser Integer userId, @RequestBody String body) {
+        return wxOrderService.expressMap(userId, body);
+    }
+
+    @PostMapping("express/truck")
+    public Object expressTruck(@LoginUser Integer userId, @RequestBody String body) {
+        return wxOrderService.expressTruck(userId, body);
+    }
+
     /**
      * 提交订单
      *

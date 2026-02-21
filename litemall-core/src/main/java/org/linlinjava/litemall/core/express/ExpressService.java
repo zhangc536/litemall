@@ -1,5 +1,6 @@
 package org.linlinjava.litemall.core.express;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +24,8 @@ public class ExpressService {
 
     private final Log logger = LogFactory.getLog(ExpressService.class);
     //请求url
-    private String ReqURL = "http://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
+    private String ReqURL = "https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
+    private String DistURL = "https://api.kdniao.com/api/dist";
 
     private ExpressProperties properties;
 
@@ -78,6 +80,61 @@ public class ExpressService {
         return null;
     }
 
+    public Map<String, Object> getMonitorInfo(String expCode, String expNo) {
+        if (!properties.isEnable()) {
+            return null;
+        }
+        try {
+            Map<String, Object> request = new HashMap<>();
+            request.put("OrderCode", "");
+            request.put("ShipperCode", expCode);
+            request.put("LogisticCode", expNo);
+            ObjectMapper mapper = new ObjectMapper();
+            String requestData = mapper.writeValueAsString(request);
+            return request("8001", requestData, ReqURL);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public Map<String, Object> getMapInfo(String expCode, String expNo, String senderCityName, String receiverCityName, Integer isReturnCoordinates, Integer isReturnRouteMap) {
+        if (!properties.isEnable()) {
+            return null;
+        }
+        try {
+            Map<String, Object> request = new HashMap<>();
+            request.put("OrderCode", "");
+            request.put("ShipperCode", expCode);
+            request.put("LogisticCode", expNo);
+            request.put("SenderCityName", senderCityName);
+            request.put("ReceiverCityName", receiverCityName);
+            request.put("IsReturnCoordinates", isReturnCoordinates == null ? 1 : isReturnCoordinates);
+            request.put("IsReturnRouteMap", isReturnRouteMap == null ? 1 : isReturnRouteMap);
+            ObjectMapper mapper = new ObjectMapper();
+            String requestData = mapper.writeValueAsString(request);
+            return request("8003", requestData, ReqURL);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public Map<String, Object> requestCustom(String requestType, Map<String, Object> requestData, String requestTarget) {
+        if (!properties.isEnable()) {
+            return null;
+        }
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String requestDataJson = mapper.writeValueAsString(requestData);
+            String url = "dist".equalsIgnoreCase(requestTarget) ? DistURL : ReqURL;
+            return request(requestType, requestDataJson, url);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     /**
      * Json方式 查询订单物流轨迹
      *
@@ -99,6 +156,20 @@ public class ExpressService {
         //根据公司业务处理返回的信息......
 
         return result;
+    }
+
+    private Map<String, Object> request(String requestType, String requestData, String url) throws Exception {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("RequestData", URLEncoder.encode(requestData, "UTF-8"));
+        params.put("EBusinessID", properties.getAppId());
+        params.put("RequestType", requestType);
+        String dataSign = encrypt(requestData, properties.getAppKey(), "UTF-8");
+        params.put("DataSign", URLEncoder.encode(dataSign, "UTF-8"));
+        params.put("DataType", "2");
+        String result = HttpUtil.sendPost(url, params);
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(result, new TypeReference<Map<String, Object>>() {
+        });
     }
 
     /**

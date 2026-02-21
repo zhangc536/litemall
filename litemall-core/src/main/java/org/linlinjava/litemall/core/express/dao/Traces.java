@@ -17,6 +17,12 @@ public class Traces {
     private String AcceptStation;
     @JsonProperty("AcceptTime")
     private String AcceptTime;
+    @JsonProperty("Location")
+    private String Location;
+    @JsonProperty("Action")
+    private String Action;
+    @JsonProperty("Remark")
+    private String Remark;
 
     public String getAcceptStation() {
         return AcceptStation;
@@ -32,6 +38,30 @@ public class Traces {
 
     public void setAcceptTime(String AcceptTime) {
         this.AcceptTime = AcceptTime;
+    }
+
+    public String getLocation() {
+        return Location;
+    }
+
+    public void setLocation(String Location) {
+        this.Location = Location;
+    }
+
+    public String getAction() {
+        return Action;
+    }
+
+    public void setAction(String Action) {
+        this.Action = Action;
+    }
+
+    public String getRemark() {
+        return Remark;
+    }
+
+    public void setRemark(String Remark) {
+        this.Remark = Remark;
     }
 
 }
