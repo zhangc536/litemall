@@ -620,6 +620,8 @@ CREATE TABLE `litemall_order` (
   `end_time` datetime DEFAULT NULL COMMENT '订单关闭时间',
   `add_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `pay_voucher` varchar(512) DEFAULT NULL COMMENT '支付凭证图片URL',
+  `voucher_status` smallint(6) DEFAULT NULL COMMENT '凭证状态: 0-待审核, 1-已通过, 2-已拒绝',
   `deleted` tinyint(1) DEFAULT 0 COMMENT '逻辑删除',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='订单表';
