@@ -37,14 +37,6 @@
         <text class="txt" wx:if="{{isPointGoods}}">{{pointsTotal}}积分</text>
       </view>
     </view>
-    <view class="order-item">
-      <view class="l">
-        <text class="name">运费</text>
-      </view>
-      <view class="r">
-        <text class="txt">￥{{freightPrice}}元</text>
-      </view>
-    </view>
   </view>
 
   <view class="goods-items">
