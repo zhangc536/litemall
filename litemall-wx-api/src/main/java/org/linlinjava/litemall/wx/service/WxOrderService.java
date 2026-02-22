@@ -454,17 +454,26 @@ public class WxOrderService {
             return ResponseUtil.badArgumentValue();
         }
         Boolean usePoints = JacksonUtil.parseBoolean(body, "usePoints");
-        boolean pointOrder = usePoints != null && usePoints;
+        boolean requestPoints = usePoints != null && usePoints;
         int requiredPoints = 0;
-        Integer userPoints = 0;
-        if (pointOrder) {
-            for (LitemallCart checkGoods : checkedGoodsList) {
-                LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(checkGoods.getGoodsId());
-                if (pointGoods == null || pointGoods.getPoints() == null || pointGoods.getPoints() <= 0) {
-                    return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常");
-                }
+        boolean allPointGoods = true;
+        for (LitemallCart checkGoods : checkedGoodsList) {
+            LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(checkGoods.getGoodsId());
+            if (pointGoods == null || pointGoods.getPoints() == null || pointGoods.getPoints() <= 0) {
+                allPointGoods = false;
+            } else {
                 requiredPoints += pointGoods.getPoints() * checkGoods.getNumber();
             }
+        }
+        if (requestPoints && !allPointGoods) {
+            return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常");
+        }
+        boolean pointOrder = requestPoints || allPointGoods;
+        if (!pointOrder) {
+            requiredPoints = 0;
+        }
+        Integer userPoints = 0;
+        if (pointOrder) {
             LitemallUser user = userService.findById(userId);
             if (user != null && user.getPoints() != null) {
                 userPoints = user.getPoints();
