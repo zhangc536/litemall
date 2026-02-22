@@ -195,6 +195,8 @@ public class WxOrderService {
         orderVo.put("pointsPrice", order.getIntegralPrice());
         orderVo.put("freightPrice", order.getFreightPrice());
         orderVo.put("actualPrice", order.getActualPrice());
+        orderVo.put("payVoucher", order.getPayVoucher());
+        orderVo.put("voucherStatus", order.getVoucherStatus());
         orderVo.put("orderStatusText", OrderUtil.orderStatusText(order));
         orderVo.put("handleOption", OrderUtil.build(order));
         orderVo.put("aftersaleStatus", order.getAftersaleStatus());
