@@ -1054,6 +1054,25 @@ public class WxOrderService {
                 user.setPoints(userPoints + points);
                 userService.updateById(user);
             }
+
+            LitemallUser orderUser = userService.findById(userId);
+            Integer inviterUserId = orderUser == null ? null : orderUser.getInviterUserId();
+            if (inviterUserId != null && !inviterUserId.equals(userId) && order.getActualPrice() != null) {
+                int inviterPoints = order.getActualPrice().multiply(new BigDecimal("10")).divide(new BigDecimal(100), 0, BigDecimal.ROUND_FLOOR).intValue();
+                if (inviterPoints > 0) {
+                    LitemallUser inviter = userService.findById(inviterUserId);
+                    if (inviter != null) {
+                        Integer inviterCurrentPoints = inviter.getPoints();
+                        if (inviterCurrentPoints == null) {
+                            inviterCurrentPoints = 0;
+                        }
+                        LitemallUser updateInviter = new LitemallUser();
+                        updateInviter.setId(inviterUserId);
+                        updateInviter.setPoints(inviterCurrentPoints + inviterPoints);
+                        userService.updateById(updateInviter);
+                    }
+                }
+            }
         }
 
         if (order.getActualPrice() != null) {
