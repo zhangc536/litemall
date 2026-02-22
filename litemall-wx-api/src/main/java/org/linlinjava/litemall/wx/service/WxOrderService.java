@@ -454,6 +454,7 @@ public class WxOrderService {
             return ResponseUtil.badArgumentValue();
         }
         Boolean usePoints = JacksonUtil.parseBoolean(body, "usePoints");
+        Integer pointsTotal = JacksonUtil.parseInteger(body, "pointsTotal");
         boolean requestPoints = usePoints != null && usePoints;
         int requiredPoints = 0;
         boolean allPointGoods = true;
@@ -465,10 +466,14 @@ public class WxOrderService {
                 requiredPoints += pointGoods.getPoints() * checkGoods.getNumber();
             }
         }
-        if (requestPoints && !allPointGoods) {
+        boolean clientPointsOrder = requestPoints && pointsTotal != null && pointsTotal > 0;
+        if (requiredPoints == 0 && clientPointsOrder) {
+            requiredPoints = pointsTotal;
+        }
+        boolean pointOrder = allPointGoods || clientPointsOrder;
+        if (requestPoints && !pointOrder) {
             return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常");
         }
-        boolean pointOrder = requestPoints || allPointGoods;
         if (!pointOrder) {
             requiredPoints = 0;
         }

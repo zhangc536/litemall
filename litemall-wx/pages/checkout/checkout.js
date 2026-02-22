@@ -201,7 +201,8 @@ Page({
       message: that.data.message,
       grouponRulesId: that.data.grouponRulesId,
       grouponLinkId: that.data.grouponLinkId,
-      usePoints: that.data.isPointGoods || that.data.pointsTotal > 0
+      usePoints: that.data.isPointGoods || that.data.pointsTotal > 0,
+      pointsTotal: that.data.pointsTotal
     }, 'POST').then(res => {
       if (res.errno === 0) {
         const orderId = res.data.orderId;
