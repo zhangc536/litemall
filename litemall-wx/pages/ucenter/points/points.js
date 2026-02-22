@@ -12,8 +12,11 @@ Page({
     let that = this;
     util.request(api.UserIndex).then(function(res) {
       if (res.errno === 0) {
+        const points = res.data && res.data.points !== undefined && res.data.points !== null
+          ? res.data.points
+          : ((res.data && res.data.userInfo && res.data.userInfo.points) ? res.data.userInfo.points : 0);
         that.setData({
-          points: res.data.userInfo.points || 0
+          points: points
         });
       }
     });
