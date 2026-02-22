@@ -23,9 +23,17 @@ Page({
       orderId: that.data.orderId
     }).then(function(res) {
       if (res.errno === 0) {
+        const orderInfo = res.data.orderInfo || {};
         that.setData({
-          orderInfo: res.data.orderInfo
+          orderInfo: orderInfo
         });
+        const actualPrice = Number(orderInfo.actualPrice || 0);
+        const pointsPrice = Number(orderInfo.pointsPrice || 0);
+        if (actualPrice === 0 || pointsPrice > 0) {
+          wx.redirectTo({
+            url: '/pages/ucenter/order/order'
+          });
+        }
       }
     });
   },
