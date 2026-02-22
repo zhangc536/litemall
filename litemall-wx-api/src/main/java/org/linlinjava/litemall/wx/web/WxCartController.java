@@ -456,6 +456,17 @@ public class WxCartController {
 
         // 根据订单商品总价计算运费，满88则免运费，否则8元；
         boolean pointOrder = usePoints != null && usePoints;
+        int pointsTotal = 0;
+        Map<Integer, Integer> pointsMap = new HashMap<>();
+        for (LitemallCart cart : checkedGoodsList) {
+            LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(cart.getGoodsId());
+            Integer points = pointGoods == null ? 0 : pointGoods.getPoints();
+            if (points == null) {
+                points = 0;
+            }
+            pointsMap.put(cart.getGoodsId(), points);
+            pointsTotal += points * cart.getNumber();
+        }
         BigDecimal freightPrice = new BigDecimal(0.00);
         if (!pointOrder && checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
             freightPrice = SystemConfig.getFreight();
@@ -465,18 +476,7 @@ public class WxCartController {
         BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).max(new BigDecimal(0.00));
 
         BigDecimal actualPrice = orderTotalPrice;
-        int pointsTotal = 0;
-        Map<Integer, Integer> pointsMap = new HashMap<>();
         if (pointOrder) {
-            for (LitemallCart cart : checkedGoodsList) {
-                LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(cart.getGoodsId());
-                Integer points = pointGoods == null ? 0 : pointGoods.getPoints();
-                if (points == null) {
-                    points = 0;
-                }
-                pointsMap.put(cart.getGoodsId(), points);
-                pointsTotal += points * cart.getNumber();
-            }
             actualPrice = new BigDecimal(0.00);
             orderTotalPrice = new BigDecimal(0.00);
             checkedGoodsPrice = new BigDecimal(0.00);

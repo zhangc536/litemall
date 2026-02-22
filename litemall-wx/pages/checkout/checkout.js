@@ -13,6 +13,7 @@ Page({
     orderTotalPrice: 0.00,
     actualPrice: 0.00,
     pointsTotal: 0,
+    pointGoodsPoints: 0,
     cartId: 0,
     addressId: 0,
     message: '',
@@ -29,12 +30,14 @@ Page({
       const grouponRulesId = options.grouponRulesId ? parseInt(options.grouponRulesId) : 0;
       const grouponLinkId = options.grouponLinkId ? parseInt(options.grouponLinkId) : 0;
       const isPointGoods = options.point == '1';
+      const pointGoodsPoints = options.points ? parseInt(options.points) : 0;
       this.setData({
         cartId: isNaN(cartId) ? 0 : cartId,
         addressId: isNaN(addressId) ? 0 : addressId,
         grouponRulesId: isNaN(grouponRulesId) ? 0 : grouponRulesId,
         grouponLinkId: isNaN(grouponLinkId) ? 0 : grouponLinkId,
-        isPointGoods: isPointGoods
+        isPointGoods: isPointGoods,
+        pointGoodsPoints: isNaN(pointGoodsPoints) ? 0 : pointGoodsPoints
       });
       try {
         wx.setStorageSync('cartId', this.data.cartId);
@@ -56,12 +59,19 @@ Page({
     }).then(function(res) {
       if (res.errno === 0) {
         let checkedGoodsList = res.data.checkedGoodsList || [];
+        let pointsTotal = res.data.pointsTotal || 0;
         if (that.data.isPointGoods) {
           const pointsMap = res.data.pointsMap || {};
           checkedGoodsList = checkedGoodsList.map(item => {
-            const pointsRequired = pointsMap[item.goodsId] || 0;
+            let pointsRequired = pointsMap[item.goodsId] || 0;
+            if (pointsRequired <= 0 && that.data.pointGoodsPoints > 0) {
+              pointsRequired = that.data.pointGoodsPoints;
+            }
             return Object.assign({}, item, { pointsRequired: pointsRequired });
           });
+          if (pointsTotal <= 0 && that.data.pointGoodsPoints > 0) {
+            pointsTotal = checkedGoodsList.reduce((sum, item) => sum + (item.pointsRequired || 0) * item.number, 0);
+          }
         }
         that.setData({
           checkedGoodsList: checkedGoodsList,
@@ -73,7 +83,7 @@ Page({
           orderTotalPrice: res.data.orderTotalPrice,
           addressId: res.data.addressId,
           grouponRulesId: res.data.grouponRulesId,
-          pointsTotal: res.data.pointsTotal || 0
+          pointsTotal: pointsTotal
         });
       }
       wx.hideLoading();
