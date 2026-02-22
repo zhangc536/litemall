@@ -33,7 +33,8 @@
         <text class="name">商品合计</text>
       </view>
       <view class="r">
-        <text class="txt">￥{{goodsTotalPrice}}元</text>
+        <text class="txt" wx:if="{{!isPointGoods}}">￥{{goodsTotalPrice}}元</text>
+        <text class="txt" wx:if="{{isPointGoods}}">{{pointsTotal}}积分</text>
       </view>
     </view>
     <view class="order-item">
@@ -57,13 +58,15 @@
           <text class="number">x{{item.number}}</text>
         </view>
         <view class="m">{{item.specifications}}</view>
-        <view class="b">￥{{item.price}}</view>
+        <view class="b" wx:if="{{!isPointGoods}}">￥{{item.price}}</view>
+        <view class="b" wx:if="{{isPointGoods}}">{{item.pointsRequired}}积分</view>
       </view>
     </view>
   </view>
 
   <view class="order-total">
-    <view class="l">实付：￥{{actualPrice}}</view>
+    <view class="l" wx:if="{{!isPointGoods}}">实付：￥{{actualPrice}}</view>
+    <view class="l" wx:if="{{isPointGoods}}">实付：{{pointsTotal}}积分</view>
     <view class="r" bindtap="submitOrder">去付款</view>
   </view>
 </view>

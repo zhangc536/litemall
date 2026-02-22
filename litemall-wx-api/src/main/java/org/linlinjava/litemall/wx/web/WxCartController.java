@@ -41,6 +41,8 @@ public class WxCartController {
     private LitemallGrouponRulesService grouponRulesService;
     @Autowired
     private LitemallUserService userService;
+    @Autowired
+    private LitemallPointGoodsService pointGoodsService;
 
     /**
      * 用户购物车信息
@@ -400,7 +402,7 @@ public class WxCartController {
      * @return 购物车操作结果
      */
     @GetMapping("checkout")
-    public Object checkout(@LoginUser Integer userId, Integer cartId, Integer addressId, Integer grouponRulesId) {
+    public Object checkout(@LoginUser Integer userId, Integer cartId, Integer addressId, Integer grouponRulesId, Boolean usePoints) {
         if (userId == null) {
             return ResponseUtil.unlogin();
         }
@@ -453,8 +455,9 @@ public class WxCartController {
         }
 
         // 根据订单商品总价计算运费，满88则免运费，否则8元；
+        boolean pointOrder = usePoints != null && usePoints;
         BigDecimal freightPrice = new BigDecimal(0.00);
-        if (checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
+        if (!pointOrder && checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
             freightPrice = SystemConfig.getFreight();
         }
 
@@ -462,6 +465,22 @@ public class WxCartController {
         BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).max(new BigDecimal(0.00));
 
         BigDecimal actualPrice = orderTotalPrice;
+        int pointsTotal = 0;
+        Map<Integer, Integer> pointsMap = new HashMap<>();
+        if (pointOrder) {
+            for (LitemallCart cart : checkedGoodsList) {
+                LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(cart.getGoodsId());
+                Integer points = pointGoods == null ? 0 : pointGoods.getPoints();
+                if (points == null) {
+                    points = 0;
+                }
+                pointsMap.put(cart.getGoodsId(), points);
+                pointsTotal += points * cart.getNumber();
+            }
+            actualPrice = new BigDecimal(0.00);
+            orderTotalPrice = new BigDecimal(0.00);
+            checkedGoodsPrice = new BigDecimal(0.00);
+        }
 
         Map<String, Object> data = new HashMap<>();
         data.put("addressId", addressId);
@@ -474,6 +493,8 @@ public class WxCartController {
         data.put("orderTotalPrice", orderTotalPrice);
         data.put("actualPrice", actualPrice);
         data.put("checkedGoodsList", checkedGoodsList);
+        data.put("pointsTotal", pointsTotal);
+        data.put("pointsMap", pointsMap);
         return ResponseUtil.ok(data);
     }
 }

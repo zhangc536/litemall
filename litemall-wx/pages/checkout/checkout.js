@@ -12,6 +12,7 @@ Page({
     grouponPrice: 0.00,
     orderTotalPrice: 0.00,
     actualPrice: 0.00,
+    pointsTotal: 0,
     cartId: 0,
     addressId: 0,
     message: '',
@@ -50,11 +51,20 @@ Page({
     util.request(api.CartCheckout, {
       cartId: that.data.cartId,
       addressId: that.data.addressId,
-      grouponRulesId: that.data.grouponRulesId
+      grouponRulesId: that.data.grouponRulesId,
+      usePoints: that.data.isPointGoods
     }).then(function(res) {
       if (res.errno === 0) {
+        let checkedGoodsList = res.data.checkedGoodsList || [];
+        if (that.data.isPointGoods) {
+          const pointsMap = res.data.pointsMap || {};
+          checkedGoodsList = checkedGoodsList.map(item => {
+            const pointsRequired = pointsMap[item.goodsId] || 0;
+            return Object.assign({}, item, { pointsRequired: pointsRequired });
+          });
+        }
         that.setData({
-          checkedGoodsList: res.data.checkedGoodsList,
+          checkedGoodsList: checkedGoodsList,
           checkedAddress: res.data.checkedAddress,
           actualPrice: res.data.actualPrice,
           grouponPrice: res.data.grouponPrice,
@@ -63,6 +73,7 @@ Page({
           orderTotalPrice: res.data.orderTotalPrice,
           addressId: res.data.addressId,
           grouponRulesId: res.data.grouponRulesId,
+          pointsTotal: res.data.pointsTotal || 0
         });
       }
       wx.hideLoading();
