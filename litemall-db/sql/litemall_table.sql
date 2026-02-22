@@ -809,6 +809,7 @@ CREATE TABLE `litemall_user` (
   `last_login_time` datetime DEFAULT NULL COMMENT '最近一次登录时间',
   `last_login_ip` varchar(63) NOT NULL DEFAULT '' COMMENT '最近一次登录IP地址',
   `user_level` tinyint(3) DEFAULT 0 COMMENT '0 普通用户，1 VIP用户，2 高级VIP用户',
+  `experience` int(11) NOT NULL DEFAULT 0 COMMENT '经验值',
   `points` int(11) NOT NULL DEFAULT 0 COMMENT '积分',
   `nickname` varchar(63) NOT NULL DEFAULT '' COMMENT '用户昵称或网络名称',
   `mobile` varchar(20) NOT NULL DEFAULT '' COMMENT '用户手机号码',

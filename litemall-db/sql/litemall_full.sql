@@ -7282,6 +7282,7 @@ CREATE TABLE `litemall_user` (
   `last_login_time` datetime DEFAULT NULL COMMENT '最近一次登录时间',
   `last_login_ip` varchar(63) NOT NULL DEFAULT '' COMMENT '最近一次登录IP地址',
   `user_level` tinyint(3) DEFAULT 0 COMMENT '0 普通用户，1 VIP用户，2 高级VIP用户',
+  `experience` int(11) NOT NULL DEFAULT 0 COMMENT '经验值',
   `points` int(11) NOT NULL DEFAULT 0 COMMENT '积分',
   `nickname` varchar(63) NOT NULL DEFAULT '' COMMENT '用户昵称或网络名称',
   `mobile` varchar(20) NOT NULL DEFAULT '' COMMENT '用户手机号码',
@@ -7305,7 +7306,7 @@ LOCK TABLES `litemall_user` WRITE;
 /*!40000 ALTER TABLE `litemall_user` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `litemall_user` VALUES
-(1,'user123','$2a$10$lTu9qi0hr19OC800Db.eludFr0AXuJUSrMHi/iPYhKRlPFeqJxlye','2019-04-20 22:17:43','0:0:0:0:0:0:0:1',0,0,'user123','','','','',0,'2019-04-20 22:17:43','2019-04-20 22:17:43',0);
+(1,'user123','$2a$10$lTu9qi0hr19OC800Db.eludFr0AXuJUSrMHi/iPYhKRlPFeqJxlye','2019-04-20 22:17:43','0:0:0:0:0:0:0:1',0,0,0,'user123','','','','',0,'2019-04-20 22:17:43','2019-04-20 22:17:43',0);
 /*!40000 ALTER TABLE `litemall_user` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
