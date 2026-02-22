@@ -55,7 +55,7 @@ Page({
       cartId: that.data.cartId,
       addressId: that.data.addressId,
       grouponRulesId: that.data.grouponRulesId,
-      usePoints: that.data.isPointGoods
+      usePoints: that.data.isPointGoods || that.data.pointsTotal > 0
     }).then(function(res) {
       if (res.errno === 0) {
         let checkedGoodsList = res.data.checkedGoodsList || [];
@@ -73,6 +73,7 @@ Page({
             pointsTotal = checkedGoodsList.reduce((sum, item) => sum + (item.pointsRequired || 0) * item.number, 0);
           }
         }
+        const isPointOrder = that.data.isPointGoods || pointsTotal > 0;
         that.setData({
           checkedGoodsList: checkedGoodsList,
           checkedAddress: res.data.checkedAddress,
@@ -83,7 +84,8 @@ Page({
           orderTotalPrice: res.data.orderTotalPrice,
           addressId: res.data.addressId,
           grouponRulesId: res.data.grouponRulesId,
-          pointsTotal: pointsTotal
+          pointsTotal: pointsTotal,
+          isPointGoods: isPointOrder
         });
       }
       wx.hideLoading();
@@ -199,7 +201,7 @@ Page({
       message: that.data.message,
       grouponRulesId: that.data.grouponRulesId,
       grouponLinkId: that.data.grouponLinkId,
-      usePoints: that.data.isPointGoods
+      usePoints: that.data.isPointGoods || that.data.pointsTotal > 0
     }, 'POST').then(res => {
       if (res.errno === 0) {
         const orderId = res.data.orderId;
