@@ -609,8 +609,9 @@ Page({
                 wx.setStorageSync('cartId', res.data);
                 wx.setStorageSync('grouponRulesId', checkedGroupon.id);
                 wx.setStorageSync('grouponLinkId', that.data.grouponLink.id);
+                const pointParam = that.data.isPointGoods ? '&point=1' : '';
                 wx.navigateTo({
-                  url: '/pages/checkout/checkout?cartId=' + res.data + '&grouponRulesId=' + checkedGroupon.id + '&grouponLinkId=' + (that.data.grouponLink.id || 0)
+                  url: '/pages/checkout/checkout?cartId=' + res.data + '&grouponRulesId=' + checkedGroupon.id + '&grouponLinkId=' + (that.data.grouponLink.id || 0) + pointParam
                 })
               } catch (e) {}
 

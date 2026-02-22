@@ -47,8 +47,9 @@
       </el-table-column>
       <el-table-column align="center" label="支付凭证" width="100">
         <template slot-scope="scope">
+          <span v-if="Number(scope.row.actualPrice) === 0 && Number(scope.row.integralPrice) > 0">积分兑换</span>
           <el-image
-            v-if="scope.row.payVoucher"
+            v-else-if="scope.row.payVoucher"
             :src="scope.row.payVoucher"
             :preview-src-list="[scope.row.payVoucher]"
             style="width: 60px; height: 60px; cursor: pointer;"

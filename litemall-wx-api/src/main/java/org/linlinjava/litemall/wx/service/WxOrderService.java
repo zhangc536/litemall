@@ -103,6 +103,8 @@ public class WxOrderService {
     private TaskService taskService;
     @Autowired
     private LitemallAftersaleService aftersaleService;
+    @Autowired
+    private LitemallPointGoodsService pointGoodsService;
 
     /**
      * 订单列表
@@ -451,6 +453,26 @@ public class WxOrderService {
         if (checkedGoodsList.size() == 0) {
             return ResponseUtil.badArgumentValue();
         }
+        Boolean usePoints = JacksonUtil.parseBoolean(body, "usePoints");
+        boolean pointOrder = usePoints != null && usePoints;
+        int requiredPoints = 0;
+        Integer userPoints = 0;
+        if (pointOrder) {
+            for (LitemallCart checkGoods : checkedGoodsList) {
+                LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(checkGoods.getGoodsId());
+                if (pointGoods == null || pointGoods.getPoints() == null || pointGoods.getPoints() <= 0) {
+                    return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常");
+                }
+                requiredPoints += pointGoods.getPoints() * checkGoods.getNumber();
+            }
+            LitemallUser user = userService.findById(userId);
+            if (user != null && user.getPoints() != null) {
+                userPoints = user.getPoints();
+            }
+            if (userPoints < requiredPoints) {
+                return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分不足");
+            }
+        }
         BigDecimal checkedGoodsPrice = new BigDecimal(0);
         for (LitemallCart checkGoods : checkedGoodsList) {
             //  只有当团购规格商品ID符合才进行团购优惠
@@ -490,6 +512,10 @@ public class WxOrderService {
         order.setIntegralPrice(new BigDecimal(0));
         order.setOrderPrice(orderTotalPrice);
         order.setActualPrice(actualPrice);
+        if (pointOrder) {
+            order.setIntegralPrice(new BigDecimal(requiredPoints));
+            order.setActualPrice(new BigDecimal("0.00"));
+        }
 
         // 有团购
         if (grouponRules != null) {
@@ -501,6 +527,12 @@ public class WxOrderService {
         // 添加订单表项
         orderService.add(order);
         orderId = order.getId();
+        if (pointOrder && requiredPoints > 0) {
+            LitemallUser updateUser = new LitemallUser();
+            updateUser.setId(userId);
+            updateUser.setPoints(userPoints - requiredPoints);
+            userService.updateById(updateUser);
+        }
 
         // 添加订单商品表项
         for (LitemallCart cartGoods : checkedGoodsList) {

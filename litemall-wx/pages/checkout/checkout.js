@@ -17,7 +17,8 @@ Page({
     message: '',
     grouponLinkId: 0,
     grouponRulesId: 0,
-    hasIdCard: false
+    hasIdCard: false,
+    isPointGoods: false
   },
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
@@ -26,11 +27,13 @@ Page({
       const addressId = options.addressId ? parseInt(options.addressId) : 0;
       const grouponRulesId = options.grouponRulesId ? parseInt(options.grouponRulesId) : 0;
       const grouponLinkId = options.grouponLinkId ? parseInt(options.grouponLinkId) : 0;
+      const isPointGoods = options.point == '1';
       this.setData({
         cartId: isNaN(cartId) ? 0 : cartId,
         addressId: isNaN(addressId) ? 0 : addressId,
         grouponRulesId: isNaN(grouponRulesId) ? 0 : grouponRulesId,
-        grouponLinkId: isNaN(grouponLinkId) ? 0 : grouponLinkId
+        grouponLinkId: isNaN(grouponLinkId) ? 0 : grouponLinkId,
+        isPointGoods: isPointGoods
       });
       try {
         wx.setStorageSync('cartId', this.data.cartId);
@@ -174,13 +177,20 @@ Page({
       addressId: that.data.addressId,
       message: that.data.message,
       grouponRulesId: that.data.grouponRulesId,
-      grouponLinkId: that.data.grouponLinkId
+      grouponLinkId: that.data.grouponLinkId,
+      usePoints: that.data.isPointGoods
     }, 'POST').then(res => {
       if (res.errno === 0) {
         const orderId = res.data.orderId;
-        wx.redirectTo({
-          url: '/pages/payVoucher/payVoucher?orderId=' + orderId
-        });
+        if (res.data.payed) {
+          wx.redirectTo({
+            url: '/pages/ucenter/order/order'
+          });
+        } else {
+          wx.redirectTo({
+            url: '/pages/payVoucher/payVoucher?orderId=' + orderId
+          });
+        }
       } else {
         util.showErrorToast(res.errmsg);
       }
