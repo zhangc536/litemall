@@ -5,12 +5,14 @@ var app = getApp();
 Page({
   data: {
     status: false,
-    orderId: 0
+    orderId: 0,
+    isPointOrder: false
   },
   onLoad: function(options) {
     this.setData({
       orderId: options.orderId,
-      status: options.status === '1' ? true : false
+      status: options.status === '1' ? true : false,
+      isPointOrder: options.isPointOrder === '1' ? true : false
     })
   },
   onReady: function() {

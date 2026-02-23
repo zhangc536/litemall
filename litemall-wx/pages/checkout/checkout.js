@@ -208,9 +208,13 @@ Page({
         const orderId = res.data.orderId;
         const payed = res.data.payed;
         const isPointOrder = that.data.isPointGoods || that.data.pointsTotal > 0;
-        if (payed || isPointOrder) {
+        if (payed && !isPointOrder) {
           wx.redirectTo({
             url: '/pages/payResult/payResult?status=1&orderId=' + orderId
+          });
+        } else if (isPointOrder) {
+          wx.redirectTo({
+            url: '/pages/payResult/payResult?status=1&orderId=' + orderId + '&isPointOrder=1'
           });
         } else {
           wx.redirectTo({

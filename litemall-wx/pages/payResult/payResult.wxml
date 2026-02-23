@@ -1,7 +1,12 @@
 <view class="container">
   <view class="pay-result">
     <view class="success" wx:if="{{status}}">
-      <view class="msg">付款成功</view>
+      <view class="msg" wx:if="{{isPointOrder}}">积分兑换成功</view>
+      <view class="msg" wx:else>付款成功</view>
+      <view class="tips" wx:if="{{isPointOrder}}">
+        <view class="p">您的积分兑换订单已提交</view>
+        <view class="p">等待管理员审核后发货</view>
+      </view>
       <view class="btns">
         <navigator class="btn" url="/pages/ucenter/order/order" open-type="redirect">查看订单</navigator>
         <navigator class="btn" url="/pages/index/index" open-type="switchTab">继续逛</navigator>

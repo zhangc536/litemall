@@ -16,7 +16,8 @@
       <view class="r">
         <view class="btn active" bindtap="cancelOrder" wx:if="{{handleOption.cancel}}">取消订单</view>
         <view class="btn active" bindtap="payOrder" wx:if="{{handleOption.pay && !orderInfo.payVoucher && orderInfo.actualPrice > 0}}">上传凭证</view>
-        <view class="btn active" wx:if="{{handleOption.pay && orderInfo.payVoucher && orderInfo.actualPrice > 0}}">已上传</view>
+        <view class="btn" wx:if="{{handleOption.pay && orderInfo.payVoucher && orderInfo.payVoucher.startsWith('积分兑换')}}">审核中</view>
+        <view class="btn active" wx:if="{{handleOption.pay && orderInfo.payVoucher && !orderInfo.payVoucher.startsWith('积分兑换') && orderInfo.actualPrice > 0}}">已上传</view>
         <view class="btn active" bindtap="confirmOrder" wx:if="{{handleOption.confirm}}">确认收货</view>
         <view class="btn active" bindtap="deleteOrder" wx:if="{{handleOption.delete}}">删除订单</view>
         <view class="btn active" bindtap="refundOrder" wx:if="{{handleOption.refund}}">申请退款</view>
@@ -69,10 +70,14 @@
           <text class="label">订单运费：</text>
           <text class="txt">￥{{orderInfo.freightPrice}}元</text>
         </view>
-        <view class="t">
+        <view class="t" wx:if="{{orderInfo.pointsPrice > 0}}">
+          <text class="label">消耗积分：</text>
+          <text class="txt">{{orderInfo.pointsPrice}}</text>
+        </view>
+        <view class="t" wx:else>
           <text class="label">订单实付：</text>
           <text class="txt">￥{{orderInfo.actualPrice}}元</text>
-        </view>        
+        </view>
       </view>
     </view>
   </view>

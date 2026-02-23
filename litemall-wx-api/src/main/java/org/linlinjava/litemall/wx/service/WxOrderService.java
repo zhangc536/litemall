@@ -134,6 +134,7 @@ public class WxOrderService {
             orderVo.put("id", o.getId());
             orderVo.put("orderSn", o.getOrderSn());
             orderVo.put("actualPrice", o.getActualPrice());
+            orderVo.put("integralPrice", o.getIntegralPrice());
             orderVo.put("orderStatusText", OrderUtil.orderStatusText(o));
             orderVo.put("handleOption", OrderUtil.build(o));
             orderVo.put("aftersaleStatus", o.getAftersaleStatus());
@@ -613,9 +614,17 @@ public class WxOrderService {
         }
 
         // NOTE: 建议开发者从业务场景核实下面代码，防止用户利用业务BUG使订单跳过支付环节。
-        // 如果订单实际支付费用是0，则直接跳过支付变成待发货状态
+        // 积分订单：设置凭证状态为待审核，等待管理员审核
+        // 普通订单：如果实际支付费用是0，则直接跳过支付变成待发货状态
         boolean payed = false;
-        if (order.getActualPrice().compareTo(new BigDecimal("0.00")) <= 0) {
+        if (pointOrder) {
+            // 积分订单：设置凭证状态为待审核，订单保持待付款状态
+            LitemallOrder o = new LitemallOrder();
+            o.setId(orderId);
+            o.setPayVoucher("积分兑换：" + requiredPoints + "积分");
+            o.setVoucherStatus((short) 0);
+            orderService.updateSelective(o);
+        } else if (order.getActualPrice().compareTo(new BigDecimal("0.00")) <= 0) {
             payed = true;
 
             LitemallOrder o = new LitemallOrder();

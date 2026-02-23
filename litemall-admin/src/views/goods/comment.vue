@@ -14,15 +14,23 @@
       <el-table-column align="center" label="订单ID" prop="id" width="80" />
       <el-table-column align="center" label="订单编号" prop="orderSn" width="180" />
       <el-table-column align="center" label="用户ID" prop="userId" width="80" />
-      <el-table-column align="center" label="订单金额" prop="actualPrice" width="100">
+      <el-table-column align="center" label="订单类型" width="100">
         <template slot-scope="scope">
-          <span style="color: #e64340;">￥{{ scope.row.actualPrice }}</span>
+          <el-tag v-if="scope.row.payVoucher && scope.row.payVoucher.startsWith('积分兑换')" type="success">积分兑换</el-tag>
+          <el-tag v-else type="primary">普通订单</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="订单金额/积分" width="120">
+        <template slot-scope="scope">
+          <span v-if="scope.row.payVoucher && scope.row.payVoucher.startsWith('积分兑换')" style="color: #67c23a;">{{ scope.row.integralPrice }}积分</span>
+          <span v-else style="color: #e64340;">￥{{ scope.row.actualPrice }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="支付凭证" width="120">
         <template slot-scope="scope">
+          <span v-if="scope.row.payVoucher && scope.row.payVoucher.startsWith('积分兑换')" style="color: #67c23a;">{{ scope.row.payVoucher }}</span>
           <el-image
-            v-if="scope.row.payVoucher"
+            v-else-if="scope.row.payVoucher"
             :src="scope.row.payVoucher"
             :preview-src-list="[scope.row.payVoucher]"
             style="width: 80px; height: 80px; cursor: pointer;"
