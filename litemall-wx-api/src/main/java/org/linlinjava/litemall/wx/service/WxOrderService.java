@@ -615,7 +615,7 @@ public class WxOrderService {
         // NOTE: 建议开发者从业务场景核实下面代码，防止用户利用业务BUG使订单跳过支付环节。
         // 如果订单实际支付费用是0，则直接跳过支付变成待发货状态
         boolean payed = false;
-        if (order.getActualPrice().equals(new BigDecimal("0.00"))) {
+        if (order.getActualPrice().compareTo(new BigDecimal("0.00")) <= 0) {
             payed = true;
 
             LitemallOrder o = new LitemallOrder();
