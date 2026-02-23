@@ -55,7 +55,7 @@ Page({
       cartId: that.data.cartId,
       addressId: that.data.addressId,
       grouponRulesId: that.data.grouponRulesId,
-      usePoints: that.data.isPointGoods || that.data.pointsTotal > 0
+      usePoints: that.data.isPointGoods
     }).then(function(res) {
       if (res.errno === 0) {
         let checkedGoodsList = res.data.checkedGoodsList || [];
@@ -70,6 +70,9 @@ Page({
             return Object.assign({}, item, { pointsRequired: pointsRequired });
           });
           if (pointsTotal <= 0 && that.data.pointGoodsPoints > 0) {
+            pointsTotal = that.data.pointGoodsPoints * checkedGoodsList.reduce((sum, item) => sum + item.number, 0);
+          }
+          if (pointsTotal <= 0) {
             pointsTotal = checkedGoodsList.reduce((sum, item) => sum + (item.pointsRequired || 0) * item.number, 0);
           }
         }
@@ -195,19 +198,24 @@ Page({
   },
   doSubmitOrder: function() {
     let that = this;
+    let pointsTotal = that.data.pointsTotal;
+    if (that.data.isPointGoods && pointsTotal <= 0 && that.data.pointGoodsPoints > 0) {
+      const totalNumber = that.data.checkedGoodsList.reduce((sum, item) => sum + item.number, 0);
+      pointsTotal = that.data.pointGoodsPoints * totalNumber;
+    }
     util.request(api.OrderSubmit, {
       cartId: that.data.cartId,
       addressId: that.data.addressId,
       message: that.data.message,
       grouponRulesId: that.data.grouponRulesId,
       grouponLinkId: that.data.grouponLinkId,
-      usePoints: that.data.isPointGoods || that.data.pointsTotal > 0,
-      pointsTotal: that.data.pointsTotal
+      usePoints: that.data.isPointGoods,
+      pointsTotal: pointsTotal
     }, 'POST').then(res => {
       if (res.errno === 0) {
         const orderId = res.data.orderId;
         const payed = res.data.payed;
-        const isPointOrder = that.data.isPointGoods || that.data.pointsTotal > 0;
+        const isPointOrder = that.data.isPointGoods || pointsTotal > 0;
         if (payed && !isPointOrder) {
           wx.redirectTo({
             url: '/pages/payResult/payResult?status=1&orderId=' + orderId

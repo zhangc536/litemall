@@ -471,9 +471,13 @@ public class WxOrderService {
         if (requiredPoints == 0 && clientPointsOrder) {
             requiredPoints = pointsTotal;
         }
-        boolean pointOrder = allPointGoods || clientPointsOrder;
-        if (requestPoints && !pointOrder) {
-            return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常");
+        boolean pointOrder = requestPoints || allPointGoods;
+        if (requestPoints && requiredPoints <= 0) {
+            if (pointsTotal != null && pointsTotal > 0) {
+                requiredPoints = pointsTotal;
+            } else {
+                return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常，请确认商品是否为积分商品");
+            }
         }
         if (!pointOrder) {
             requiredPoints = 0;
