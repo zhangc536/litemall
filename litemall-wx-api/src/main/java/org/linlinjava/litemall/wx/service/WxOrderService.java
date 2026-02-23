@@ -456,7 +456,9 @@ public class WxOrderService {
         }
         Boolean usePoints = JacksonUtil.parseBoolean(body, "usePoints");
         Integer pointsTotal = JacksonUtil.parseInteger(body, "pointsTotal");
+        logger.info("Order submit - usePoints: " + usePoints + ", pointsTotal: " + pointsTotal);
         boolean requestPoints = usePoints != null && usePoints;
+        logger.info("Order submit - requestPoints: " + requestPoints);
         int requiredPoints = 0;
         boolean allPointGoods = true;
         for (LitemallCart checkGoods : checkedGoodsList) {
