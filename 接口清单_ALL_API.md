@@ -77,6 +77,7 @@
   - GET /admin/order/voucher/list
   - POST /admin/order/audit
   - POST /admin/order/ship
+  - 积分订单说明：payVoucher 以“积分兑换”开头，voucherStatus=0 待审核/1 通过/2 拒绝，审核通过后订单状态更新为 201
 
 > 说明：旧的评论管理接口仍存在但前端未使用  
 > - GET /admin/comment/list  
@@ -101,6 +102,7 @@
   - POST /wx/order/delete
   - GET /wx/order/goods
   - POST /wx/order/comment
+  - 积分订单说明：提交后生成 payVoucher“积分兑换”，可信用户等级>=4 自动通过审核并置为已付款，否则为待审核
 - 对象存储（用户通用上传/下载）
   - POST /wx/storage/upload
   - GET /wx/storage/fetch/{key}

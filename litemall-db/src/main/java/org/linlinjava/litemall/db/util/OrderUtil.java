@@ -34,6 +34,17 @@ public class OrderUtil {
 
     public static String orderStatusText(LitemallOrder order) {
         int status = order.getOrderStatus().intValue();
+        if (isPointOrder(order)) {
+            Short voucherStatus = order.getVoucherStatus();
+            if (voucherStatus != null) {
+                if (voucherStatus == 0) {
+                    return "待审核";
+                }
+                if (voucherStatus == 2) {
+                    return "已拒绝";
+                }
+            }
+        }
 
         if (status == 101) {
             return "未付款";
@@ -76,6 +87,20 @@ public class OrderUtil {
         }
 
         throw new IllegalStateException("orderStatus不支持");
+    }
+
+    private static boolean isPointOrder(LitemallOrder order) {
+        if (order == null) {
+            return false;
+        }
+        if (order.getPayVoucher() != null && order.getPayVoucher().startsWith("积分兑换")) {
+            return true;
+        }
+        if (order.getIntegralPrice() != null && order.getActualPrice() != null) {
+            return order.getIntegralPrice().compareTo(java.math.BigDecimal.ZERO) > 0
+                    && order.getActualPrice().compareTo(java.math.BigDecimal.ZERO) == 0;
+        }
+        return false;
     }
 
 

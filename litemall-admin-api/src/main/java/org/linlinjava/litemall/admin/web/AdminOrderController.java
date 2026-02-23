@@ -97,6 +97,7 @@ public class AdminOrderController {
             if ("APPROVED".equalsIgnoreCase(status)) {
                 order.setOrderStatus(OrderUtil.STATUS_PAY);
                 order.setVoucherStatus((short) 1);
+                order.setPayTime(LocalDateTime.now());
             } else if ("REJECTED".equalsIgnoreCase(status)) {
                 order.setVoucherStatus((short) 2);
             } else {

@@ -485,8 +485,9 @@ public class WxOrderService {
             requiredPoints = 0;
         }
         Integer userPoints = 0;
+        LitemallUser user = null;
         if (pointOrder) {
-            LitemallUser user = userService.findById(userId);
+            user = userService.findById(userId);
             if (user != null && user.getPoints() != null) {
                 userPoints = user.getPoints();
             }
@@ -624,11 +625,17 @@ public class WxOrderService {
         // 普通订单：如果实际支付费用是0，则直接跳过支付变成待发货状态
         boolean payed = false;
         if (pointOrder) {
-            // 积分订单：设置凭证状态为待审核，订单保持待付款状态
+            boolean autoApproved = isTrustedPointUser(user);
             LitemallOrder o = new LitemallOrder();
             o.setId(orderId);
             o.setPayVoucher("积分兑换：" + requiredPoints + "积分");
-            o.setVoucherStatus((short) 0);
+            if (autoApproved) {
+                o.setOrderStatus(OrderUtil.STATUS_PAY);
+                o.setVoucherStatus((short) 1);
+                o.setPayTime(LocalDateTime.now());
+            } else {
+                o.setVoucherStatus((short) 0);
+            }
             orderService.updateSelective(o);
         } else if (order.getActualPrice().compareTo(new BigDecimal("0.00")) <= 0) {
             payed = true;
@@ -1365,5 +1372,21 @@ public class WxOrderService {
             logger.error("上传支付凭证失败", e);
             return ResponseUtil.fail(500, "上传失败");
         }
+    }
+
+    private boolean isTrustedPointUser(LitemallUser user) {
+        if (user == null) {
+            return false;
+        }
+        Byte userLevel = user.getUserLevel();
+        if (userLevel != null && userLevel >= 4) {
+            return true;
+        }
+        Integer experience = user.getExperience();
+        if (experience == null) {
+            return false;
+        }
+        LitemallUserLevel level = userLevelService.findByExperience(experience);
+        return level != null && level.getId() != null && level.getId() >= 4;
     }
 }

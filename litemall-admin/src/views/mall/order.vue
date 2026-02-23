@@ -29,14 +29,17 @@
       <el-table-column align="center" label="用户ID" prop="userId" width="80" />
       <el-table-column align="center" label="收货人" prop="consignee" width="100" />
       <el-table-column align="center" label="手机号" prop="mobile" width="120" />
-      <el-table-column align="center" label="订单金额" width="100">
+      <el-table-column align="center" label="订单金额/积分" width="120">
         <template slot-scope="scope">
-          <span style="color: #e64340;">￥{{ scope.row.actualPrice }}</span>
+          <span v-if="isPointOrder(scope.row)" style="color: #67c23a;">{{ scope.row.integralPrice }}积分</span>
+          <span v-else style="color: #e64340;">￥{{ scope.row.actualPrice }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="订单状态" width="100">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.orderStatus === 101" type="warning">待付款</el-tag>
+          <el-tag v-if="isPointOrder(scope.row) && scope.row.voucherStatus === 0" type="warning">待审核</el-tag>
+          <el-tag v-else-if="isPointOrder(scope.row) && scope.row.voucherStatus === 2" type="danger">已拒绝</el-tag>
+          <el-tag v-else-if="scope.row.orderStatus === 101" type="warning">待付款</el-tag>
           <el-tag v-else-if="scope.row.orderStatus === 201" type="primary">待发货</el-tag>
           <el-tag v-else-if="scope.row.orderStatus === 301" type="info">待收货</el-tag>
           <el-tag v-else-if="scope.row.orderStatus === 401" type="success">已完成</el-tag>
@@ -47,7 +50,7 @@
       </el-table-column>
       <el-table-column align="center" label="支付凭证" width="100">
         <template slot-scope="scope">
-          <span v-if="Number(scope.row.actualPrice) === 0 && Number(scope.row.integralPrice) > 0">积分兑换</span>
+          <span v-if="isPointOrder(scope.row)" style="color: #67c23a;">{{ scope.row.payVoucher || '积分兑换' }}</span>
           <el-image
             v-else-if="scope.row.payVoucher"
             :src="scope.row.payVoucher"
@@ -82,7 +85,9 @@
       <el-descriptions v-if="currentOrder" :column="2" border>
         <el-descriptions-item label="订单编号">{{ currentOrder.orderSn }}</el-descriptions-item>
         <el-descriptions-item label="订单状态">
-          <el-tag v-if="currentOrder.orderStatus === 101" type="warning">待付款</el-tag>
+          <el-tag v-if="isPointOrder(currentOrder) && currentOrder.voucherStatus === 0" type="warning">待审核</el-tag>
+          <el-tag v-else-if="isPointOrder(currentOrder) && currentOrder.voucherStatus === 2" type="danger">已拒绝</el-tag>
+          <el-tag v-else-if="currentOrder.orderStatus === 101" type="warning">待付款</el-tag>
           <el-tag v-else-if="currentOrder.orderStatus === 201" type="primary">待发货</el-tag>
           <el-tag v-else-if="currentOrder.orderStatus === 301" type="info">待收货</el-tag>
           <el-tag v-else-if="currentOrder.orderStatus === 401" type="success">已完成</el-tag>
@@ -95,16 +100,19 @@
         <el-descriptions-item label="商品金额">￥{{ currentOrder.goodsPrice }}</el-descriptions-item>
         <el-descriptions-item label="运费">￥{{ currentOrder.freightPrice }}</el-descriptions-item>
         <el-descriptions-item label="优惠券优惠">￥{{ currentOrder.couponPrice }}</el-descriptions-item>
-        <el-descriptions-item label="积分抵扣">￥{{ currentOrder.integralPrice }}</el-descriptions-item>
+        <el-descriptions-item v-if="isPointOrder(currentOrder)" label="积分数量">{{ currentOrder.integralPrice }}积分</el-descriptions-item>
+        <el-descriptions-item v-else label="积分抵扣">￥{{ currentOrder.integralPrice }}</el-descriptions-item>
         <el-descriptions-item label="实付金额">
-          <span style="color: #e64340; font-size: 18px;">￥{{ currentOrder.actualPrice }}</span>
+          <span v-if="isPointOrder(currentOrder)" style="color: #67c23a; font-size: 18px;">{{ currentOrder.integralPrice }}积分</span>
+          <span v-else style="color: #e64340; font-size: 18px;">￥{{ currentOrder.actualPrice }}</span>
         </el-descriptions-item>
         <el-descriptions-item label="下单时间">{{ currentOrder.addTime }}</el-descriptions-item>
         <el-descriptions-item label="用户留言" :span="2">{{ currentOrder.message || '无' }}</el-descriptions-item>
         <el-descriptions-item label="物流公司">{{ currentOrder.shipChannel || '-' }}</el-descriptions-item>
         <el-descriptions-item label="物流单号">{{ currentOrder.shipSn || '-' }}</el-descriptions-item>
         <el-descriptions-item v-if="currentOrder.payVoucher" label="支付凭证" :span="2">
-          <el-image :src="currentOrder.payVoucher" :preview-src-list="[currentOrder.payVoucher]" style="width: 150px; height: 150px;" fit="cover" />
+          <span v-if="isPointOrder(currentOrder)" style="color: #67c23a;">{{ currentOrder.payVoucher }}</span>
+          <el-image v-else :src="currentOrder.payVoucher" :preview-src-list="[currentOrder.payVoucher]" style="width: 150px; height: 150px;" fit="cover" />
         </el-descriptions-item>
       </el-descriptions>
       <div slot="footer">
@@ -251,6 +259,17 @@ export default {
           this.loadOrders()
         })
       }).catch(() => {})
+    },
+    isPointOrder(order) {
+      if (!order) {
+        return false
+      }
+      const actualPrice = Number(order.actualPrice || 0)
+      const integralPrice = Number(order.integralPrice || 0)
+      if (integralPrice > 0 && actualPrice === 0) {
+        return true
+      }
+      return order.payVoucher && order.payVoucher.startsWith('积分兑换')
     }
   }
 }
