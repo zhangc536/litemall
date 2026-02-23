@@ -206,9 +206,11 @@ Page({
     }, 'POST').then(res => {
       if (res.errno === 0) {
         const orderId = res.data.orderId;
-        if (res.data.payed) {
+        const payed = res.data.payed;
+        const isPointOrder = that.data.isPointGoods || that.data.pointsTotal > 0;
+        if (payed || isPointOrder) {
           wx.redirectTo({
-            url: '/pages/ucenter/order/order'
+            url: '/pages/payResult/payResult?status=1&orderId=' + orderId
           });
         } else {
           wx.redirectTo({
