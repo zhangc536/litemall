@@ -23,6 +23,9 @@ public class OrderVo {
     private String shipSn;
     private String message;
     private LocalDateTime payTime;
+    private Byte orderType;
+    private Integer pointsUsed;
+    private Short voucherStatus;
     private List<OrderGoodsVo> goodsVoList;
 
     public LocalDateTime getPayTime() {
@@ -167,6 +170,30 @@ public class OrderVo {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public Byte getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(Byte orderType) {
+        this.orderType = orderType;
+    }
+
+    public Integer getPointsUsed() {
+        return pointsUsed;
+    }
+
+    public void setPointsUsed(Integer pointsUsed) {
+        this.pointsUsed = pointsUsed;
+    }
+
+    public Short getVoucherStatus() {
+        return voucherStatus;
+    }
+
+    public void setVoucherStatus(Short voucherStatus) {
+        this.voucherStatus = voucherStatus;
     }
 
     public List<OrderGoodsVo> getGoodsVoList() {

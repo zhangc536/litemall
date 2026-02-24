@@ -137,6 +137,9 @@
         <result column="user_id" property="userId"/>
         <result column="user_name" property="userName"/>
         <result column="user_avatar" property="userAvatar"/>
+        <result column="order_type" property="orderType"/>
+        <result column="points_used" property="pointsUsed"/>
+        <result column="voucher_status" property="voucherStatus"/>
 
         <collection property="goodsVoList" ofType="org.linlinjava.litemall.db.domain.OrderGoodsVo">
             <id column="ogid" property="id"/>
@@ -153,6 +156,7 @@
         select o.id, o.order_sn, o.order_status, o.actual_price, o.freight_price, o.add_time, o.message,
         o.consignee, o.address, o.mobile, o.pay_time, o.order_price, o.ship_channel, o.ship_sn,
         u.id user_id, u.nickname user_name, u.avatar user_avatar, o.integral_price,
+        o.order_type, o.points_used, o.voucher_status,
         og.id ogid, og.goods_id, og.product_id, og.goods_name, og.pic_url goods_picture,
         og.specifications goods_specifications, og.number goods_number, og.price goods_price
         from litemall_order o

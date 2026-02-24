@@ -31,7 +31,7 @@
       <el-table-column align="center" label="手机号" prop="mobile" width="120" />
       <el-table-column align="center" label="订单金额/积分" width="120">
         <template slot-scope="scope">
-          <span v-if="isPointOrder(scope.row)" style="color: #67c23a;">{{ scope.row.integralPrice }}积分</span>
+          <span v-if="isPointOrder(scope.row)" style="color: #67c23a;">{{ scope.row.pointsUsed }}积分</span>
           <span v-else style="color: #e64340;">￥{{ scope.row.actualPrice }}</span>
         </template>
       </el-table-column>
@@ -100,10 +100,10 @@
         <el-descriptions-item label="商品金额">￥{{ currentOrder.goodsPrice }}</el-descriptions-item>
         <el-descriptions-item label="运费">￥{{ currentOrder.freightPrice }}</el-descriptions-item>
         <el-descriptions-item label="优惠券优惠">￥{{ currentOrder.couponPrice }}</el-descriptions-item>
-        <el-descriptions-item v-if="isPointOrder(currentOrder)" label="积分数量">{{ currentOrder.integralPrice }}积分</el-descriptions-item>
+        <el-descriptions-item v-if="isPointOrder(currentOrder)" label="积分数量">{{ currentOrder.pointsUsed }}积分</el-descriptions-item>
         <el-descriptions-item v-else label="积分抵扣">￥{{ currentOrder.integralPrice }}</el-descriptions-item>
         <el-descriptions-item label="实付金额">
-          <span v-if="isPointOrder(currentOrder)" style="color: #67c23a; font-size: 18px;">{{ currentOrder.integralPrice }}积分</span>
+          <span v-if="isPointOrder(currentOrder)" style="color: #67c23a; font-size: 18px;">{{ currentOrder.pointsUsed }}积分</span>
           <span v-else style="color: #e64340; font-size: 18px;">￥{{ currentOrder.actualPrice }}</span>
         </el-descriptions-item>
         <el-descriptions-item label="下单时间">{{ currentOrder.addTime }}</el-descriptions-item>
@@ -264,12 +264,7 @@ export default {
       if (!order) {
         return false
       }
-      const actualPrice = Number(order.actualPrice || 0)
-      const integralPrice = Number(order.integralPrice || 0)
-      if (integralPrice > 0 && actualPrice === 0) {
-        return true
-      }
-      return order.payVoucher && order.payVoucher.startsWith('积分兑换')
+      return order.orderType === 1
     }
   }
 }
