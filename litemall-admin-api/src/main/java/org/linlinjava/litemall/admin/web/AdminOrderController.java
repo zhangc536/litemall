@@ -105,7 +105,7 @@ public class AdminOrderController {
                 order.setOrderStatus(OrderUtil.STATUS_PAY);
                 order.setVoucherStatus((short) 1);
                 order.setPayTime(LocalDateTime.now());
-                logger.info("订单审核通过：orderId={}, isPointsOrder={}", orderId, isPointsOrder);
+                logger.info("订单审核通过：orderId=" + orderId + ", isPointsOrder=" + isPointsOrder);
             } else if ("REJECTED".equalsIgnoreCase(status)) {
                 order.setVoucherStatus((short) 2);
                 if (isPointsOrder) {
@@ -120,16 +120,16 @@ public class AdminOrderController {
                                 "审核拒绝，积分返还"
                         );
                         if (success) {
-                            logger.info("积分订单审核拒绝，积分返还成功：orderId={}, points={}", orderId, pointsUsed);
+                            logger.info("积分订单审核拒绝，积分返还成功：orderId=" + orderId + ", points=" + pointsUsed);
                             order.setOrderStatus(OrderUtil.STATUS_CANCEL);
                             order.setEndTime(LocalDateTime.now());
                         } else {
-                            logger.error("积分订单审核拒绝，积分返还失败：orderId={}", orderId);
+                            logger.error("积分订单审核拒绝，积分返还失败：orderId=" + orderId);
                             return ResponseUtil.fail(500, "积分返还失败，请重试");
                         }
                     }
                 }
-                logger.info("订单审核拒绝：orderId={}, isPointsOrder={}", orderId, isPointsOrder);
+                logger.info("订单审核拒绝：orderId=" + orderId + ", isPointsOrder=" + isPointsOrder);
             } else {
                 return ResponseUtil.badArgument();
             }
