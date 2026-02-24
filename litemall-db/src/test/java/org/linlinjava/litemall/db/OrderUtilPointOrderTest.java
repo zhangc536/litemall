@@ -12,7 +12,7 @@ public class OrderUtilPointOrderTest {
     @Test
     public void testPointOrderAuditText() {
         LitemallOrder order = new LitemallOrder();
-        order.setOrderStatus(OrderUtil.STATUS_CREATE);
+        order.setOrderStatus(OrderUtil.STATUS_PAY);
         order.setPayVoucher("积分兑换：100积分");
         order.setVoucherStatus((short) 0);
         order.setIntegralPrice(new BigDecimal("100"));

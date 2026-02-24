@@ -537,7 +537,13 @@ public class WxOrderService {
         order.setIntegralPrice(new BigDecimal(0));
         order.setOrderPrice(orderTotalPrice);
         order.setActualPrice(actualPrice);
+        boolean autoApproved = false;
         if (pointOrder) {
+            autoApproved = isTrustedPointUser(user);
+            order.setOrderStatus(OrderUtil.STATUS_PAY);
+            order.setPayTime(LocalDateTime.now());
+            order.setPayVoucher("积分兑换：" + requiredPoints + "积分");
+            order.setVoucherStatus(autoApproved ? (short) 1 : (short) 0);
             order.setIntegralPrice(new BigDecimal(requiredPoints));
             order.setActualPrice(new BigDecimal("0.00"));
         }
@@ -628,18 +634,6 @@ public class WxOrderService {
         // 普通订单：如果实际支付费用是0，则直接跳过支付变成待发货状态
         boolean payed = false;
         if (pointOrder) {
-            boolean autoApproved = isTrustedPointUser(user);
-            LitemallOrder o = new LitemallOrder();
-            o.setId(orderId);
-            o.setPayVoucher("积分兑换：" + requiredPoints + "积分");
-            o.setOrderStatus(OrderUtil.STATUS_PAY);
-            o.setPayTime(LocalDateTime.now());
-            if (autoApproved) {
-                o.setVoucherStatus((short) 1);
-            } else {
-                o.setVoucherStatus((short) 0);
-            }
-            orderService.updateSelective(o);
             payed = true;
         } else if (order.getActualPrice().compareTo(new BigDecimal("0.00")) <= 0) {
             payed = true;
