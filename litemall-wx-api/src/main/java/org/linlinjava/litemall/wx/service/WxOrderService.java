@@ -473,13 +473,16 @@ public class WxOrderService {
         if (requiredPoints == 0 && clientPointsOrder) {
             requiredPoints = pointsTotal;
         }
-        boolean pointOrder = requestPoints || allPointGoods;
+        boolean pointOrder = requestPoints || allPointGoods || (pointsTotal != null && pointsTotal > 0);
         if (requestPoints && requiredPoints <= 0) {
             if (pointsTotal != null && pointsTotal > 0) {
                 requiredPoints = pointsTotal;
             } else {
                 return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常，请确认商品是否为积分商品");
             }
+        }
+        if (pointOrder && requiredPoints <= 0 && pointsTotal != null && pointsTotal > 0) {
+            requiredPoints = pointsTotal;
         }
         if (!pointOrder) {
             requiredPoints = 0;
@@ -629,14 +632,15 @@ public class WxOrderService {
             LitemallOrder o = new LitemallOrder();
             o.setId(orderId);
             o.setPayVoucher("积分兑换：" + requiredPoints + "积分");
+            o.setOrderStatus(OrderUtil.STATUS_PAY);
+            o.setPayTime(LocalDateTime.now());
             if (autoApproved) {
-                o.setOrderStatus(OrderUtil.STATUS_PAY);
                 o.setVoucherStatus((short) 1);
-                o.setPayTime(LocalDateTime.now());
             } else {
                 o.setVoucherStatus((short) 0);
             }
             orderService.updateSelective(o);
+            payed = true;
         } else if (order.getActualPrice().compareTo(new BigDecimal("0.00")) <= 0) {
             payed = true;
 
