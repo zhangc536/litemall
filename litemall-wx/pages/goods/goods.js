@@ -609,6 +609,13 @@ Page({
                 wx.setStorageSync('cartId', res.data);
                 wx.setStorageSync('grouponRulesId', checkedGroupon.id);
                 wx.setStorageSync('grouponLinkId', that.data.grouponLink.id);
+                if (that.data.isPointGoods) {
+                  wx.setStorageSync('isPointGoods', true);
+                  wx.setStorageSync('pointGoodsPoints', that.data.pointGoodsPoints);
+                } else {
+                  wx.removeStorageSync('isPointGoods');
+                  wx.removeStorageSync('pointGoodsPoints');
+                }
                 const pointParam = that.data.isPointGoods ? '&point=1&points=' + that.data.pointGoodsPoints : '';
                 wx.navigateTo({
                   url: '/pages/checkout/checkout?cartId=' + res.data + '&grouponRulesId=' + checkedGroupon.id + '&grouponLinkId=' + (that.data.grouponLink.id || 0) + pointParam

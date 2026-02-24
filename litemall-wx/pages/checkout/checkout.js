@@ -160,29 +160,17 @@ Page({
       if (grouponLinkId === "") {
         grouponLinkId = 0;
       }
-      var isPointGoods = wx.getStorageSync('isPointGoods');
-      var pointGoodsPoints = wx.getStorageSync('pointGoodsPoints');
       
-      if (isPointGoods !== true && isPointGoods !== 'true') {
-        isPointGoods = false;
-        pointGoodsPoints = 0;
-        try {
-          wx.removeStorageSync('isPointGoods');
-          wx.removeStorageSync('pointGoodsPoints');
-        } catch (e) {}
-      }
-      
-      if (pointGoodsPoints === "") {
-        pointGoodsPoints = 0;
-      }
+      var isPointGoods = this.data.isPointGoods;
+      var pointGoodsPoints = this.data.pointGoodsPoints;
 
       this.setData({
         cartId: cartId,
         addressId: addressId,
         grouponRulesId: grouponRulesId,
         grouponLinkId: grouponLinkId,
-        isPointGoods: isPointGoods === true || isPointGoods === 'true',
-        pointGoodsPoints: pointGoodsPoints ? parseInt(pointGoodsPoints) : 0
+        isPointGoods: isPointGoods,
+        pointGoodsPoints: pointGoodsPoints
       });
 
     } catch (e) {

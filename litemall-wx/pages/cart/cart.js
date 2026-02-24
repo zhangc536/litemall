@@ -250,6 +250,8 @@ Page({
     // storage中设置了cartId，则是购物车购买
     try {
       wx.setStorageSync('cartId', 0);
+      wx.removeStorageSync('isPointGoods');
+      wx.removeStorageSync('pointGoodsPoints');
       wx.navigateTo({
         url: '/pages/checkout/checkout?cartId=0'
       })
