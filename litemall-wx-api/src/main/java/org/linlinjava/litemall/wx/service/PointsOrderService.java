@@ -214,7 +214,7 @@ public class PointsOrderService {
             return true;
         }
 
-        order.setOrderStatus(OrderUtil.STATUS_COMPLETE);
+        order.setOrderStatus(OrderUtil.STATUS_CONFIRM);
         order.setEndTime(LocalDateTime.now());
         orderService.updateSelective(order);
 

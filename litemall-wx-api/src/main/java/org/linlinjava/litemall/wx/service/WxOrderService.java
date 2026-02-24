@@ -462,7 +462,7 @@ public class WxOrderService {
         }
         Boolean usePoints = JacksonUtil.parseBoolean(body, "usePoints");
         Integer pointsTotal = JacksonUtil.parseInteger(body, "pointsTotal");
-        logger.info("Order submit - usePoints: {}, pointsTotal: {}", usePoints, pointsTotal);
+        logger.info("Order submit - usePoints: " + usePoints + ", pointsTotal: " + pointsTotal);
         
         boolean requestPoints = usePoints != null && usePoints;
         int requiredPoints = 0;
@@ -485,7 +485,7 @@ public class WxOrderService {
                 return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常，请确认商品是否为积分商品");
             }
             if (pointsTotal != null && pointsTotal > 0 && !pointsTotal.equals(requiredPoints)) {
-                logger.warn("积分数量不一致：前端传递={}, 后端计算={}", pointsTotal, requiredPoints);
+                logger.warn("积分数量不一致：前端传递=" + pointsTotal + ", 后端计算=" + requiredPoints);
             }
         }
         
@@ -497,7 +497,7 @@ public class WxOrderService {
                 userPoints = user.getPoints();
             }
             if (userPoints < requiredPoints) {
-                logger.warn("积分不足：userId={}, userPoints={}, requiredPoints={}", userId, userPoints, requiredPoints);
+                logger.warn("积分不足：userId=" + userId + ", userPoints=" + userPoints + ", requiredPoints=" + requiredPoints);
                 return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分不足，当前积分：" + userPoints + "，需要积分：" + requiredPoints);
             }
         }
@@ -552,7 +552,7 @@ public class WxOrderService {
             order.setActualPrice(new BigDecimal("0.00"));
             order.setFreightPrice(BigDecimal.ZERO);
             order.setOrderPrice(BigDecimal.ZERO);
-            logger.info("积分订单创建：userId={}, requiredPoints={}, autoApproved={}", userId, requiredPoints, autoApproved);
+            logger.info("积分订单创建：userId=" + userId + ", requiredPoints=" + requiredPoints + ", autoApproved=" + autoApproved);
         } else {
             order.setOrderType(LitemallOrder.ORDER_TYPE_NORMAL);
         }
@@ -574,7 +574,7 @@ public class WxOrderService {
             if (!deductSuccess) {
                 throw new RuntimeException("积分扣除失败，请重试");
             }
-            logger.info("积分订单积分扣除成功：userId={}, points={}, orderId={}", userId, requiredPoints, orderId);
+            logger.info("积分订单积分扣除成功：userId=" + userId + ", points=" + requiredPoints + ", orderId=" + orderId);
         }
 
         // 添加订单商品表项
@@ -1349,9 +1349,9 @@ public class WxOrderService {
         );
         
         if (success) {
-            logger.info("订单取消积分返还成功：orderId={}, points={}", order.getId(), pointsUsed);
+            logger.info("订单取消积分返还成功：orderId=" + order.getId() + ", points=" + pointsUsed);
         } else {
-            logger.error("订单取消积分返还失败：orderId={}, points={}", order.getId(), pointsUsed);
+            logger.error("订单取消积分返还失败：orderId=" + order.getId() + ", points=" + pointsUsed);
         }
     }
     
@@ -1377,9 +1377,9 @@ public class WxOrderService {
         );
         
         if (success) {
-            logger.info("审核拒绝积分返还成功：orderId={}, points={}", order.getId(), pointsUsed);
+            logger.info("审核拒绝积分返还成功：orderId=" + order.getId() + ", points=" + pointsUsed);
         } else {
-            logger.error("审核拒绝积分返还失败：orderId={}, points={}", order.getId(), pointsUsed);
+            logger.error("审核拒绝积分返还失败：orderId=" + order.getId() + ", points=" + pointsUsed);
         }
     }
     
