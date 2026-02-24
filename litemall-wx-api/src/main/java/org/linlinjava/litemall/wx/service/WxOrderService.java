@@ -553,9 +553,10 @@ public class WxOrderService {
             autoApproved = isTrustedPointUser(user);
             order.setOrderType(LitemallOrder.ORDER_TYPE_POINTS);
             order.setPointsUsed(requiredPoints);
-            order.setOrderStatus(OrderUtil.STATUS_CREATE);
+            order.setOrderStatus(OrderUtil.STATUS_PAY);
+            order.setPayTime(LocalDateTime.now());
             order.setPayVoucher("积分兑换：" + requiredPoints + "积分");
-            order.setVoucherStatus((short) 0);
+            order.setVoucherStatus(autoApproved ? (short) 1 : (short) 0);
             order.setIntegralPrice(new BigDecimal(requiredPoints));
             order.setActualPrice(new BigDecimal("0.00"));
             order.setFreightPrice(BigDecimal.ZERO);

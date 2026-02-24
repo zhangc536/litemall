@@ -89,7 +89,7 @@ Page({
             pointsTotal = checkedGoodsList.reduce((sum, item) => sum + (item.pointsRequired || 0) * item.number, 0);
           }
         }
-        const isPointOrder = that.data.isPointGoods || pointsTotal > 0;
+        const isPointOrder = that.data.isPointGoods;
         that.setData({
           checkedGoodsList: checkedGoodsList,
           checkedAddress: res.data.checkedAddress,

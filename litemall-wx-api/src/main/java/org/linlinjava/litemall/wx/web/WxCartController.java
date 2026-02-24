@@ -458,14 +458,16 @@ public class WxCartController {
         boolean pointOrder = usePoints != null && usePoints;
         int pointsTotal = 0;
         Map<Integer, Integer> pointsMap = new HashMap<>();
-        for (LitemallCart cart : checkedGoodsList) {
-            LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(cart.getGoodsId());
-            Integer points = pointGoods == null ? 0 : pointGoods.getPoints();
-            if (points == null) {
-                points = 0;
+        if (pointOrder) {
+            for (LitemallCart cart : checkedGoodsList) {
+                LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(cart.getGoodsId());
+                Integer points = pointGoods == null ? 0 : pointGoods.getPoints();
+                if (points == null) {
+                    points = 0;
+                }
+                pointsMap.put(cart.getGoodsId(), points);
+                pointsTotal += points * cart.getNumber();
             }
-            pointsMap.put(cart.getGoodsId(), points);
-            pointsTotal += points * cart.getNumber();
         }
         BigDecimal freightPrice = new BigDecimal(0.00);
         if (!pointOrder && checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
