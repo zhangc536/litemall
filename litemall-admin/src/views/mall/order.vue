@@ -264,7 +264,13 @@ export default {
       if (!order) {
         return false
       }
-      return order.orderType === 1
+      if (order.orderType === 1) {
+        return true
+      }
+      if (order.payVoucher && order.payVoucher.startsWith('积分兑换')) {
+        return true
+      }
+      return false
     }
   }
 }

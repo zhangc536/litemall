@@ -54,7 +54,11 @@ Page({
         console.log(res.data);
         const orderInfo = res.data.orderInfo || {};
         const orderType = orderInfo.orderType || 0;
-        const isPointOrder = orderType === 1;
+        const payVoucher = orderInfo.payVoucher || '';
+        let isPointOrder = orderType === 1;
+        if (!isPointOrder && payVoucher.indexOf('积分兑换') === 0) {
+          isPointOrder = true;
+        }
         that.setData({
           orderInfo: orderInfo,
           orderGoods: res.data.orderGoods,
