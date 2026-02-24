@@ -220,6 +220,34 @@ EOF
     log_info "用户等级字段添加完成"
 }
 
+add_points_system_fields() {
+    log_info "添加积分系统升级字段..."
+    
+    mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME <<EOF
+ALTER TABLE litemall_order ADD COLUMN IF NOT EXISTS order_type TINYINT DEFAULT 0 COMMENT '订单类型：0-普通订单，1-积分订单';
+ALTER TABLE litemall_order ADD COLUMN IF NOT EXISTS points_used INT DEFAULT 0 COMMENT '消耗积分数量';
+
+CREATE TABLE IF NOT EXISTS litemall_points_log (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL COMMENT '用户ID',
+    points INT NOT NULL COMMENT '积分变动数量',
+    type TINYINT NOT NULL COMMENT '类型：1-订单获得，2-积分兑换，3-管理员调整，4-订单取消返还，5-审核拒绝返还',
+    order_id INT DEFAULT NULL COMMENT '关联订单ID',
+    order_sn VARCHAR(63) DEFAULT NULL COMMENT '关联订单编号',
+    description VARCHAR(255) DEFAULT NULL COMMENT '描述',
+    balance_after INT DEFAULT 0 COMMENT '变动后余额',
+    add_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
+    INDEX idx_order_id (order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='积分流水记录表';
+
+UPDATE litemall_order SET order_type = 1, points_used = integral_price 
+WHERE pay_voucher LIKE '积分兑换%' AND deleted = 0 AND order_type = 0;
+EOF
+    
+    log_info "积分系统升级字段添加完成"
+}
+
 build_project() {
     log_info "构建项目..."
     
@@ -351,6 +379,7 @@ main() {
     update_database_urls
     add_voucher_fields
     add_user_level_fields
+    add_points_system_fields
     build_project
     config_nginx
     setup_ssl

@@ -10,6 +10,8 @@ import org.linlinjava.litemall.db.domain.LitemallOrder;
 import org.linlinjava.litemall.db.domain.LitemallStorage;
 import org.linlinjava.litemall.db.service.LitemallOrderService;
 import org.linlinjava.litemall.db.service.LitemallStorageService;
+import org.linlinjava.litemall.db.service.LitemallPointsLogService;
+import org.linlinjava.litemall.db.domain.LitemallPointsLog;
 import org.linlinjava.litemall.db.util.OrderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -32,6 +34,8 @@ public class AdminOrderController {
     private AdminOrderService adminOrderService;
     @Autowired
     private LitemallStorageService storageService;
+    @Autowired
+    private LitemallPointsLogService pointsLogService;
 
     @RequiresPermissions("admin:order:list")
     @RequiresPermissionsDesc(menu = {"订单管理", "订单列表"}, button = "查询")
@@ -94,12 +98,38 @@ public class AdminOrderController {
             if (order == null) {
                 return ResponseUtil.badArgument();
             }
+            
+            boolean isPointsOrder = order.getOrderType() != null && order.getOrderType() == LitemallOrder.ORDER_TYPE_POINTS;
+            
             if ("APPROVED".equalsIgnoreCase(status)) {
                 order.setOrderStatus(OrderUtil.STATUS_PAY);
                 order.setVoucherStatus((short) 1);
                 order.setPayTime(LocalDateTime.now());
+                logger.info("订单审核通过：orderId={}, isPointsOrder={}", orderId, isPointsOrder);
             } else if ("REJECTED".equalsIgnoreCase(status)) {
                 order.setVoucherStatus((short) 2);
+                if (isPointsOrder) {
+                    Integer pointsUsed = order.getPointsUsed();
+                    if (pointsUsed != null && pointsUsed > 0) {
+                        boolean success = pointsLogService.refundPoints(
+                                order.getUserId(),
+                                pointsUsed,
+                                order.getId(),
+                                order.getOrderSn(),
+                                LitemallPointsLog.TYPE_AUDIT_REJECT_REFUND,
+                                "审核拒绝，积分返还"
+                        );
+                        if (success) {
+                            logger.info("积分订单审核拒绝，积分返还成功：orderId={}, points={}", orderId, pointsUsed);
+                            order.setOrderStatus(OrderUtil.STATUS_CANCEL);
+                            order.setEndTime(LocalDateTime.now());
+                        } else {
+                            logger.error("积分订单审核拒绝，积分返还失败：orderId={}", orderId);
+                            return ResponseUtil.fail(500, "积分返还失败，请重试");
+                        }
+                    }
+                }
+                logger.info("订单审核拒绝：orderId={}, isPointsOrder={}", orderId, isPointsOrder);
             } else {
                 return ResponseUtil.badArgument();
             }

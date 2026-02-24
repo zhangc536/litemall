@@ -53,10 +53,8 @@ Page({
       if (res.errno === 0) {
         console.log(res.data);
         const orderInfo = res.data.orderInfo || {};
-        const payVoucher = orderInfo.payVoucher || '';
-        const pointsPrice = Number(orderInfo.pointsPrice || 0);
-        const actualPrice = Number(orderInfo.actualPrice || 0);
-        const isPointOrder = payVoucher.indexOf('积分兑换') === 0 || (pointsPrice > 0 && actualPrice === 0);
+        const orderType = orderInfo.orderType || 0;
+        const isPointOrder = orderType === 1;
         that.setData({
           orderInfo: orderInfo,
           orderGoods: res.data.orderGoods,

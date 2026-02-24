@@ -93,12 +93,11 @@ public class OrderUtil {
         if (order == null) {
             return false;
         }
-        if (order.getPayVoucher() != null && order.getPayVoucher().startsWith("积分兑换")) {
+        if (order.getOrderType() != null && order.getOrderType() == LitemallOrder.ORDER_TYPE_POINTS) {
             return true;
         }
-        if (order.getIntegralPrice() != null && order.getActualPrice() != null) {
-            return order.getIntegralPrice().compareTo(java.math.BigDecimal.ZERO) > 0
-                    && order.getActualPrice().compareTo(java.math.BigDecimal.ZERO) == 0;
+        if (order.getPayVoucher() != null && order.getPayVoucher().startsWith("积分兑换")) {
+            return true;
         }
         return false;
     }

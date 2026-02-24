@@ -39,7 +39,7 @@
         <view class="status"></view>
       </view>
       <view class="b">
-        <view class="l" wx:if="{{item.integralPrice > 0}}">消耗积分：{{item.integralPrice}}</view>
+        <view class="l" wx:if="{{item.orderType === 1}}">消耗积分：{{item.pointsUsed}}</view>
         <view class="l" wx:else>实付：￥{{item.actualPrice}}</view>
         <view class="r">
           <view class="btn" wx:if="{{item.handleOption.cancel}}" catchtap="cancelOrder" data-orderid="{{item.id}}">取消订单</view>
