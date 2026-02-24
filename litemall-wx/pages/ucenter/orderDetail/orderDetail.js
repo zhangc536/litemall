@@ -8,7 +8,8 @@ Page({
     orderGoods: [],
     expressInfo: {},
     flag: false,
-    handleOption: {}
+    handleOption: {},
+    isPointOrder: false
   },
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
@@ -51,11 +52,17 @@ Page({
     }).then(function(res) {
       if (res.errno === 0) {
         console.log(res.data);
+        const orderInfo = res.data.orderInfo || {};
+        const payVoucher = orderInfo.payVoucher || '';
+        const pointsPrice = Number(orderInfo.pointsPrice || 0);
+        const actualPrice = Number(orderInfo.actualPrice || 0);
+        const isPointOrder = payVoucher.indexOf('积分兑换') === 0 || (pointsPrice > 0 && actualPrice === 0);
         that.setData({
-          orderInfo: res.data.orderInfo,
+          orderInfo: orderInfo,
           orderGoods: res.data.orderGoods,
-          handleOption: res.data.orderInfo.handleOption,
-          expressInfo: res.data.expressInfo
+          handleOption: orderInfo.handleOption,
+          expressInfo: res.data.expressInfo,
+          isPointOrder: isPointOrder
         });
       }
 

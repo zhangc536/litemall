@@ -15,9 +15,10 @@
     <view class="item-c">
       <view class="r">
         <view class="btn active" bindtap="cancelOrder" wx:if="{{handleOption.cancel}}">取消订单</view>
-        <view class="btn active" bindtap="payOrder" wx:if="{{handleOption.pay && !orderInfo.payVoucher && orderInfo.actualPrice > 0}}">上传凭证</view>
-        <view class="btn" wx:if="{{handleOption.pay && orderInfo.payVoucher && orderInfo.payVoucher.startsWith('积分兑换')}}">审核中</view>
-        <view class="btn active" wx:if="{{handleOption.pay && orderInfo.payVoucher && !orderInfo.payVoucher.startsWith('积分兑换') && orderInfo.actualPrice > 0}}">已上传</view>
+        <view class="btn active" bindtap="payOrder" wx:if="{{handleOption.pay && !isPointOrder && !orderInfo.payVoucher && orderInfo.actualPrice > 0}}">上传凭证</view>
+        <view class="btn" wx:if="{{isPointOrder && orderInfo.voucherStatus === 0}}">审核中</view>
+        <view class="btn" wx:if="{{isPointOrder && orderInfo.voucherStatus === 2}}">已拒绝</view>
+        <view class="btn active" wx:if="{{handleOption.pay && !isPointOrder && orderInfo.payVoucher && orderInfo.actualPrice > 0}}">已上传</view>
         <view class="btn active" bindtap="confirmOrder" wx:if="{{handleOption.confirm}}">确认收货</view>
         <view class="btn active" bindtap="deleteOrder" wx:if="{{handleOption.delete}}">删除订单</view>
         <view class="btn active" bindtap="refundOrder" wx:if="{{handleOption.refund}}">申请退款</view>

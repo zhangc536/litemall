@@ -111,7 +111,9 @@ public class OrderUtil {
         if (status == 101) {
             // 如果订单没有被取消，且没有支付，则可支付，可取消
             handleOption.setCancel(true);
-            handleOption.setPay(true);
+            if (!isPointOrder(order)) {
+                handleOption.setPay(true);
+            }
         } else if (status == 102 || status == 103) {
             // 如果订单已经取消或是已完成，则可删除
             handleOption.setDelete(true);
