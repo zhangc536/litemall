@@ -44,9 +44,20 @@ Page({
         wx.setStorageSync('addressId', this.data.addressId);
         wx.setStorageSync('grouponRulesId', this.data.grouponRulesId);
         wx.setStorageSync('grouponLinkId', this.data.grouponLinkId);
-        wx.setStorageSync('isPointGoods', this.data.isPointGoods);
+        wx.setStorageSync('isPointGoods', isPointGoods);
         wx.setStorageSync('pointGoodsPoints', this.data.pointGoodsPoints);
       } catch (e) {}
+    }
+    
+    if (!options || options.point != '1') {
+      try {
+        wx.removeStorageSync('isPointGoods');
+        wx.removeStorageSync('pointGoodsPoints');
+      } catch (e) {}
+      this.setData({
+        isPointGoods: false,
+        pointGoodsPoints: 0
+      });
     }
   },
 
@@ -151,6 +162,16 @@ Page({
       }
       var isPointGoods = wx.getStorageSync('isPointGoods');
       var pointGoodsPoints = wx.getStorageSync('pointGoodsPoints');
+      
+      if (isPointGoods !== true && isPointGoods !== 'true') {
+        isPointGoods = false;
+        pointGoodsPoints = 0;
+        try {
+          wx.removeStorageSync('isPointGoods');
+          wx.removeStorageSync('pointGoodsPoints');
+        } catch (e) {}
+      }
+      
       if (pointGoodsPoints === "") {
         pointGoodsPoints = 0;
       }
@@ -208,30 +229,34 @@ Page({
   doSubmitOrder: function() {
     let that = this;
     let pointsTotal = that.data.pointsTotal;
-    if (that.data.isPointGoods && pointsTotal <= 0 && that.data.pointGoodsPoints > 0) {
+    let isPointGoods = that.data.isPointGoods;
+    
+    if (isPointGoods && pointsTotal <= 0 && that.data.pointGoodsPoints > 0) {
       const totalNumber = that.data.checkedGoodsList.reduce((sum, item) => sum + item.number, 0);
       pointsTotal = that.data.pointGoodsPoints * totalNumber;
     }
+    
     util.request(api.OrderSubmit, {
       cartId: that.data.cartId,
       addressId: that.data.addressId,
       message: that.data.message,
       grouponRulesId: that.data.grouponRulesId,
       grouponLinkId: that.data.grouponLinkId,
-      usePoints: that.data.isPointGoods,
-      pointsTotal: pointsTotal
+      usePoints: isPointGoods ? true : false,
+      pointsTotal: isPointGoods ? pointsTotal : 0
     }, 'POST').then(res => {
       if (res.errno === 0) {
         const orderId = res.data.orderId;
         const payed = res.data.payed;
-        const isPointOrder = that.data.isPointGoods || pointsTotal > 0;
-        if (payed && !isPointOrder) {
-          wx.redirectTo({
-            url: '/pages/payResult/payResult?status=1&orderId=' + orderId
-          });
-        } else if (isPointOrder) {
+        const orderType = res.data.orderType;
+        const isPointOrder = orderType === 1;
+        if (isPointOrder) {
           wx.redirectTo({
             url: '/pages/payResult/payResult?status=1&orderId=' + orderId + '&isPointOrder=1'
+          });
+        } else if (payed) {
+          wx.redirectTo({
+            url: '/pages/payResult/payResult?status=1&orderId=' + orderId
           });
         } else {
           wx.redirectTo({

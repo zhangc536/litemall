@@ -706,6 +706,7 @@ public class WxOrderService {
         Map<String, Object> data = new HashMap<>();
         data.put("orderId", orderId);
         data.put("payed", payed);
+        data.put("orderType", order.getOrderType());
         if (grouponRulesId != null && grouponRulesId > 0) {
             data.put("grouponLinkId", grouponLinkId);
         }
