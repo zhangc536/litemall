@@ -464,20 +464,23 @@ public class WxOrderService {
         Integer pointsTotal = JacksonUtil.parseInteger(body, "pointsTotal");
         logger.info("Order submit - usePoints: " + usePoints + ", pointsTotal: " + pointsTotal);
         
-        boolean requestPoints = usePoints != null && usePoints;
         int requiredPoints = 0;
-        boolean allPointGoods = true;
+        int pointGoodsCount = 0;
+        int totalGoodsCount = checkedGoodsList.size();
         
         for (LitemallCart checkGoods : checkedGoodsList) {
             LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(checkGoods.getGoodsId());
-            if (pointGoods == null || pointGoods.getPoints() == null || pointGoods.getPoints() <= 0) {
-                allPointGoods = false;
-            } else {
+            if (pointGoods != null && pointGoods.getPoints() != null && pointGoods.getPoints() > 0) {
                 requiredPoints += pointGoods.getPoints() * checkGoods.getNumber();
+                pointGoodsCount++;
             }
         }
         
-        boolean pointOrder = requestPoints || allPointGoods;
+        boolean allPointGoods = (pointGoodsCount == totalGoodsCount) && (totalGoodsCount > 0);
+        boolean hasPointGoods = pointGoodsCount > 0;
+        boolean requestPoints = usePoints != null && usePoints;
+        
+        boolean pointOrder = allPointGoods && requestPoints;
         
         if (pointOrder) {
             if (requiredPoints <= 0) {
@@ -487,6 +490,11 @@ public class WxOrderService {
             if (pointsTotal != null && pointsTotal > 0 && !pointsTotal.equals(requiredPoints)) {
                 logger.warn("积分数量不一致：前端传递=" + pointsTotal + ", 后端计算=" + requiredPoints);
             }
+        }
+        
+        if (requestPoints && !allPointGoods) {
+            logger.warn("用户请求积分支付但购物车中包含非积分商品：pointGoodsCount=" + pointGoodsCount + ", totalGoodsCount=" + totalGoodsCount);
+            return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "购物车中包含非积分商品，无法使用积分支付");
         }
         
         Integer userPoints = 0;
