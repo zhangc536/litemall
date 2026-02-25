@@ -6,28 +6,24 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.linlinjava.litemall.core.express.config.ExpressProperties;
 import org.linlinjava.litemall.core.express.dao.ExpressInfo;
+import org.linlinjava.litemall.core.express.dao.Traces;
 import org.linlinjava.litemall.core.util.HttpUtil;
 import org.springframework.util.Base64Utils;
 
 import java.net.URLEncoder;
 import java.security.MessageDigest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-/**
- * 物流查询服务
- * <p>
- * 快递鸟即时查询API http://www.kdniao.com/api-track
- */
 public class ExpressService {
 
     private final Log logger = LogFactory.getLog(ExpressService.class);
-    //请求url
-    private String ReqURL = "https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
-    private String DistURL = "https://api.kdniao.com/api/dist";
+
+    private static final String REQ_URL = "https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
+    private static final String REQUEST_TYPE_TRACK = "1002";
+    private static final String REQUEST_TYPE_MONITOR = "8001";
 
     private ExpressProperties properties;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public ExpressProperties getProperties() {
         return properties;
@@ -37,155 +33,102 @@ public class ExpressService {
         this.properties = properties;
     }
 
-    /**
-     * 获取物流供应商名
-     *
-     * @param vendorCode
-     * @return
-     */
     public String getVendorName(String vendorCode) {
-        for (Map<String, String> item : properties.getVendors()) {
-            if (item.get("code").equals(vendorCode))
-                return item.get("name");
+        if (vendorCode == null) {
+            return null;
         }
-        return null;
+        for (Map<String, String> item : properties.getVendors()) {
+            if (vendorCode.equals(item.get("code"))) {
+                return item.get("name");
+            }
+        }
+        return vendorCode;
     }
 
     public List<Map<String, String>> getVendors() {
         return properties.getVendors();
     }
 
-    /**
-     * 获取物流信息
-     *
-     * @param expCode
-     * @param expNo
-     * @return
-     */
     public ExpressInfo getExpressInfo(String expCode, String expNo) {
         if (!properties.isEnable()) {
-            return null;
+            logger.warn("物流查询服务未启用");
+            return createDisabledResult();
+        }
+
+        if (expCode == null || expCode.trim().isEmpty()) {
+            logger.error("快递公司代码为空");
+            return createErrorResult("快递公司代码为空");
+        }
+
+        if (expNo == null || expNo.trim().isEmpty()) {
+            logger.error("快递单号为空");
+            return createErrorResult("快递单号为空");
         }
 
         try {
-            String result = getOrderTracesByJson(expCode, expNo);
-            ObjectMapper objMap = new ObjectMapper();
-            ExpressInfo ei = objMap.readValue(result, ExpressInfo.class);
-            ei.setShipperName(getVendorName(expCode));
-            return ei;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
+            logger.info("开始查询物流信息：快递公司=" + expCode + "(" + getVendorName(expCode) + "), 快递单号=" + expNo);
 
-        return null;
+            String result = queryExpressApi(expCode, expNo);
+            logger.info("快递鸟API返回：" + result);
+
+            ExpressInfo expressInfo = objectMapper.readValue(result, ExpressInfo.class);
+
+            if (expressInfo == null) {
+                logger.error("物流信息解析失败：返回结果为空");
+                return createErrorResult("物流信息解析失败");
+            }
+
+            expressInfo.setShipperName(getVendorName(expCode));
+
+            if (!expressInfo.getSuccess()) {
+                String reason = expressInfo.getReason();
+                logger.error("快递鸟API返回失败：" + reason);
+                return createErrorResult(reason != null ? reason : "查询失败");
+            }
+
+            List<Traces> traces = expressInfo.getTraces();
+            if (traces == null || traces.isEmpty()) {
+                logger.info("暂无物流轨迹信息");
+            } else {
+                logger.info("查询到 " + traces.size() + " 条物流轨迹");
+            }
+
+            return expressInfo;
+
+        } catch (Exception e) {
+            logger.error("物流查询异常：" + e.getMessage(), e);
+            return createErrorResult("物流查询异常：" + e.getMessage());
+        }
     }
 
-    public Map<String, Object> getMonitorInfo(String expCode, String expNo) {
-        if (!properties.isEnable()) {
-            return null;
-        }
-        try {
-            Map<String, Object> request = new HashMap<>();
-            request.put("OrderCode", "");
-            request.put("ShipperCode", expCode);
-            request.put("LogisticCode", expNo);
-            ObjectMapper mapper = new ObjectMapper();
-            String requestData = mapper.writeValueAsString(request);
-            return request("8001", requestData, ReqURL);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
+    private String queryExpressApi(String expCode, String expNo) throws Exception {
+        String requestData = buildRequestData(expCode, expNo);
 
-    public Map<String, Object> getMapInfo(String expCode, String expNo, String senderCityName, String receiverCityName, Integer isReturnCoordinates, Integer isReturnRouteMap) {
-        if (!properties.isEnable()) {
-            return null;
-        }
-        try {
-            Map<String, Object> request = new HashMap<>();
-            request.put("OrderCode", "");
-            request.put("ShipperCode", expCode);
-            request.put("LogisticCode", expNo);
-            request.put("SenderCityName", senderCityName);
-            request.put("ReceiverCityName", receiverCityName);
-            request.put("IsReturnCoordinates", isReturnCoordinates == null ? 1 : isReturnCoordinates);
-            request.put("IsReturnRouteMap", isReturnRouteMap == null ? 1 : isReturnRouteMap);
-            ObjectMapper mapper = new ObjectMapper();
-            String requestData = mapper.writeValueAsString(request);
-            return request("8003", requestData, ReqURL);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public Map<String, Object> requestCustom(String requestType, Map<String, Object> requestData, String requestTarget) {
-        if (!properties.isEnable()) {
-            return null;
-        }
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String requestDataJson = mapper.writeValueAsString(requestData);
-            String url = "dist".equalsIgnoreCase(requestTarget) ? DistURL : ReqURL;
-            return request(requestType, requestDataJson, url);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    /**
-     * Json方式 查询订单物流轨迹
-     *
-     * @throws Exception
-     */
-    private String getOrderTracesByJson(String expCode, String expNo) throws Exception {
-        String requestData = "{'OrderCode':'','ShipperCode':'" + expCode + "','LogisticCode':'" + expNo + "'}";
-
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("RequestData", URLEncoder.encode(requestData, "UTF-8"));
         params.put("EBusinessID", properties.getAppId());
-        params.put("RequestType", "1002");
-        String dataSign = encrypt(requestData, properties.getAppKey(), "UTF-8");
-        params.put("DataSign", URLEncoder.encode(dataSign, "UTF-8"));
+        params.put("RequestType", REQUEST_TYPE_TRACK);
+        params.put("DataSign", URLEncoder.encode(generateDataSign(requestData), "UTF-8"));
         params.put("DataType", "2");
 
-        String result = HttpUtil.sendPost(ReqURL, params);
-
-        //根据公司业务处理返回的信息......
-
-        return result;
+        return HttpUtil.sendPost(REQ_URL, params);
     }
 
-    private Map<String, Object> request(String requestType, String requestData, String url) throws Exception {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("RequestData", URLEncoder.encode(requestData, "UTF-8"));
-        params.put("EBusinessID", properties.getAppId());
-        params.put("RequestType", requestType);
-        String dataSign = encrypt(requestData, properties.getAppKey(), "UTF-8");
-        params.put("DataSign", URLEncoder.encode(dataSign, "UTF-8"));
-        params.put("DataType", "2");
-        String result = HttpUtil.sendPost(url, params);
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(result, new TypeReference<Map<String, Object>>() {
-        });
+    private String buildRequestData(String expCode, String expNo) {
+        return "{'OrderCode':'','ShipperCode':'" + expCode + "','LogisticCode':'" + expNo + "'}";
     }
 
-    /**
-     * MD5加密
-     *
-     * @param str     内容
-     * @param charset 编码方式
-     * @throws Exception
-     */
-    private String MD5(String str, String charset) throws Exception {
+    private String generateDataSign(String requestData) throws Exception {
+        String content = requestData + properties.getAppKey();
+        return Base64Utils.encodeToString(md5(content).getBytes("UTF-8"));
+    }
+
+    private String md5(String content) throws Exception {
         MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(str.getBytes(charset));
-        byte[] result = md.digest();
+        byte[] digest = md.digest(content.getBytes("UTF-8"));
         StringBuilder sb = new StringBuilder(32);
-        for (int i = 0; i < result.length; i++) {
-            int val = result[i] & 0xff;
+        for (byte b : digest) {
+            int val = b & 0xff;
             if (val <= 0xf) {
                 sb.append("0");
             }
@@ -194,28 +137,50 @@ public class ExpressService {
         return sb.toString().toLowerCase();
     }
 
-    /**
-     * Sign签名生成
-     *
-     * @param content  内容
-     * @param keyValue Appkey
-     * @param charset  编码方式
-     * @return DataSign签名
-     */
-    private String encrypt(String content, String keyValue, String charset) {
-        if (keyValue != null) {
-            content = content + keyValue;
-        }
-        byte[] src;
-        try {
-            src = MD5(content, charset).getBytes(charset);
-            return Base64Utils.encodeToString(src);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+    private ExpressInfo createDisabledResult() {
+        ExpressInfo info = new ExpressInfo();
+        info.setSuccess(false);
+        info.setReason("物流查询服务未启用");
+        info.setTraces(new ArrayList<>());
+        return info;
+    }
+
+    private ExpressInfo createErrorResult(String reason) {
+        ExpressInfo info = new ExpressInfo();
+        info.setSuccess(false);
+        info.setReason(reason);
+        info.setTraces(new ArrayList<>());
+        return info;
+    }
+
+    public Map<String, Object> getMonitorInfo(String expCode, String expNo) {
+        if (!properties.isEnable()) {
+            logger.warn("物流查询服务未启用");
+            return null;
         }
 
+        try {
+            Map<String, Object> request = new HashMap<>();
+            request.put("OrderCode", "");
+            request.put("ShipperCode", expCode);
+            request.put("LogisticCode", expNo);
+            String requestData = objectMapper.writeValueAsString(request);
+            return doRequest(REQUEST_TYPE_MONITOR, requestData);
+        } catch (Exception e) {
+            logger.error("物流监控查询异常：" + e.getMessage(), e);
+        }
         return null;
     }
 
+    private Map<String, Object> doRequest(String requestType, String requestData) throws Exception {
+        Map<String, String> params = new HashMap<>();
+        params.put("RequestData", URLEncoder.encode(requestData, "UTF-8"));
+        params.put("EBusinessID", properties.getAppId());
+        params.put("RequestType", requestType);
+        params.put("DataSign", URLEncoder.encode(generateDataSign(requestData), "UTF-8"));
+        params.put("DataType", "2");
 
+        String result = HttpUtil.sendPost(REQ_URL, params);
+        return objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {});
+    }
 }

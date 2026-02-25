@@ -225,18 +225,10 @@ public class WxOrderService {
         result.put("orderInfo", orderVo);
         result.put("orderGoods", orderGoodsList);
 
-        // 订单状态为已发货且物流信息不为空
-        //"YTO", "800669400640887922"
         if (order.getOrderStatus().equals(OrderUtil.STATUS_SHIP)) {
             ExpressInfo ei = expressService.getExpressInfo(order.getShipChannel(), order.getShipSn());
-            if(ei == null){
-                result.put("expressInfo", new ArrayList<>());
-            }
-            else {
-                result.put("expressInfo", ei);
-            }
-        }
-        else{
+            result.put("expressInfo", ei != null ? ei : new ArrayList<>());
+        } else {
             result.put("expressInfo", new ArrayList<>());
         }
 
@@ -265,10 +257,20 @@ public class WxOrderService {
         if (order.getShipChannel() == null || order.getShipSn() == null) {
             return ResponseUtil.badArgumentValue();
         }
+        
+        logger.info("物流查询请求：userId=" + userId + ", orderId=" + orderId + ", shipChannel=" + order.getShipChannel() + ", shipSn=" + order.getShipSn());
+        
         ExpressInfo ei = expressService.getExpressInfo(order.getShipChannel(), order.getShipSn());
         if (ei == null) {
-            return ResponseUtil.ok(new HashMap<>());
+            logger.warn("物流查询返回空结果");
+            Map<String, Object> emptyResult = new HashMap<>();
+            emptyResult.put("Success", false);
+            emptyResult.put("Reason", "暂无物流信息");
+            emptyResult.put("Traces", new ArrayList<>());
+            return ResponseUtil.ok(emptyResult);
         }
+        
+        logger.info("物流查询成功：success=" + ei.getSuccess() + ", tracesCount=" + (ei.getTraces() != null ? ei.getTraces().size() : 0));
         return ResponseUtil.ok(ei);
     }
 

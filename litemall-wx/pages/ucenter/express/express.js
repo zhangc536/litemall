@@ -9,7 +9,9 @@ Page({
     traces: [],
     loading: false,
     stateText: '物流状态',
-    latestTrace: null
+    latestTrace: null,
+    success: true,
+    reason: ''
   },
   onLoad: function(options) {
     this.setData({
@@ -32,39 +34,61 @@ Page({
       orderId: that.data.orderId
     }, 'POST').then(function(res) {
       if (res.errno === 0) {
+        let data = res.data || {};
         let traces = [];
         let stateText = '物流状态';
-        if (res.data && res.data.State) {
-          stateText = that.getStateText(res.data.State);
+        let success = data.Success !== false;
+        let reason = data.Reason || '';
+
+        if (data.State) {
+          stateText = that.getStateText(data.State);
         }
-        if (res.data && res.data.StateEx) {
-          stateText = res.data.StateEx;
+        if (data.StateEx) {
+          stateText = data.StateEx;
         }
-        if (res.data && res.data.Traces) {
-          traces = res.data.Traces.slice().reverse();
+        if (data.Traces && data.Traces.length > 0) {
+          traces = data.Traces.slice().reverse();
         }
+
         let latestTrace = traces.length ? traces[0] : null;
+
         that.setData({
           traces: traces,
           stateText: stateText,
-          latestTrace: latestTrace
+          latestTrace: latestTrace,
+          success: success,
+          reason: reason
         });
-        if (!traces.length) {
+
+        if (!success && reason) {
           wx.showToast({
-            title: '暂无物流信息',
+            title: reason,
+            icon: 'none',
+            duration: 3000
+          });
+        } else if (!traces.length) {
+          wx.showToast({
+            title: '暂无物流轨迹',
             icon: 'none'
           });
         }
       } else {
-        util.showErrorToast(res.errmsg);
+        util.showErrorToast(res.errmsg || '查询失败');
+        that.setData({
+          success: false,
+          reason: res.errmsg || '查询失败'
+        });
       }
       that.setData({
         loading: false
       });
-    }).catch(function() {
+    }).catch(function(err) {
       that.setData({
-        loading: false
+        loading: false,
+        success: false,
+        reason: '网络错误，请稍后重试'
       });
+      util.showErrorToast('网络错误，请稍后重试');
     });
   },
   getStateText: function(state) {
@@ -78,9 +102,23 @@ Page({
       '6': '清关',
       '7': '代签收'
     };
-    if (map[state]) {
-      return map[state];
+    return map[state] || '物流状态';
+  },
+  copyExpNo: function() {
+    let expNo = this.data.expNo;
+    if (expNo) {
+      wx.setClipboardData({
+        data: expNo,
+        success: function() {
+          wx.showToast({
+            title: '已复制单号',
+            icon: 'success'
+          });
+        }
+      });
     }
-    return '物流状态';
+  },
+  refreshExpress: function() {
+    this.loadExpress();
   }
 });
