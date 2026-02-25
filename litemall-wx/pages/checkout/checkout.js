@@ -24,6 +24,8 @@ Page({
   },
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
+    console.log('checkout onLoad - options:', options);
+    
     if (options) {
       const cartId = options.cartId ? parseInt(options.cartId) : 0;
       const addressId = options.addressId ? parseInt(options.addressId) : 0;
@@ -31,6 +33,9 @@ Page({
       const grouponLinkId = options.grouponLinkId ? parseInt(options.grouponLinkId) : 0;
       const isPointGoods = options.point == '1';
       const pointGoodsPoints = options.points ? parseInt(options.points) : 0;
+      
+      console.log('checkout onLoad - isPointGoods from options:', isPointGoods, 'point:', options.point);
+      
       this.setData({
         cartId: isNaN(cartId) ? 0 : cartId,
         addressId: isNaN(addressId) ? 0 : addressId,
@@ -50,6 +55,7 @@ Page({
     }
     
     if (!options || options.point != '1') {
+      console.log('checkout onLoad - clearing isPointGoods, options exist:', !!options, 'point value:', options ? options.point : 'no options');
       try {
         wx.removeStorageSync('isPointGoods');
         wx.removeStorageSync('pointGoodsPoints');
@@ -59,11 +65,14 @@ Page({
         pointGoodsPoints: 0
       });
     }
+    
+    console.log('checkout onLoad - final isPointGoods:', this.data.isPointGoods);
   },
 
   //获取checkou信息
   getCheckoutInfo: function() {
     let that = this;
+    console.log('getCheckoutInfo - isPointGoods:', that.data.isPointGoods);
     util.request(api.CartCheckout, {
       cartId: that.data.cartId,
       addressId: that.data.addressId,
@@ -89,7 +98,6 @@ Page({
             pointsTotal = checkedGoodsList.reduce((sum, item) => sum + (item.pointsRequired || 0) * item.number, 0);
           }
         }
-        const isPointOrder = that.data.isPointGoods;
         that.setData({
           checkedGoodsList: checkedGoodsList,
           checkedAddress: res.data.checkedAddress,
@@ -100,9 +108,9 @@ Page({
           orderTotalPrice: res.data.orderTotalPrice,
           addressId: res.data.addressId,
           grouponRulesId: res.data.grouponRulesId,
-          pointsTotal: pointsTotal,
-          isPointGoods: isPointOrder
+          pointsTotal: pointsTotal
         });
+        console.log('getCheckoutInfo done - isPointGoods:', that.data.isPointGoods);
       }
       wx.hideLoading();
     });
@@ -143,6 +151,9 @@ Page({
     wx.showLoading({
       title: '加载中...',
     });
+    
+    console.log('checkout onShow - current isPointGoods:', this.data.isPointGoods);
+    
     try {
       var cartId = wx.getStorageSync('cartId');
       if (cartId === "") {
@@ -160,21 +171,15 @@ Page({
       if (grouponLinkId === "") {
         grouponLinkId = 0;
       }
-      
-      var isPointGoods = this.data.isPointGoods;
-      var pointGoodsPoints = this.data.pointGoodsPoints;
 
       this.setData({
         cartId: cartId,
         addressId: addressId,
         grouponRulesId: grouponRulesId,
-        grouponLinkId: grouponLinkId,
-        isPointGoods: isPointGoods,
-        pointGoodsPoints: pointGoodsPoints
+        grouponLinkId: grouponLinkId
       });
 
     } catch (e) {
-      // Do something when catch error
       console.log(e);
     }
 
@@ -219,10 +224,14 @@ Page({
     let pointsTotal = that.data.pointsTotal;
     let isPointGoods = that.data.isPointGoods;
     
+    console.log('doSubmitOrder - isPointGoods:', isPointGoods, 'pointsTotal:', pointsTotal);
+    
     if (isPointGoods && pointsTotal <= 0 && that.data.pointGoodsPoints > 0) {
       const totalNumber = that.data.checkedGoodsList.reduce((sum, item) => sum + item.number, 0);
       pointsTotal = that.data.pointGoodsPoints * totalNumber;
     }
+    
+    console.log('Submitting order - usePoints:', isPointGoods ? true : false);
     
     util.request(api.OrderSubmit, {
       cartId: that.data.cartId,
