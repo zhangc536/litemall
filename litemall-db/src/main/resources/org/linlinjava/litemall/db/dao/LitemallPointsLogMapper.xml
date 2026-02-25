@@ -33,6 +33,15 @@
     limit 1
   </select>
 
+  <select id="selectByOrderIdAndType" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from litemall_points_log
+    where order_id = #{orderId,jdbcType=INTEGER}
+    and type = #{type,jdbcType=TINYINT}
+    limit 1
+  </select>
+
   <insert id="insertSelective" parameterType="org.linlinjava.litemall.db.domain.LitemallPointsLog">
     insert into litemall_points_log
     <trim prefix="(" suffix=")" suffixOverrides=",">

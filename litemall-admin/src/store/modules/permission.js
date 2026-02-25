@@ -1,4 +1,5 @@
 import { asyncRoutes, constantRoutes } from '@/router'
+import Layout from '@/views/layout/Layout'
 
 /**
  * 通过meta.perms判断是否与当前用户权限匹配
@@ -38,6 +39,52 @@ function filterAsyncRoutes(routes, perms) {
   return res
 }
 
+function isSuperRole(roles) {
+  if (!roles || roles.length === 0) {
+    return false
+  }
+  return roles.includes('超级管理员') || roles.includes('超级管理')
+}
+
+function buildOrderRoute() {
+  return {
+    path: '/order',
+    component: Layout,
+    redirect: 'noredirect',
+    alwaysShow: true,
+    name: 'orderManage',
+    meta: {
+      title: '订单管理',
+      icon: 'shopping'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/mall/order'),
+        name: 'orderList',
+        meta: {
+          title: '订单列表',
+          noCache: true
+        }
+      }
+    ]
+  }
+}
+
+function ensureOrderRoute(routes) {
+  const inConstant = constantRoutes.some(route => route && route.path === '/order')
+  if (inConstant) {
+    return routes
+  }
+  const hasOrder = routes.some(route => route && route.path === '/order')
+  if (hasOrder) {
+    return routes
+  }
+  const fromExisting = [...constantRoutes, ...asyncRoutes].find(route => route && route.path === '/order')
+  const orderRoute = fromExisting || buildOrderRoute()
+  return routes.concat(orderRoute)
+}
+
 const permission = {
   state: {
     routes: constantRoutes,
@@ -52,13 +99,14 @@ const permission = {
   actions: {
     GenerateRoutes({ commit }, data) {
       return new Promise(resolve => {
-        const { perms } = data
+        const { perms, roles } = data
         let accessedRoutes
-        if (perms.includes('*')) {
+        if (isSuperRole(roles) || perms.includes('*')) {
           accessedRoutes = asyncRoutes
         } else {
           accessedRoutes = filterAsyncRoutes(asyncRoutes, perms)
         }
+        accessedRoutes = ensureOrderRoute(accessedRoutes)
         commit('SET_ROUTES', accessedRoutes)
         resolve()
       })

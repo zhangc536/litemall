@@ -165,9 +165,17 @@ public class AdminAuthController {
         Set<String> roles = roleService.queryByIds(roleIds);
         Set<String> permissions = permissionService.queryByRoleIds(roleIds);
         data.put("roles", roles);
-        // NOTE
-        // 这里需要转换perms结构，因为对于前端而已API形式的权限更容易理解
-        data.put("perms", toApi(permissions));
+        boolean isSuper = permissionService.checkSuperPermission(Arrays.asList(roleIds));
+        if (!isSuper && roles != null) {
+            isSuper = roles.contains("超级管理员") || roles.contains("超级管理");
+        }
+        Collection<String> perms;
+        if (isSuper) {
+            perms = getSystemPermissionsMap().values();
+        } else {
+            perms = toApi(permissions);
+        }
+        data.put("perms", perms);
         return ResponseUtil.ok(data);
     }
 

@@ -622,6 +622,8 @@ CREATE TABLE `litemall_order` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `pay_voucher` varchar(512) DEFAULT NULL COMMENT '支付凭证图片URL',
   `voucher_status` smallint(6) DEFAULT NULL COMMENT '凭证状态: 0-待审核, 1-已通过, 2-已拒绝',
+  `order_type` tinyint(4) DEFAULT 0 COMMENT '订单类型：0-普通订单，1-积分订单',
+  `points_used` int(11) DEFAULT 0 COMMENT '消耗积分数量',
   `deleted` tinyint(1) DEFAULT 0 COMMENT '逻辑删除',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='订单表';
@@ -653,6 +655,57 @@ CREATE TABLE `litemall_order_goods` (
   KEY `order_id` (`order_id`),
   KEY `goods_id` (`goods_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='订单商品表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `litemall_points_log`
+--
+
+DROP TABLE IF EXISTS `litemall_points_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `litemall_points_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL COMMENT '用户ID',
+  `points` int(11) NOT NULL COMMENT '积分变动数量（正数增加，负数减少）',
+  `type` tinyint(4) NOT NULL COMMENT '类型：1-订单获得，2-积分兑换，3-管理员调整，4-订单取消返还，5-审核拒绝返还',
+  `order_id` int(11) DEFAULT NULL COMMENT '关联订单ID',
+  `order_sn` varchar(63) DEFAULT NULL COMMENT '关联订单编号',
+  `description` varchar(255) DEFAULT NULL COMMENT '描述',
+  `balance_after` int(11) DEFAULT 0 COMMENT '变动后余额',
+  `add_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_order_id` (`order_id`),
+  KEY `idx_add_time` (`add_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='积分流水记录表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `litemall_point_goods`
+--
+
+DROP TABLE IF EXISTS `litemall_point_goods`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `litemall_point_goods` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `goods_id` int(11) NOT NULL COMMENT '关联商品ID',
+  `goods_name` varchar(127) NOT NULL COMMENT '商品名称',
+  `goods_brief` varchar(255) DEFAULT NULL COMMENT '商品简介',
+  `pic_url` varchar(255) DEFAULT NULL COMMENT '图片URL',
+  `points` int(11) NOT NULL DEFAULT 0 COMMENT '所需积分',
+  `price` decimal(10,2) DEFAULT 0.00 COMMENT '所需金额（备用）',
+  `amount` int(11) DEFAULT 0 COMMENT '库存数量',
+  `status` tinyint(4) DEFAULT 1 COMMENT '状态：0-下架，1-上架',
+  `sort_order` int(11) DEFAULT 0 COMMENT '排序',
+  `add_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(4) DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_goods_id` (`goods_id`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='积分商品表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

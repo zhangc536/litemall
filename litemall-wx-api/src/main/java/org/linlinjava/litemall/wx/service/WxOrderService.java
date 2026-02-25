@@ -1322,6 +1322,20 @@ public class WxOrderService {
         orderRouterService.rejectOrder(order);
     }
 
+    public void releasePoints(LitemallOrder order) {
+        if (order == null) {
+            return;
+        }
+        if (!pointsOrderService.isPointsOrder(order)) {
+            return;
+        }
+        pointsOrderService.refundPointsForOrder(
+                order,
+                LitemallPointsLog.TYPE_ORDER_CANCEL_REFUND,
+                "订单超时取消，积分返还"
+        );
+    }
+
     @Autowired
     private StorageService storageService;
 

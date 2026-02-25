@@ -19,6 +19,8 @@ import java.util.Set;
 public class LitemallPermissionService {
     @Resource
     private LitemallPermissionMapper permissionMapper;
+    @Resource
+    private LitemallRoleMapper roleMapper;
 
     public Set<String> queryByRoleIds(Integer[] roleIds) {
         Set<String> permissions = new HashSet<String>();
@@ -34,6 +36,9 @@ public class LitemallPermissionService {
             permissions.add(permission.getPermission());
         }
 
+        if (hasSuperRole(Arrays.asList(roleIds))) {
+            permissions.add("*");
+        }
         return permissions;
     }
 
@@ -52,6 +57,9 @@ public class LitemallPermissionService {
             permissions.add(permission.getPermission());
         }
 
+        if (hasSuperRole(Arrays.asList(roleId))) {
+            permissions.add("*");
+        }
         return permissions;
     }
 
@@ -69,6 +77,9 @@ public class LitemallPermissionService {
             permissions.add(permission.getPermission());
         }
 
+        if (hasSuperRole(roleIds)) {
+            permissions.add("*");
+        }
         return permissions;
     }
 
@@ -79,7 +90,11 @@ public class LitemallPermissionService {
 
         LitemallPermissionExample example = new LitemallPermissionExample();
         example.or().andRoleIdEqualTo(roleId).andPermissionEqualTo("*").andDeletedEqualTo(false);
-        return permissionMapper.countByExample(example) != 0;
+        if (permissionMapper.countByExample(example) != 0) {
+            return true;
+        }
+        LitemallRole role = roleMapper.selectByPrimaryKey(roleId);
+        return isSuperRole(role);
     }
 
     public boolean checkSuperPermission(List<Integer> roleIds) {
@@ -89,7 +104,10 @@ public class LitemallPermissionService {
 
         LitemallPermissionExample example = new LitemallPermissionExample();
         example.or().andRoleIdIn(roleIds).andPermissionEqualTo("*").andDeletedEqualTo(false);
-        return permissionMapper.countByExample(example) != 0;
+        if (permissionMapper.countByExample(example) != 0) {
+            return true;
+        }
+        return hasSuperRole(roleIds);
     }
 
     public void deleteByRoleId(Integer roleId) {
@@ -102,5 +120,28 @@ public class LitemallPermissionService {
         litemallPermission.setAddTime(LocalDateTime.now());
         litemallPermission.setUpdateTime(LocalDateTime.now());
         permissionMapper.insertSelective(litemallPermission);
+    }
+
+    private boolean hasSuperRole(List<Integer> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return false;
+        }
+        LitemallRoleExample example = new LitemallRoleExample();
+        example.or().andIdIn(roleIds).andEnabledEqualTo(true).andDeletedEqualTo(false);
+        List<LitemallRole> roles = roleMapper.selectByExample(example);
+        for (LitemallRole role : roles) {
+            if (isSuperRole(role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isSuperRole(LitemallRole role) {
+        if (role == null) {
+            return false;
+        }
+        String name = role.getName();
+        return "超级管理员".equals(name) || "超级管理".equals(name);
     }
 }

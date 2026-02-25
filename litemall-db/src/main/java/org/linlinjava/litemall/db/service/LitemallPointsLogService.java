@@ -83,8 +83,8 @@ public class LitemallPointsLogService {
             return false;
         }
 
-        LitemallPointsLog existLog = pointsLogMapper.selectByOrderId(orderId);
-        if (existLog != null && existLog.getType() == type) {
+        LitemallPointsLog existLog = pointsLogMapper.selectByOrderIdAndType(orderId, type);
+        if (existLog != null) {
             logger.warn("积分返还失败：已存在相同类型的返还记录, orderId={}, type={}", orderId, type);
             return false;
         }

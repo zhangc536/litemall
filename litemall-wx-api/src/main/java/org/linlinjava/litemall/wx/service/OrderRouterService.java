@@ -5,6 +5,7 @@ import org.linlinjava.litemall.db.service.*;
 import org.linlinjava.litemall.db.util.OrderUtil;
 import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.core.system.SystemConfig;
+import org.linlinjava.litemall.wx.util.WxResponseCode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,6 @@ public class OrderRouterService {
     @Autowired
     private LitemallPointsLogService pointsLogService;
 
-    private static final String ORDER_CHECKOUT_FAIL = "订单下单失败";
-
     public boolean isPointsOrder(LitemallOrder order) {
         return order != null && order.getOrderType() != null 
                 && order.getOrderType() == LitemallOrder.ORDER_TYPE_POINTS;
@@ -72,19 +71,19 @@ public class OrderRouterService {
         int requiredPoints = pointsOrderService.calculateRequiredPoints(checkedGoodsList);
         if (requiredPoints < 0) {
             logger.error("积分订单计算失败：购物车中包含非积分商品");
-            return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "购物车中包含非积分商品，无法使用积分支付");
+            return ResponseUtil.fail(WxResponseCode.ORDER_CHECKOUT_FAIL, "购物车中包含非积分商品，无法使用积分支付");
         }
         
         if (requiredPoints == 0) {
             logger.error("积分订单计算失败：购物车中没有有效的积分商品");
-            return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常，请确认商品是否为积分商品");
+            return ResponseUtil.fail(WxResponseCode.ORDER_CHECKOUT_FAIL, "积分商品信息异常，请确认商品是否为积分商品");
         }
         
         if (!pointsOrderService.validatePointsBalance(userId, requiredPoints)) {
             LitemallUser user = userService.findById(userId);
             int currentPoints = (user != null && user.getPoints() != null) ? user.getPoints() : 0;
             logger.error("积分不足：userId=" + userId + ", currentPoints=" + currentPoints + ", requiredPoints=" + requiredPoints);
-            return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分不足，当前积分：" + currentPoints + "，需要积分：" + requiredPoints);
+            return ResponseUtil.fail(WxResponseCode.ORDER_CHECKOUT_FAIL, "积分不足，当前积分：" + currentPoints + "，需要积分：" + requiredPoints);
         }
         
         logger.info("积分订单验证通过：requiredPoints=" + requiredPoints);

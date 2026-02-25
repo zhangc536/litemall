@@ -109,6 +109,28 @@ export const constantRoutes = [
         }
       }
     ]
+  },
+  {
+    path: '/order',
+    component: Layout,
+    redirect: 'noredirect',
+    alwaysShow: true,
+    name: 'orderManage',
+    meta: {
+      title: '订单管理',
+      icon: 'shopping'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/mall/order'),
+        name: 'orderList',
+        meta: {
+          title: '订单列表',
+          noCache: true
+        }
+      }
+    ]
   }
 ]
 
@@ -225,30 +247,6 @@ export const asyncRoutes = [
         meta: {
           perms: ['GET /admin/order/voucher/list', 'POST /admin/order/audit', 'POST /admin/order/ship'],
           title: '审核列表',
-          noCache: true
-        }
-      }
-    ]
-  },
-
-  {
-    path: '/order',
-    component: Layout,
-    redirect: 'noredirect',
-    alwaysShow: true,
-    name: 'orderManage',
-    meta: {
-      title: '订单管理',
-      icon: 'shopping'
-    },
-    children: [
-      {
-        path: 'list',
-        component: () => import('@/views/mall/order'),
-        name: 'orderList',
-        meta: {
-          perms: ['GET /admin/order/list'],
-          title: '订单列表',
           noCache: true
         }
       }
