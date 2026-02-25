@@ -141,7 +141,9 @@ public class WxOrderService {
             Map<String, Object> orderVo = new HashMap<>();
             orderVo.put("id", o.getId());
             orderVo.put("orderSn", o.getOrderSn());
-            orderVo.put("actualPrice", o.getActualPrice());
+            boolean isPointsOrder = o.getOrderType() != null && o.getOrderType() == 1;
+            BigDecimal actualPrice = isPointsOrder ? o.getActualPrice() : o.getGoodsPrice();
+            orderVo.put("actualPrice", actualPrice);
             orderVo.put("integralPrice", o.getIntegralPrice());
             orderVo.put("orderType", o.getOrderType());
             orderVo.put("pointsUsed", o.getPointsUsed());
@@ -206,8 +208,12 @@ public class WxOrderService {
         orderVo.put("address", order.getAddress());
         orderVo.put("goodsPrice", order.getGoodsPrice());
         orderVo.put("pointsPrice", order.getIntegralPrice());
-        orderVo.put("freightPrice", order.getFreightPrice());
-        orderVo.put("actualPrice", order.getActualPrice());
+        boolean isPointsOrder = order.getOrderType() != null && order.getOrderType() == 1
+                || (order.getPayVoucher() != null && order.getPayVoucher().startsWith("积分兑换"));
+        BigDecimal actualPrice = isPointsOrder ? order.getActualPrice() : order.getGoodsPrice();
+        BigDecimal freightPrice = isPointsOrder ? order.getFreightPrice() : BigDecimal.ZERO;
+        orderVo.put("freightPrice", freightPrice);
+        orderVo.put("actualPrice", actualPrice);
         orderVo.put("payVoucher", order.getPayVoucher());
         orderVo.put("voucherStatus", order.getVoucherStatus());
         orderVo.put("orderType", order.getOrderType());

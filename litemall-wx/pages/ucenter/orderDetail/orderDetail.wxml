@@ -67,10 +67,6 @@
           <text class="label">商品合计：</text>
           <text class="txt">￥{{orderInfo.goodsPrice}}元</text>
         </view>
-        <view class="t">
-          <text class="label">订单运费：</text>
-          <text class="txt">￥{{orderInfo.freightPrice}}元</text>
-        </view>
         <view class="t" wx:if="{{orderInfo.orderType === 1 || (orderInfo.payVoucher && orderInfo.payVoucher.indexOf('积分兑换') === 0)}}">
           <text class="label">消耗积分：</text>
           <text class="txt">{{orderInfo.pointsUsed || orderInfo.integralPrice}}</text>
