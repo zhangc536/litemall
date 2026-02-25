@@ -470,18 +470,29 @@ Page({
 
   onLoad: function(options) {
     // 页面初始化 options为页面跳转所带来的参数
-    if (options.point) {
+    console.log('goods onLoad - options:', options);
+    
+    if (options && options.point) {
       this.setData({
         isPointGoods: options.point == '1'
       });
+    } else {
+      this.setData({
+        isPointGoods: false,
+        pointGoodsPoints: 0
+      });
     }
-    if (options.points) {
+    
+    if (options && options.points) {
       const pointsValue = parseInt(options.points);
       this.setData({
         pointGoodsPoints: isNaN(pointsValue) ? 0 : pointsValue
       });
     }
-    if (options.id) {
+    
+    console.log('goods onLoad - isPointGoods:', this.data.isPointGoods);
+    
+    if (options && options.id) {
       this.setData({
         id: parseInt(options.id)
       });
