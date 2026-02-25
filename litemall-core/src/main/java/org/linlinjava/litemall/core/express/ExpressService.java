@@ -18,7 +18,8 @@ public class ExpressService {
     private final Log logger = LogFactory.getLog(ExpressService.class);
 
     private static final String API_URL = "https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
-    private static final String REQUEST_TYPE = "8002";
+    private static final String REQUEST_TYPE_QUERY = "8002";
+    private static final String REQUEST_TYPE_MAP = "8003";
 
     private ExpressProperties properties;
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -90,7 +91,7 @@ public class ExpressService {
             Map<String, String> params = new HashMap<>();
             params.put("RequestData", URLEncoder.encode(requestDataJson, "UTF-8"));
             params.put("EBusinessID", appId);
-            params.put("RequestType", REQUEST_TYPE);
+            params.put("RequestType", REQUEST_TYPE_QUERY);
             params.put("DataSign", URLEncoder.encode(dataSign, "UTF-8"));
             params.put("DataType", "2");
 
@@ -139,6 +140,83 @@ public class ExpressService {
     }
 
     public Map<String, Object> getMonitorInfo(String expCode, String expNo) {
+        return null;
+    }
+
+    public Map<String, Object> getMapInfo(String expCode, String expNo, String senderCityName, 
+            String receiverCityName, Integer isReturnCoordinates, Integer isReturnRouteMap) {
+        if (!properties.isEnable()) {
+            logger.warn("快递查询服务未启用");
+            return createMapResult(false, "快递查询服务未启用", null);
+        }
+
+        if (expNo == null || expNo.trim().isEmpty()) {
+            logger.error("快递单号为空");
+            return createMapResult(false, "快递单号为空", null);
+        }
+
+        String appId = properties.getAppId();
+        String appKey = properties.getAppKey();
+
+        if (appId == null || appId.trim().isEmpty() || appKey == null || appKey.trim().isEmpty()) {
+            logger.error("快递鸟配置错误");
+            return createMapResult(false, "快递查询服务配置错误", null);
+        }
+
+        try {
+            Map<String, Object> requestData = new HashMap<>();
+            if (expCode != null && !expCode.trim().isEmpty()) {
+                requestData.put("ShipperCode", expCode);
+            }
+            requestData.put("LogisticCode", expNo);
+            if (senderCityName != null && !senderCityName.trim().isEmpty()) {
+                requestData.put("SenderCityName", senderCityName);
+            }
+            if (receiverCityName != null && !receiverCityName.trim().isEmpty()) {
+                requestData.put("ReceiverCityName", receiverCityName);
+            }
+            if (isReturnCoordinates != null) {
+                requestData.put("IsReturnCoordinates", isReturnCoordinates);
+            }
+            if (isReturnRouteMap != null) {
+                requestData.put("IsReturnRouteMap", isReturnRouteMap);
+            }
+
+            String requestDataJson = objectMapper.writeValueAsString(requestData);
+            logger.info("物流轨迹地图查询请求：expCode=" + expCode + ", expNo=" + expNo);
+
+            String dataSign = generateSign(requestDataJson, appKey);
+
+            Map<String, String> params = new HashMap<>();
+            params.put("RequestData", URLEncoder.encode(requestDataJson, "UTF-8"));
+            params.put("EBusinessID", appId);
+            params.put("RequestType", REQUEST_TYPE_MAP);
+            params.put("DataSign", URLEncoder.encode(dataSign, "UTF-8"));
+            params.put("DataType", "2");
+
+            String response = HttpUtil.sendPost(API_URL, params);
+            logger.info("物流轨迹地图响应：" + response);
+
+            return objectMapper.readValue(response, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+
+        } catch (Exception e) {
+            logger.error("物流轨迹地图查询异常：" + e.getMessage(), e);
+            return createMapResult(false, "查询异常：" + e.getMessage(), null);
+        }
+    }
+
+    private Map<String, Object> createMapResult(boolean success, String reason, Object data) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("Success", success);
+        result.put("Reason", reason);
+        if (data != null) {
+            result.put("Data", data);
+        }
+        return result;
+    }
+
+    public Map<String, Object> requestCustom(String requestType, Map<String, Object> requestData, String requestTarget) {
+        logger.warn("requestCustom方法暂未实现");
         return null;
     }
 }
