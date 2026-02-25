@@ -226,7 +226,12 @@ public class WxOrderService {
         result.put("orderGoods", orderGoodsList);
 
         if (order.getOrderStatus().equals(OrderUtil.STATUS_SHIP)) {
-            ExpressInfo ei = expressService.getExpressInfo(order.getShipChannel(), order.getShipSn());
+            String phoneTail = null;
+            String mobile = order.getMobile();
+            if (mobile != null && mobile.length() >= 4) {
+                phoneTail = mobile.substring(mobile.length() - 4);
+            }
+            ExpressInfo ei = expressService.getExpressInfo(order.getShipChannel(), order.getShipSn(), phoneTail);
             result.put("expressInfo", ei != null ? ei : new ArrayList<>());
         } else {
             result.put("expressInfo", new ArrayList<>());
@@ -258,9 +263,15 @@ public class WxOrderService {
             return ResponseUtil.badArgumentValue();
         }
         
-        logger.info("物流查询请求：userId=" + userId + ", orderId=" + orderId + ", shipChannel=" + order.getShipChannel() + ", shipSn=" + order.getShipSn());
+        String phoneTail = null;
+        String mobile = order.getMobile();
+        if (mobile != null && mobile.length() >= 4) {
+            phoneTail = mobile.substring(mobile.length() - 4);
+        }
         
-        ExpressInfo ei = expressService.getExpressInfo(order.getShipChannel(), order.getShipSn());
+        logger.info("物流查询请求：userId=" + userId + ", orderId=" + orderId + ", shipChannel=" + order.getShipChannel() + ", shipSn=" + order.getShipSn() + ", phoneTail=" + phoneTail);
+        
+        ExpressInfo ei = expressService.getExpressInfo(order.getShipChannel(), order.getShipSn(), phoneTail);
         if (ei == null) {
             logger.warn("物流查询返回空结果");
             Map<String, Object> emptyResult = new HashMap<>();

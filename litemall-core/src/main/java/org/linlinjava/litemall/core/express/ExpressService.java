@@ -19,7 +19,9 @@ public class ExpressService {
     private final Log logger = LogFactory.getLog(ExpressService.class);
 
     private static final String REQ_URL = "https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
+    private static final String DIST_URL = "https://api.kdniao.com/api/dist";
     private static final String REQUEST_TYPE_TRACK = "1002";
+    private static final String REQUEST_TYPE_QUERY = "8002";
     private static final String REQUEST_TYPE_MONITOR = "8001";
 
     private ExpressProperties properties;
@@ -50,6 +52,10 @@ public class ExpressService {
     }
 
     public ExpressInfo getExpressInfo(String expCode, String expNo) {
+        return getExpressInfo(expCode, expNo, null);
+    }
+
+    public ExpressInfo getExpressInfo(String expCode, String expNo, String phoneTail) {
         if (!properties.isEnable()) {
             logger.warn("物流查询服务未启用");
             return createDisabledResult();
@@ -66,9 +72,9 @@ public class ExpressService {
         }
 
         try {
-            logger.info("开始查询物流信息：快递公司=" + expCode + "(" + getVendorName(expCode) + "), 快递单号=" + expNo);
+            logger.info("开始查询物流信息：快递公司=" + expCode + "(" + getVendorName(expCode) + "), 快递单号=" + expNo + ", 手机尾号=" + phoneTail);
 
-            String result = queryExpressApi(expCode, expNo);
+            String result = queryExpressApi(expCode, expNo, phoneTail);
             logger.info("快递鸟API返回：" + result);
 
             ExpressInfo expressInfo = objectMapper.readValue(result, ExpressInfo.class);
@@ -101,7 +107,33 @@ public class ExpressService {
         }
     }
 
-    private String queryExpressApi(String expCode, String expNo) throws Exception {
+    private String queryExpressApi(String expCode, String expNo, String phoneTail) throws Exception {
+        if (phoneTail != null && !phoneTail.trim().isEmpty()) {
+            return queryDistApi(expCode, expNo, phoneTail);
+        } else {
+            return queryTrackApi(expCode, expNo);
+        }
+    }
+
+    private String queryDistApi(String expCode, String expNo, String phoneTail) throws Exception {
+        Map<String, String> requestDataMap = new HashMap<>();
+        requestDataMap.put("ShipperCode", expCode);
+        requestDataMap.put("LogisticCode", expNo);
+        requestDataMap.put("Phone", phoneTail);
+        String requestData = objectMapper.writeValueAsString(requestDataMap);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("RequestData", URLEncoder.encode(requestData, "UTF-8"));
+        params.put("EBusinessID", properties.getAppId());
+        params.put("RequestType", REQUEST_TYPE_QUERY);
+        params.put("DataSign", URLEncoder.encode(generateDataSign(requestData), "UTF-8"));
+        params.put("DataType", "2");
+
+        logger.info("快递查询API(8002)请求：" + DIST_URL);
+        return HttpUtil.sendPost(DIST_URL, params);
+    }
+
+    private String queryTrackApi(String expCode, String expNo) throws Exception {
         String requestData = buildRequestData(expCode, expNo);
 
         Map<String, String> params = new HashMap<>();
@@ -111,7 +143,12 @@ public class ExpressService {
         params.put("DataSign", URLEncoder.encode(generateDataSign(requestData), "UTF-8"));
         params.put("DataType", "2");
 
+        logger.info("即时查询API(1002)请求：" + REQ_URL);
         return HttpUtil.sendPost(REQ_URL, params);
+    }
+
+    private String queryExpressApi(String expCode, String expNo) throws Exception {
+        return queryTrackApi(expCode, expNo);
     }
 
     private String buildRequestData(String expCode, String expNo) {
