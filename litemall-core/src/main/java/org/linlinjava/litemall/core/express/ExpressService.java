@@ -119,7 +119,7 @@ public class ExpressService {
         Map<String, String> requestDataMap = new HashMap<>();
         requestDataMap.put("ShipperCode", expCode);
         requestDataMap.put("LogisticCode", expNo);
-        requestDataMap.put("Phone", phoneTail);
+        requestDataMap.put("CustomerName", phoneTail);
         String requestData = objectMapper.writeValueAsString(requestDataMap);
 
         Map<String, String> params = new HashMap<>();
@@ -129,8 +129,8 @@ public class ExpressService {
         params.put("DataSign", URLEncoder.encode(generateDataSign(requestData), "UTF-8"));
         params.put("DataType", "2");
 
-        logger.info("快递查询API(8002)请求：" + DIST_URL);
-        return HttpUtil.sendPost(DIST_URL, params);
+        logger.info("快递查询API(8002)请求：" + REQ_URL);
+        return HttpUtil.sendPost(REQ_URL, params);
     }
 
     private String queryTrackApi(String expCode, String expNo) throws Exception {
