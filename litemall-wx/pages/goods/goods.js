@@ -560,8 +560,20 @@ Page({
 
   },
 
+  addFastPoints: function() {
+    this.addFastWithPoint(true);
+  },
+
+  addFastCash: function() {
+    this.addFastWithPoint(false);
+  },
+
   //立即购买（先自动加入购物车）
   addFast: function() {
+    this.addFastWithPoint(false);
+  },
+
+  addFastWithPoint: function(usePoints) {
     var that = this;
     if (this.data.openAttr == false) {
       //打开规格选择窗口
@@ -609,14 +621,14 @@ Page({
                 wx.setStorageSync('cartId', res.data);
                 wx.setStorageSync('grouponRulesId', checkedGroupon.id);
                 wx.setStorageSync('grouponLinkId', that.data.grouponLink.id);
-                if (that.data.isPointGoods) {
+                if (usePoints) {
                   wx.setStorageSync('isPointGoods', true);
                   wx.setStorageSync('pointGoodsPoints', that.data.pointGoodsPoints);
                 } else {
                   wx.removeStorageSync('isPointGoods');
                   wx.removeStorageSync('pointGoodsPoints');
                 }
-                const pointParam = that.data.isPointGoods ? '&point=1&points=' + that.data.pointGoodsPoints : '';
+                const pointParam = usePoints ? '&point=1&points=' + that.data.pointGoodsPoints : '';
                 wx.navigateTo({
                   url: '/pages/checkout/checkout?cartId=' + res.data + '&grouponRulesId=' + checkedGroupon.id + '&grouponLinkId=' + (that.data.grouponLink.id || 0) + pointParam
                 })
@@ -627,9 +639,13 @@ Page({
             }
           });
       };
-      this.ensurePointPurchaseAllowed().then(function() {
+      if (usePoints) {
+        this.ensurePointPurchaseAllowed().then(function() {
+          doFastAdd();
+        });
+      } else {
         doFastAdd();
-      });
+      }
     }
 
 
