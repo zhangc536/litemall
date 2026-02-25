@@ -470,7 +470,11 @@ public class WxOrderService {
         Boolean usePoints = JacksonUtil.parseBoolean(body, "usePoints");
         Integer pointsTotal = JacksonUtil.parseInteger(body, "pointsTotal");
         logger.info("Order submit - usePoints: " + usePoints + ", pointsTotal: " + pointsTotal + ", checkedGoodsList size: " + checkedGoodsList.size());
-        
+
+        if (usePoints != null && usePoints && (pointsTotal == null || pointsTotal <= 0)) {
+            usePoints = false;
+        }
+
         boolean isPointsOrder = usePoints != null && usePoints;
         int requiredPoints = 0;
         
@@ -627,7 +631,7 @@ public class WxOrderService {
         // 积分订单：设置凭证状态为待审核，等待管理员审核
         // 普通订单：如果实际支付费用是0，则直接跳过支付变成待发货状态
         boolean payed = false;
-        if (pointOrder) {
+        if (isPointsOrder) {
             payed = true;
         } else if (order.getActualPrice().compareTo(new BigDecimal("0.00")) <= 0) {
             payed = true;

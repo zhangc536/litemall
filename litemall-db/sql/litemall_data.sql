@@ -3142,7 +3142,10 @@ INSERT INTO `litemall_permission` VALUES
 (28,3,'admin:coupon:delete','2019-01-07 15:18:57','2019-01-07 15:18:57',0),
 (29,3,'admin:coupon:read','2019-01-07 15:18:57','2019-01-07 15:18:57',0),
 (30,3,'admin:coupon:create','2019-01-07 15:18:57','2019-01-07 15:18:57',0),
-(31,3,'admin:coupon:update','2019-01-07 15:18:57','2019-01-07 15:18:57',0);
+(31,3,'admin:coupon:update','2019-01-07 15:18:57','2019-01-07 15:18:57',0),
+(32,2,'admin:order:list','2019-01-07 15:18:57','2019-01-07 15:18:57',0),
+(33,2,'admin:order:audit','2019-01-07 15:18:57','2019-01-07 15:18:57',0),
+(34,2,'admin:order:ship','2019-01-07 15:18:57','2019-01-07 15:18:57',0);
 /*!40000 ALTER TABLE `litemall_permission` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
