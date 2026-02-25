@@ -59,6 +59,9 @@ Page({
         if (!isPointOrder && payVoucher.indexOf('积分兑换') === 0) {
           isPointOrder = true;
         }
+        if (!isPointOrder) {
+          orderInfo.actualPrice = orderInfo.goodsPrice;
+        }
         that.setData({
           orderInfo: orderInfo,
           orderGoods: res.data.orderGoods,
