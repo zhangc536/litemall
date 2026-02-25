@@ -125,6 +125,8 @@ public class ExpressService {
         }
         String requestData = objectMapper.writeValueAsString(requestDataMap);
 
+        logger.info("快递查询配置：appId=" + properties.getAppId() + ", appKey=" + (properties.getAppKey() != null ? properties.getAppKey().substring(0, 8) + "..." : "null"));
+
         Map<String, String> params = new HashMap<>();
         params.put("RequestData", URLEncoder.encode(requestData, "UTF-8"));
         params.put("EBusinessID", properties.getAppId());

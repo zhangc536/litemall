@@ -228,8 +228,12 @@ public class WxOrderService {
         if (order.getOrderStatus().equals(OrderUtil.STATUS_SHIP)) {
             String phoneTail = null;
             String mobile = order.getMobile();
+            logger.info("订单物流查询：orderId=" + orderId + ", mobile=" + mobile + ", shipChannel=" + order.getShipChannel() + ", shipSn=" + order.getShipSn());
             if (mobile != null && mobile.length() >= 4) {
                 phoneTail = mobile.substring(mobile.length() - 4);
+                logger.info("提取手机尾号：phoneTail=" + phoneTail);
+            } else {
+                logger.warn("手机号为空或格式不对：mobile=" + mobile);
             }
             ExpressInfo ei = expressService.getExpressInfo(order.getShipChannel(), order.getShipSn(), phoneTail);
             result.put("expressInfo", ei != null ? ei : new ArrayList<>());

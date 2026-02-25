@@ -53,8 +53,8 @@ litemall:
   # 快鸟物流查询配置
   express:
     enable: true
-    appId: 1912788
-    appKey: 3e1ce226-8749-4266-8cef-bb3e6234ec4c
+    appId: "1912788"
+    appKey: "3e1ce226-8749-4266-8cef-bb3e6234ec4c"
     vendors:
     - code: "ZTO"
       name: "中通快递"
