@@ -98,14 +98,18 @@ Page({
             pointsTotal = checkedGoodsList.reduce((sum, item) => sum + (item.pointsRequired || 0) * item.number, 0);
           }
         }
+        const goodsTotalPrice = res.data.goodsTotalPrice;
+        const actualPrice = that.data.isPointGoods ? res.data.actualPrice : goodsTotalPrice;
+        const orderTotalPrice = that.data.isPointGoods ? res.data.orderTotalPrice : goodsTotalPrice;
+        const freightPrice = that.data.isPointGoods ? res.data.freightPrice : 0;
         that.setData({
           checkedGoodsList: checkedGoodsList,
           checkedAddress: res.data.checkedAddress,
-          actualPrice: res.data.actualPrice,
+          actualPrice: actualPrice,
           grouponPrice: res.data.grouponPrice,
-          freightPrice: res.data.freightPrice,
-          goodsTotalPrice: res.data.goodsTotalPrice,
-          orderTotalPrice: res.data.orderTotalPrice,
+          freightPrice: freightPrice,
+          goodsTotalPrice: goodsTotalPrice,
+          orderTotalPrice: orderTotalPrice,
           addressId: res.data.addressId,
           grouponRulesId: res.data.grouponRulesId,
           pointsTotal: pointsTotal
