@@ -83,3 +83,49 @@ page {
   background: #a78845;
   color: #fff;
 }
+
+.inviter-info {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  margin-top: 16rpx;
+}
+
+.inviter-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.inviter-detail {
+  flex: 1;
+}
+
+.inviter-name {
+  font-size: 30rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.inviter-id {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+}
+
+.inviter-code {
+  font-size: 24rpx;
+  color: #a78845;
+}
+
+.bound-tip {
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+  padding: 16rpx 0;
+  background: #f7f7f7;
+  border-radius: 8rpx;
+  margin-top: 16rpx;
+}

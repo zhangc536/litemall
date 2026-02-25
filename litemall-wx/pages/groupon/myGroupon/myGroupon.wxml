@@ -12,7 +12,15 @@
     <button class="share-btn" open-type="share" disabled="{{!inviteCode}}">邀请好友</button>
   </view>
 
-  <view class="card">
+  <view class="card" wx:if="{{hasBoundInviter && inviter}}">
+    <view class="title">我的邀请人</view>
+    <view class="inviter-info">
+      <view class="inviter-name">{{inviter.nickName || '用户'}}</view>
+    </view>
+    <view class="bound-tip">您已绑定邀请人，无法再次绑定</view>
+  </view>
+
+  <view class="card" wx:else>
     <view class="title">填写邀请码</view>
     <view class="input-box">
       <input class="invite-input" type="number" maxlength="20" placeholder="请输入邀请码" bindinput="bindInviteInput" value="{{inviteCodeInput}}" />

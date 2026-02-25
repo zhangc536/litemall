@@ -693,6 +693,47 @@ public class WxAuthController {
         data.put("nickName", user.getNickname());
         data.put("avatar", user.getAvatar());
         data.put("mobile", user.getMobile());
+        data.put("inviterUserId", user.getInviterUserId());
+
+        if (user.getInviterUserId() != null && user.getInviterUserId() > 0) {
+            LitemallUser inviter = userService.findById(user.getInviterUserId());
+            if (inviter != null) {
+                Map<Object, Object> inviterInfo = new HashMap<Object, Object>();
+                inviterInfo.put("userId", inviter.getId());
+                inviterInfo.put("nickName", inviter.getNickname());
+                inviterInfo.put("avatar", inviter.getAvatar());
+                inviterInfo.put("inviteCode", inviter.getInviteCode());
+                data.put("inviter", inviterInfo);
+            }
+        }
+
+        return ResponseUtil.ok(data);
+    }
+
+    @GetMapping("inviter_info")
+    public Object inviterInfo(@LoginUser Integer userId) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        LitemallUser user = userService.findById(userId);
+        if (user == null) {
+            return ResponseUtil.unlogin();
+        }
+
+        Map<Object, Object> data = new HashMap<Object, Object>();
+        data.put("hasBound", user.getInviterUserId() != null && user.getInviterUserId() > 0);
+
+        if (user.getInviterUserId() != null && user.getInviterUserId() > 0) {
+            LitemallUser inviter = userService.findById(user.getInviterUserId());
+            if (inviter != null) {
+                Map<Object, Object> inviterInfo = new HashMap<Object, Object>();
+                inviterInfo.put("userId", inviter.getId());
+                inviterInfo.put("nickName", inviter.getNickname());
+                inviterInfo.put("avatar", inviter.getAvatar());
+                inviterInfo.put("inviteCode", inviter.getInviteCode());
+                data.put("inviter", inviterInfo);
+            }
+        }
 
         return ResponseUtil.ok(data);
     }

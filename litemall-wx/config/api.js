@@ -17,6 +17,7 @@ module.exports = {
   AuthBindInviteCode: WxApiRoot + 'auth/bind_invite_code', //绑定邀请码
   AuthInfo: WxApiRoot + 'auth/info', //用户信息
   AuthInviteQrcode: WxApiRoot + 'auth/invite_qrcode', //邀请码二维码
+  AuthInviterInfo: WxApiRoot + 'auth/inviter_info', //获取邀请人信息
   AuthProfile: WxApiRoot + 'auth/profile', //账号信息更新
 
   GoodsCount: WxApiRoot + 'goods/count', //统计商品总数

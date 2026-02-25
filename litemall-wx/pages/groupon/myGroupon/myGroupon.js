@@ -9,7 +9,9 @@ Page({
     isLoading: false,
     hasLogin: false,
     inviteQrcodeUrl: '',
-    isQrcodeLoading: false
+    isQrcodeLoading: false,
+    hasBoundInviter: false,
+    inviter: null
   },
   onLoad: function(options) {
     this.setData({
@@ -31,18 +33,22 @@ Page({
       this.setData({
         hasLogin: false,
         inviteCode: '',
-        inviteQrcodeUrl: ''
+        inviteQrcodeUrl: '',
+        hasBoundInviter: false,
+        inviter: null
       });
       return Promise.resolve();
     }
     this.setData({
       hasLogin: true
     });
-    return Promise.all([this.fetchInviteCode(), this.fetchInviteQrcode()]).catch(() => {
+    return Promise.all([this.fetchInviteCode(), this.fetchInviteQrcode(), this.fetchInviterInfo()]).catch(() => {
       this.setData({
         hasLogin: false,
         inviteCode: '',
-        inviteQrcodeUrl: ''
+        inviteQrcodeUrl: '',
+        hasBoundInviter: false,
+        inviter: null
       });
     });
   },
@@ -63,6 +69,21 @@ Page({
     }).finally(() => {
       this.setData({
         isLoading: false
+      });
+    });
+  },
+  fetchInviterInfo() {
+    return util.request(api.AuthInviterInfo).then((res) => {
+      if (res.errno === 0) {
+        this.setData({
+          hasBoundInviter: res.data.hasBound || false,
+          inviter: res.data.inviter || null
+        });
+      }
+    }).catch(() => {
+      this.setData({
+        hasBoundInviter: false,
+        inviter: null
       });
     });
   },
@@ -106,6 +127,14 @@ Page({
       });
       return;
     }
+    if (this.data.hasBoundInviter) {
+      wx.showModal({
+        title: '提示',
+        content: '您已绑定邀请人，无法再次绑定',
+        showCancel: false
+      });
+      return;
+    }
     const inviteCode = (this.data.inviteCodeInput || '').trim();
     if (!inviteCode) {
       wx.showModal({
@@ -128,6 +157,7 @@ Page({
         this.setData({
           inviteCodeInput: ''
         });
+        this.fetchInviterInfo();
         wx.showModal({
           title: '绑定成功',
           content: '邀请码绑定成功',
@@ -149,17 +179,13 @@ Page({
       });
   },
   onReady: function() {
-    // 页面渲染完成
   },
   onShow: function() {
-    // 页面显示
     this.refreshInviteInfo();
   },
   onHide: function() {
-    // 页面隐藏
   },
   onUnload: function() {
-    // 页面关闭
   },
   onShareAppMessage: function() {
     const inviteCode = this.data.inviteCode;
