@@ -470,12 +470,8 @@ public class WxCartController {
             }
         }
         BigDecimal freightPrice = new BigDecimal(0.00);
-        if (!pointOrder && checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
-            freightPrice = SystemConfig.getFreight();
-        }
 
-        // 订单费用
-        BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).max(new BigDecimal(0.00));
+        BigDecimal orderTotalPrice = checkedGoodsPrice.max(new BigDecimal(0.00));
 
         BigDecimal actualPrice = orderTotalPrice;
         if (pointOrder) {

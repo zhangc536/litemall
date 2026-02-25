@@ -511,11 +511,7 @@ public class WxOrderService {
         }
 
         BigDecimal freightPrice = new BigDecimal(0);
-        if (checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
-            freightPrice = SystemConfig.getFreight();
-        }
-
-        BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).max(new BigDecimal(0));
+        BigDecimal orderTotalPrice = checkedGoodsPrice.max(new BigDecimal(0));
         BigDecimal actualPrice = orderTotalPrice;
 
         Integer orderId = null;

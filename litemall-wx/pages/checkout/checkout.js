@@ -98,7 +98,6 @@ Page({
             pointsTotal = checkedGoodsList.reduce((sum, item) => sum + (item.pointsRequired || 0) * item.number, 0);
           }
         }
-        const isPointOrder = that.data.isPointGoods && res.data && res.data.actualPrice == 0 && pointsTotal > 0;
         that.setData({
           checkedGoodsList: checkedGoodsList,
           checkedAddress: res.data.checkedAddress,
@@ -110,11 +109,12 @@ Page({
           addressId: res.data.addressId,
           grouponRulesId: res.data.grouponRulesId,
           pointsTotal: pointsTotal
-        , isPointGoods: isPointOrder });
+        });
         console.log('getCheckoutInfo done - isPointGoods:', that.data.isPointGoods);
       }
       wx.hideLoading();
     });
+  },
   checkIdCard: function() {
     let that = this;
     return new Promise(function(resolve, reject) {
@@ -231,8 +231,7 @@ Page({
       pointsTotal = that.data.pointGoodsPoints * totalNumber;
     }
     
-    const usePoints = !!isPointGoods && this.data.actualPrice == 0 && pointsTotal > 0;
-    console.log('Submitting order - usePoints:', usePoints);
+    console.log('Submitting order - usePoints:', isPointGoods ? true : false);
     
     util.request(api.OrderSubmit, {
       cartId: that.data.cartId,
@@ -240,8 +239,8 @@ Page({
       message: that.data.message,
       grouponRulesId: that.data.grouponRulesId,
       grouponLinkId: that.data.grouponLinkId,
-      usePoints: usePoints,
-      pointsTotal: usePoints ? pointsTotal : 0
+      usePoints: isPointGoods ? true : false,
+      pointsTotal: isPointGoods ? pointsTotal : 0
     }, 'POST').then(res => {
       if (res.errno === 0) {
         const orderId = res.data.orderId;
