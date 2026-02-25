@@ -108,18 +108,21 @@ public class ExpressService {
     }
 
     private String queryExpressApi(String expCode, String expNo, String phoneTail) throws Exception {
-        if (phoneTail != null && !phoneTail.trim().isEmpty()) {
-            return queryDistApi(expCode, expNo, phoneTail);
-        } else {
-            return queryTrackApi(expCode, expNo);
+        // 始终使用快递查询API(8002)，因为用户只订购了这个服务
+        if (phoneTail == null || phoneTail.trim().isEmpty()) {
+            logger.warn("手机尾号为空，快递查询可能失败");
+            phoneTail = "";
         }
+        return queryDistApi(expCode, expNo, phoneTail);
     }
 
     private String queryDistApi(String expCode, String expNo, String phoneTail) throws Exception {
         Map<String, String> requestDataMap = new HashMap<>();
         requestDataMap.put("ShipperCode", expCode);
         requestDataMap.put("LogisticCode", expNo);
-        requestDataMap.put("CustomerName", phoneTail);
+        if (phoneTail != null && !phoneTail.trim().isEmpty()) {
+            requestDataMap.put("CustomerName", phoneTail);
+        }
         String requestData = objectMapper.writeValueAsString(requestDataMap);
 
         Map<String, String> params = new HashMap<>();
@@ -129,7 +132,7 @@ public class ExpressService {
         params.put("DataSign", URLEncoder.encode(generateDataSign(requestData), "UTF-8"));
         params.put("DataType", "2");
 
-        logger.info("快递查询API(8002)请求：" + REQ_URL);
+        logger.info("快递查询API(8002)请求：" + REQ_URL + ", 请求数据: " + requestData);
         return HttpUtil.sendPost(REQ_URL, params);
     }
 
