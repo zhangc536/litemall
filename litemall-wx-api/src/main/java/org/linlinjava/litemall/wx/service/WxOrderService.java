@@ -462,45 +462,33 @@ public class WxOrderService {
         }
         Boolean usePoints = JacksonUtil.parseBoolean(body, "usePoints");
         Integer pointsTotal = JacksonUtil.parseInteger(body, "pointsTotal");
-        logger.info("Order submit - usePoints: " + usePoints + ", pointsTotal: " + pointsTotal);
+        logger.info("Order submit - usePoints: " + usePoints + ", pointsTotal: " + pointsTotal + ", checkedGoodsList size: " + checkedGoodsList.size());
+        
+        boolean requestPoints = usePoints != null && usePoints;
+        boolean pointOrder = requestPoints;
         
         int requiredPoints = 0;
-        int pointGoodsCount = 0;
         int totalGoodsCount = checkedGoodsList.size();
         
-        for (LitemallCart checkGoods : checkedGoodsList) {
-            LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(checkGoods.getGoodsId());
-            if (pointGoods != null && pointGoods.getPoints() != null && pointGoods.getPoints() > 0) {
-                requiredPoints += pointGoods.getPoints() * checkGoods.getNumber();
-                pointGoodsCount++;
-            }
-        }
-        
-        boolean allPointGoods = (pointGoodsCount == totalGoodsCount) && (totalGoodsCount > 0);
-        boolean hasPointGoods = pointGoodsCount > 0;
-        boolean requestPoints = usePoints != null && usePoints;
-        
-        boolean pointOrder = allPointGoods && requestPoints;
-        
         if (pointOrder) {
+            for (LitemallCart checkGoods : checkedGoodsList) {
+                LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(checkGoods.getGoodsId());
+                if (pointGoods != null && pointGoods.getPoints() != null && pointGoods.getPoints() > 0) {
+                    requiredPoints += pointGoods.getPoints() * checkGoods.getNumber();
+                }
+            }
+            
             if (requiredPoints <= 0) {
                 logger.error("积分订单计算失败：购物车中没有有效的积分商品");
                 return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常，请确认商品是否为积分商品");
             }
+            
             if (pointsTotal != null && pointsTotal > 0 && !pointsTotal.equals(requiredPoints)) {
                 logger.warn("积分数量不一致：前端传递=" + pointsTotal + ", 后端计算=" + requiredPoints);
             }
-        }
-        
-        if (requestPoints && !allPointGoods) {
-            logger.warn("用户请求积分支付但购物车中包含非积分商品：pointGoodsCount=" + pointGoodsCount + ", totalGoodsCount=" + totalGoodsCount);
-            return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "购物车中包含非积分商品，无法使用积分支付");
-        }
-        
-        Integer userPoints = 0;
-        LitemallUser user = null;
-        if (pointOrder) {
-            user = userService.findById(userId);
+            
+            Integer userPoints = 0;
+            LitemallUser user = userService.findById(userId);
             if (user != null && user.getPoints() != null) {
                 userPoints = user.getPoints();
             }
@@ -509,6 +497,9 @@ public class WxOrderService {
                 return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分不足，当前积分：" + userPoints + "，需要积分：" + requiredPoints);
             }
         }
+        
+        logger.info("Order type: " + (pointOrder ? "积分订单" : "凭证订单") + ", requiredPoints=" + requiredPoints);
+        
         BigDecimal checkedGoodsPrice = new BigDecimal(0);
         for (LitemallCart checkGoods : checkedGoodsList) {
             //  只有当团购规格商品ID符合才进行团购优惠
