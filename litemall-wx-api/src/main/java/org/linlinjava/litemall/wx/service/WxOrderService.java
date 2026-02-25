@@ -107,6 +107,12 @@ public class WxOrderService {
     private LitemallPointGoodsService pointGoodsService;
     @Autowired
     private LitemallPointsLogService pointsLogService;
+    @Autowired
+    private OrderRouterService orderRouterService;
+    @Autowired
+    private PointsOrderService pointsOrderService;
+    @Autowired
+    private NormalOrderService normalOrderService;
 
     /**
      * 订单列表
@@ -460,49 +466,39 @@ public class WxOrderService {
         if (checkedGoodsList.size() == 0) {
             return ResponseUtil.badArgumentValue();
         }
+        
         Boolean usePoints = JacksonUtil.parseBoolean(body, "usePoints");
         Integer pointsTotal = JacksonUtil.parseInteger(body, "pointsTotal");
         logger.info("Order submit - usePoints: " + usePoints + ", pointsTotal: " + pointsTotal + ", checkedGoodsList size: " + checkedGoodsList.size());
         
-        boolean requestPoints = usePoints != null && usePoints;
-        boolean pointOrder = requestPoints;
-        
+        boolean isPointsOrder = usePoints != null && usePoints;
         int requiredPoints = 0;
-        int totalGoodsCount = checkedGoodsList.size();
         
-        if (pointOrder) {
-            for (LitemallCart checkGoods : checkedGoodsList) {
-                LitemallPointGoods pointGoods = pointGoodsService.findByGoodsId(checkGoods.getGoodsId());
-                if (pointGoods != null && pointGoods.getPoints() != null && pointGoods.getPoints() > 0) {
-                    requiredPoints += pointGoods.getPoints() * checkGoods.getNumber();
-                }
+        if (isPointsOrder) {
+            requiredPoints = pointsOrderService.calculateRequiredPoints(checkedGoodsList);
+            if (requiredPoints < 0) {
+                logger.error("积分订单计算失败：购物车中包含非积分商品");
+                return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "购物车中包含非积分商品，无法使用积分支付");
             }
-            
-            if (requiredPoints <= 0) {
+            if (requiredPoints == 0) {
                 logger.error("积分订单计算失败：购物车中没有有效的积分商品");
                 return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分商品信息异常，请确认商品是否为积分商品");
             }
-            
-            if (pointsTotal != null && pointsTotal > 0 && !pointsTotal.equals(requiredPoints)) {
-                logger.warn("积分数量不一致：前端传递=" + pointsTotal + ", 后端计算=" + requiredPoints);
+            if (!pointsOrderService.validatePointsBalance(userId, requiredPoints)) {
+                LitemallUser user = userService.findById(userId);
+                int currentPoints = (user != null && user.getPoints() != null) ? user.getPoints() : 0;
+                logger.error("积分不足：userId=" + userId + ", currentPoints=" + currentPoints + ", requiredPoints=" + requiredPoints);
+                return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分不足，当前积分：" + currentPoints + "，需要积分：" + requiredPoints);
             }
-            
-            Integer userPoints = 0;
-            LitemallUser pointUser = userService.findById(userId);
-            if (pointUser != null && pointUser.getPoints() != null) {
-                userPoints = pointUser.getPoints();
-            }
-            if (userPoints < requiredPoints) {
-                logger.warn("积分不足：userId=" + userId + ", userPoints=" + userPoints + ", requiredPoints=" + requiredPoints);
-                return ResponseUtil.fail(ORDER_CHECKOUT_FAIL, "积分不足，当前积分：" + userPoints + "，需要积分：" + requiredPoints);
-            }
+            logger.info("积分订单验证通过：requiredPoints=" + requiredPoints);
+        } else {
+            logger.info("普通订单 - 跳过积分验证");
         }
         
-        logger.info("Order type: " + (pointOrder ? "积分订单" : "凭证订单") + ", requiredPoints=" + requiredPoints);
+        logger.info("Order type: " + (isPointsOrder ? "积分订单" : "普通订单") + ", requiredPoints=" + requiredPoints);
         
         BigDecimal checkedGoodsPrice = new BigDecimal(0);
         for (LitemallCart checkGoods : checkedGoodsList) {
-            //  只有当团购规格商品ID符合才进行团购优惠
             if (grouponRules != null && grouponRules.getGoodsId().equals(checkGoods.getGoodsId())) {
                 checkedGoodsPrice = checkedGoodsPrice.add(checkGoods.getPrice().subtract(grouponPrice).multiply(new BigDecimal(checkGoods.getNumber())));
             } else {
@@ -510,21 +506,16 @@ public class WxOrderService {
             }
         }
 
-        // 根据订单商品总价计算运费，满足条件（例如88元）则免运费，否则需要支付运费（例如8元）；
         BigDecimal freightPrice = new BigDecimal(0);
         if (checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
             freightPrice = SystemConfig.getFreight();
         }
 
-        // 订单费用
         BigDecimal orderTotalPrice = checkedGoodsPrice.add(freightPrice).max(new BigDecimal(0));
-        // 最终支付费用
         BigDecimal actualPrice = orderTotalPrice;
 
         Integer orderId = null;
-        LitemallOrder order = null;
-        // 订单
-        order = new LitemallOrder();
+        LitemallOrder order = new LitemallOrder();
         order.setUserId(userId);
         order.setOrderSn(orderService.generateOrderSn(userId));
         order.setOrderStatus(OrderUtil.STATUS_CREATE);
@@ -539,48 +530,38 @@ public class WxOrderService {
         order.setIntegralPrice(new BigDecimal(0));
         order.setOrderPrice(orderTotalPrice);
         order.setActualPrice(actualPrice);
-        boolean autoApproved = false;
-        if (pointOrder) {
+
+        if (isPointsOrder) {
             LitemallUser user = userService.findById(userId);
-            autoApproved = isTrustedPointUser(user);
-            order.setOrderType(LitemallOrder.ORDER_TYPE_POINTS);
-            order.setPointsUsed(requiredPoints);
-            order.setOrderStatus(OrderUtil.STATUS_PAY);
-            order.setPayTime(LocalDateTime.now());
-            order.setPayVoucher("积分兑换：" + requiredPoints + "积分");
-            order.setVoucherStatus(autoApproved ? (short) 1 : (short) 0);
-            order.setIntegralPrice(new BigDecimal(requiredPoints));
-            order.setActualPrice(new BigDecimal("0.00"));
-            order.setFreightPrice(BigDecimal.ZERO);
-            order.setOrderPrice(BigDecimal.ZERO);
+            boolean autoApproved = isTrustedPointUser(user);
+            pointsOrderService.setupPointsOrder(order, requiredPoints);
+            if (autoApproved) {
+                order.setVoucherStatus((short) 1);
+            }
             logger.info("积分订单创建：userId=" + userId + ", requiredPoints=" + requiredPoints + ", autoApproved=" + autoApproved);
         } else {
-            order.setOrderType(LitemallOrder.ORDER_TYPE_NORMAL);
+            normalOrderService.setupNormalOrder(order, actualPrice, freightPrice);
+            logger.info("普通订单创建：userId=" + userId + ", actualPrice=" + actualPrice);
         }
 
-        // 有团购
         if (grouponRules != null) {
-            order.setGrouponPrice(grouponPrice);    //  团购价格
+            order.setGrouponPrice(grouponPrice);
         } else {
-            order.setGrouponPrice(new BigDecimal(0));    //  团购价格
+            order.setGrouponPrice(new BigDecimal(0));
         }
 
-        // 添加订单表项
         orderService.add(order);
         orderId = order.getId();
         
-        // 积分订单：扣除积分并记录流水
-        if (pointOrder && requiredPoints > 0) {
-            boolean deductSuccess = deductPointsWithLog(userId, requiredPoints, orderId, order.getOrderSn());
+        if (isPointsOrder && requiredPoints > 0) {
+            boolean deductSuccess = pointsOrderService.deductPointsForOrder(userId, requiredPoints, orderId, order.getOrderSn());
             if (!deductSuccess) {
                 throw new RuntimeException("积分扣除失败，请重试");
             }
             logger.info("积分订单积分扣除成功：userId=" + userId + ", points=" + requiredPoints + ", orderId=" + orderId);
         }
 
-        // 添加订单商品表项
         for (LitemallCart cartGoods : checkedGoodsList) {
-            // 订单商品
             LitemallOrderGoods orderGoods = new LitemallOrderGoods();
             orderGoods.setOrderId(order.getId());
             orderGoods.setGoodsId(cartGoods.getGoodsId());
@@ -764,7 +745,8 @@ public class WxOrderService {
             }
         }
 
-        releasePoints(order);
+        // 使用路由服务处理积分返还
+        orderRouterService.cancelOrder(order);
 
         return ResponseUtil.ok();
     }
@@ -1329,64 +1311,11 @@ public class WxOrderService {
      * @author Tyson
      * @date 2020/6/8/0008 1:41
      */
-    public void releasePoints(LitemallOrder order) {
-        if (order == null) {
-            return;
-        }
-        if (order.getOrderType() == null || order.getOrderType() != LitemallOrder.ORDER_TYPE_POINTS) {
-            return;
-        }
-        Integer pointsUsed = order.getPointsUsed();
-        if (pointsUsed == null || pointsUsed <= 0) {
-            return;
-        }
-        
-        boolean success = pointsLogService.refundPoints(
-                order.getUserId(),
-                pointsUsed,
-                order.getId(),
-                order.getOrderSn(),
-                LitemallPointsLog.TYPE_ORDER_CANCEL_REFUND,
-                "订单取消，积分返还"
-        );
-        
-        if (success) {
-            logger.info("订单取消积分返还成功：orderId=" + order.getId() + ", points=" + pointsUsed);
-        } else {
-            logger.error("订单取消积分返还失败：orderId=" + order.getId() + ", points=" + pointsUsed);
-        }
-    }
-    
     public void refundPointsForReject(LitemallOrder order) {
         if (order == null) {
             return;
         }
-        if (order.getOrderType() == null || order.getOrderType() != LitemallOrder.ORDER_TYPE_POINTS) {
-            return;
-        }
-        Integer pointsUsed = order.getPointsUsed();
-        if (pointsUsed == null || pointsUsed <= 0) {
-            return;
-        }
-        
-        boolean success = pointsLogService.refundPoints(
-                order.getUserId(),
-                pointsUsed,
-                order.getId(),
-                order.getOrderSn(),
-                LitemallPointsLog.TYPE_AUDIT_REJECT_REFUND,
-                "审核拒绝，积分返还"
-        );
-        
-        if (success) {
-            logger.info("审核拒绝积分返还成功：orderId=" + order.getId() + ", points=" + pointsUsed);
-        } else {
-            logger.error("审核拒绝积分返还失败：orderId=" + order.getId() + ", points=" + pointsUsed);
-        }
-    }
-    
-    private boolean deductPointsWithLog(Integer userId, int points, Integer orderId, String orderSn) {
-        return pointsLogService.deductPoints(userId, points, orderId, orderSn, "积分兑换商品");
+        orderRouterService.rejectOrder(order);
     }
 
     @Autowired
