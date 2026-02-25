@@ -49,6 +49,10 @@ public class ExpressService {
         return properties.getVendors();
     }
 
+    public ExpressInfo getExpressInfo(String expCode, String expNo) {
+        return queryExpress(expCode, expNo, null);
+    }
+
     public ExpressInfo queryExpress(String expCode, String expNo, String phoneTail) {
         if (!properties.isEnable()) {
             logger.warn("快递查询服务未启用");
