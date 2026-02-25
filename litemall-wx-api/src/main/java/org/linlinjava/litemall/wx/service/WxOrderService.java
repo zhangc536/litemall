@@ -488,9 +488,9 @@ public class WxOrderService {
             }
             
             Integer userPoints = 0;
-            LitemallUser user = userService.findById(userId);
-            if (user != null && user.getPoints() != null) {
-                userPoints = user.getPoints();
+            LitemallUser pointUser = userService.findById(userId);
+            if (pointUser != null && pointUser.getPoints() != null) {
+                userPoints = pointUser.getPoints();
             }
             if (userPoints < requiredPoints) {
                 logger.warn("积分不足：userId=" + userId + ", userPoints=" + userPoints + ", requiredPoints=" + requiredPoints);
@@ -541,6 +541,7 @@ public class WxOrderService {
         order.setActualPrice(actualPrice);
         boolean autoApproved = false;
         if (pointOrder) {
+            LitemallUser user = userService.findById(userId);
             autoApproved = isTrustedPointUser(user);
             order.setOrderType(LitemallOrder.ORDER_TYPE_POINTS);
             order.setPointsUsed(requiredPoints);
