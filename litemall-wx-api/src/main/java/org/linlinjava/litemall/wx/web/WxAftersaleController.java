@@ -104,9 +104,13 @@ public class WxAftersaleController {
         data.put("aftersale", aftersale);
         Map<String, Object> orderVo = new HashMap<>();
         orderVo.put("goodsPrice", order.getGoodsPrice());
-        orderVo.put("freightPrice", order.getFreightPrice());
+        boolean isPointsOrder = order.getOrderType() != null && order.getOrderType() == 1
+                || (order.getPayVoucher() != null && order.getPayVoucher().startsWith("积分兑换"));
+        BigDecimal freightPrice = isPointsOrder ? order.getFreightPrice() : BigDecimal.ZERO;
+        BigDecimal actualPrice = isPointsOrder ? order.getActualPrice() : order.getGoodsPrice();
+        orderVo.put("freightPrice", freightPrice);
         orderVo.put("pointsPrice", order.getIntegralPrice());
-        orderVo.put("actualPrice", order.getActualPrice());
+        orderVo.put("actualPrice", actualPrice);
         data.put("order", orderVo);
         data.put("orderGoods", orderGoodsList);
         return ResponseUtil.ok(data);
