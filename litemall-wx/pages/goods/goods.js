@@ -435,15 +435,21 @@ Page({
       let checkedProduct = checkedProductArray[0];
       //console.log("checkedProduct: "+checkedProduct.url);
       if (checkedProduct.number > 0) {
+        let normalizedNumber = this.normalizeNumber(this.data.number);
+        if (normalizedNumber > checkedProduct.number) {
+          normalizedNumber = checkedProduct.number;
+        }
         this.setData({
           checkedSpecPrice: checkedProduct.price,
           tmpPicUrl: checkedProduct.url,
-          soldout: false
+          soldout: false,
+          number: normalizedNumber
         });
       } else {
         this.setData({
           checkedSpecPrice: this.data.goods.retailPrice,
-          soldout: true
+          soldout: true,
+          number: 1
         });
       }
 
@@ -738,8 +744,50 @@ Page({
     });
   },
   addNumber: function() {
+    let number = this.data.number + 1;
+    const maxNumber = this.getCurrentStock();
+    if (maxNumber && number > maxNumber) {
+      number = maxNumber;
+    }
     this.setData({
-      number: this.data.number + 1
+      number: number
+    });
+  },
+  normalizeNumber: function(value) {
+    let number = parseInt(value, 10);
+    if (isNaN(number) || number < 1) {
+      number = 1;
+    }
+    return number;
+  },
+  getCurrentStock: function() {
+    if (!this.isCheckedAllSpec()) {
+      return null;
+    }
+    let checkedProductArray = this.getCheckedProductItem(this.getCheckedSpecKey());
+    if (!checkedProductArray || checkedProductArray.length <= 0) {
+      return null;
+    }
+    return checkedProductArray[0].number;
+  },
+  onNumberInput: function(e) {
+    let number = this.normalizeNumber(e.detail.value);
+    const maxNumber = this.getCurrentStock();
+    if (maxNumber && number > maxNumber) {
+      number = maxNumber;
+    }
+    this.setData({
+      number: number
+    });
+  },
+  onNumberBlur: function(e) {
+    let number = this.normalizeNumber(e.detail.value);
+    const maxNumber = this.getCurrentStock();
+    if (maxNumber && number > maxNumber) {
+      number = maxNumber;
+    }
+    this.setData({
+      number: number
     });
   },
   onHide: function() {

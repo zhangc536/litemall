@@ -173,7 +173,7 @@
         <view class="name">数量</view>
         <view class="selnum">
           <view class="cut" bindtap="cutNumber">-</view>
-          <input value="{{number}}" class="number" disabled="true" type="number" />
+          <input value="{{number}}" class="number" type="number" bindinput="onNumberInput" bindblur="onNumberBlur" />
           <view class="add" bindtap="addNumber">+</view>
         </view>
       </view>
