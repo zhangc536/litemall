@@ -582,18 +582,6 @@ EOF
     log_info "权限配置更新完成"
 }
 
-init_goods_admin_id() {
-    log_step "初始化商品admin_id字段"
-    
-    mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME <<'EOF'
-ALTER TABLE litemall_goods ADD COLUMN IF NOT EXISTS admin_id int(11) DEFAULT NULL COMMENT '创建者管理员ID' AFTER deleted;
-ALTER TABLE litemall_goods ADD INDEX IF NOT EXISTS idx_admin_id (admin_id);
-UPDATE litemall_goods SET admin_id = 1 WHERE admin_id IS NULL;
-EOF
-    
-    log_info "商品admin_id字段初始化完成"
-}
-
 update_database_urls() {
     log_step "更新数据库URL"
     
