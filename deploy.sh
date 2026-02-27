@@ -690,9 +690,49 @@ build_backend_only() {
 config_nginx() {
     log_step "配置 Nginx"
     
-    cat > /etc/nginx/sites-enabled/default <<'EOF'
+    # 先创建SSL配置文件（如果不存在）
+    mkdir -p /etc/letsencrypt
+    
+    if [ ! -f /etc/letsencrypt/options-ssl-nginx.conf ]; then
+        log_info "创建SSL配置文件..."
+        cat > /etc/letsencrypt/options-ssl-nginx.conf <<'EOF'
+ssl_session_cache shared:le_nginx_SSL:10m;
+ssl_session_timeout 1440m;
+ssl_session_tickets off;
+
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_prefer_server_ciphers off;
+
+ssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384";
+EOF
+    fi
+    
+    if [ ! -f /etc/letsencrypt/ssl-dhparams.pem ]; then
+        log_info "生成DH参数..."
+        openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 2048 2>/dev/null
+    fi
+    
+    # 检查SSL证书是否存在
+    local ssl_cert="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+    local ssl_key="/etc/letsencrypt/live/$DOMAIN/privkey.pem"
+    
+    if [ -f "$ssl_cert" ] && [ -f "$ssl_key" ]; then
+        log_info "检测到SSL证书，配置HTTPS..."
+        config_nginx_ssl
+    else
+        log_info "未检测到SSL证书，先配置HTTP..."
+        config_nginx_http
+    fi
+    
+    nginx -t && systemctl reload nginx
+    
+    log_info "Nginx 配置完成"
+}
+
+config_nginx_http() {
+    cat > /etc/nginx/sites-enabled/default <<EOF
 ##
-# Default litemall nginx config
+# litemall nginx config (HTTP only)
 ##
 
 server {
@@ -704,24 +744,80 @@ server {
     index index.html index.htm index.nginx-debian.html;
 
     location / {
-        try_files $uri $uri/ =404;
+        try_files \$uri \$uri/ =404;
     }
 }
 
 server {
     listen 80;
     listen [::]:80;
-    server_name DOMAIN_PLACEHOLDER;
-    return 301 https://$host$request_uri;
+    server_name $DOMAIN;
+
+    root /var/www/litemall-admin;
+    index index.html;
+
+    client_max_body_size 50M;
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    location /wx/ {
+        proxy_pass http://127.0.0.1:8082;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+EOF
+}
+
+config_nginx_ssl() {
+    cat > /etc/nginx/sites-enabled/default <<EOF
+##
+# litemall nginx config (HTTPS)
+##
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $DOMAIN;
+    return 301 https://\$host\$request_uri;
 }
 
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
-    server_name DOMAIN_PLACEHOLDER;
+    server_name $DOMAIN;
 
-    ssl_certificate /etc/letsencrypt/live/DOMAIN_PLACEHOLDER/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/DOMAIN_PLACEHOLDER/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
@@ -731,59 +827,78 @@ server {
     client_max_body_size 50M;
 
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files \$uri \$uri/ /index.html;
     }
 
     location /admin/ {
         proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_connect_timeout 60s;
         proxy_read_timeout 60s;
     }
 
     location /wx/ {
         proxy_pass http://127.0.0.1:8082;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_connect_timeout 60s;
         proxy_read_timeout 60s;
     }
 }
 EOF
-    
-    sed -i "s|DOMAIN_PLACEHOLDER|$DOMAIN|g" /etc/nginx/sites-enabled/default
-    
-    nginx -t && systemctl reload nginx
-    
-    log_info "Nginx 配置完成"
 }
 
 setup_ssl() {
     log_step "配置 SSL 证书"
     
-    read -p "是否申请 SSL 证书？(y/n，默认y): " apply_ssl
-    apply_ssl=${apply_ssl:-y}
+    local ssl_cert="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+    local ssl_key="/etc/letsencrypt/live/$DOMAIN/privkey.pem"
     
-    if [ "$apply_ssl" = "y" ]; then
-        log_info "安装 Certbot..."
-        if [ "$PKG_MANAGER" = "yum" ]; then
-            yum install -y certbot python3-certbot-nginx
-        else
-            apt-get install -y certbot python3-certbot-nginx
-        fi
+    if [ -f "$ssl_cert" ] && [ -f "$ssl_key" ]; then
+        log_info "SSL证书已存在，配置HTTPS..."
+        config_nginx_ssl
+        nginx -t && systemctl reload nginx
+        return
+    fi
+    
+    log_info "安装 Certbot..."
+    if [ "$PKG_MANAGER" = "yum" ]; then
+        yum install -y certbot python3-certbot-nginx
+    else
+        apt-get install -y certbot python3-certbot-nginx
+    fi
+    
+    log_info "申请 SSL 证书..."
+    
+    # 先配置HTTP版本的Nginx以便certbot验证
+    config_nginx_http
+    nginx -t && systemctl reload nginx
+    
+    # 等待Nginx重启
+    sleep 3
+    
+    # 申请证书
+    if certbot --nginx -d $DOMAIN --non-interactive --agree-tos --register-unsafely-without-email --no-redirect; then
+        log_info "SSL证书申请成功"
         
-        log_info "申请 SSL 证书..."
-        certbot --nginx -d $DOMAIN --non-interactive --agree-tos --register-unsafely-without-email || true
+        # 重新配置HTTPS版本的Nginx
+        config_nginx_ssl
+        nginx -t && systemctl reload nginx
         
-        log_info "设置自动续期..."
+        # 设置自动续期
         (crontab -l 2>/dev/null; echo "0 3 * * * certbot renew --quiet") | crontab -
         
         log_info "SSL 证书配置完成"
+    else
+        log_error "SSL证书申请失败"
+        log_info "请确保域名已正确解析到服务器IP"
+        log_info "可以稍后手动申请: certbot --nginx -d $DOMAIN"
+        log_info "暂时使用HTTP模式运行..."
     fi
 }
 
