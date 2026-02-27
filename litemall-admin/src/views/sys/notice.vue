@@ -23,7 +23,7 @@
       <el-table-column align="center" :label="$t('sys_notice.table.content')" prop="content">
         <template slot-scope="scope">
           <el-dialog :visible.sync="contentDialogVisible" :title="$t('sys_notice.dialog.content_detail')">
-            <div v-html="contentDetail" />
+            <div v-html="sanitizeHtml(contentDetail)" />
           </el-dialog>
           <el-button type="primary" size="mini" @click="showContent(scope.row.content)">{{ $t('app.button.view') }}</el-button>
         </template>
@@ -252,6 +252,16 @@ export default {
     showContent(content) {
       this.contentDetail = content
       this.contentDialogVisible = true
+    },
+    sanitizeHtml(html) {
+      if (!html) return ''
+      return html
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+=/gi, '')
     },
     handleBatchDelete() {
       if (this.multipleSelection.length === 0) {

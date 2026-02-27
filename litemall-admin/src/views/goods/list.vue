@@ -62,7 +62,7 @@
       <el-table-column align="center" :label="$t('goods_list.table.detail')" prop="detail">
         <template slot-scope="scope">
           <el-dialog :visible.sync="detailDialogVisible" :title="$t('goods_list.dialog.detail')">
-            <div class="goods-detail-box" v-html="goodsDetail" />
+            <div class="goods-detail-box" v-html="sanitizeHtml(goodsDetail)" />
           </el-dialog>
           <el-button type="primary" size="mini" @click="showDetail(scope.row.detail)">{{ $t('app.button.view') }}</el-button>
         </template>
@@ -189,6 +189,16 @@ export default {
       this.goodsDetail = detail
       this.detailDialogVisible = true
     },
+    sanitizeHtml(html) {
+      if (!html) return ''
+      return html
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+=/gi, '')
+    },
     handleDelete(row) {
       this.$confirm('确定删除?', '警告', {
         confirmButtonText: '确定',
@@ -211,7 +221,6 @@ export default {
       }).catch(() => {})
     },
     handleSelectionChange(val) {
-      console.log(val)
       this.batchDeleteArr = val
     },
     handleDeleteRows() {

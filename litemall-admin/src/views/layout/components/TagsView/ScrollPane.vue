@@ -22,7 +22,7 @@ export default {
     this.scrollWrapper.addEventListener('scroll', this.emitScroll, true)
   },
   beforeDestroy() {
-    this.scrollWrapper.removeEventListener('scroll', this.emitScroll)
+    this.scrollWrapper.removeEventListener('scroll', this.emitScroll, true)
   },
   methods: {
     handleScroll(e) {

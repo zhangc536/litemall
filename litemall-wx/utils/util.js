@@ -25,34 +25,24 @@ function formatNumber(n) {
 function request(url, data = {}, method = "GET") {
   return new Promise(function(resolve, reject) {
     var token = wx.getStorageSync('token');
-    if (token && (data == null || data.token === undefined)) {
-      data = data || {};
-      data.token = token;
-    }
-    if (token && url.indexOf('token=') === -1) {
-      url = url + (url.indexOf('?') === -1 ? '?' : '&') + 'token=' + encodeURIComponent(token);
-    }
     wx.request({
       url: url,
       data: data,
       method: method,
       header: {
         'Content-Type': 'application/json',
-        'X-Litemall-Token': token
+        'X-Litemall-Token': token || ''
       },
       success: function(res) {
 
         if (res.statusCode == 200) {
 
           if (res.data.errno == 501) {
-            // 清除登录相关内容
             try {
               wx.removeStorageSync('userInfo');
               wx.removeStorageSync('token');
             } catch (e) {
-              // Do something when catch error
             }
-            // 切换到登录页面
             wx.navigateTo({
               url: '/pages/auth/login/login'
             });

@@ -12,4 +12,6 @@ public interface OrderMapper {
     int updateWithOptimisticLocker(@Param("lastUpdateTime") LocalDateTime lastUpdateTime, @Param("order") LitemallOrder order);
     List<Map> getOrderIds(@Param("query") String query, @Param("orderByClause") String orderByClause);
     List<OrderVo> getOrderList(@Param("query") String query, @Param("orderByClause") String orderByClause);
+    List<Map> getOrderIdsWithParams(@Param("query") String query, @Param("orderByClause") String orderByClause, @Param("params") Object[] params);
+    List<OrderVo> getOrderListWithParams(@Param("query") String query, @Param("orderByClause") String orderByClause, @Param("params") Object[] params);
 }

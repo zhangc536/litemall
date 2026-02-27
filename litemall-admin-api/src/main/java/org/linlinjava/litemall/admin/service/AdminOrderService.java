@@ -63,6 +63,9 @@ public class AdminOrderService {
 
     public Object detail(Integer id) {
         LitemallOrder order = orderService.findById(id);
+        if (order == null) {
+            return ResponseUtil.badArgument();
+        }
         List<LitemallOrderGoods> orderGoods = orderGoodsService.queryByOid(id);
         UserVo user = userService.findUserVoById(order.getUserId());
         Map<String, Object> data = new HashMap<>();

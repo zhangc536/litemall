@@ -13,40 +13,39 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class JwtHelper {
-	// 秘钥
-	static final String SECRET = "X-Litemall-Token";
-	// 签名是有谁生成
-	static final String ISSUSER = "LITEMALL";
-	// 签名的主题
-	static final String SUBJECT = "this is litemall token";
-	// 签名的观众
-	static final String AUDIENCE = "MINIAPP";
+	private static String secret;
+	
+	@Value("${litemall.security.jwt.secret:litemall-default-secret-key-please-change-in-production}")
+	public void setSecret(String secret) {
+		JwtHelper.secret = secret;
+	}
+	
+	private static final String ISSUSER = "LITEMALL";
+	private static final String SUBJECT = "this is litemall token";
+	private static final String AUDIENCE = "MINIAPP";
 	
 	
 	public String createToken(Integer userId){
 		try {
-		    Algorithm algorithm = Algorithm.HMAC256(SECRET);
+		    Algorithm algorithm = Algorithm.HMAC256(secret);
 		    Map<String, Object> map = new HashMap<String, Object>();
 		    Date nowDate = new Date();
-		    // 过期时间：2小时
 		    Date expireDate = getAfterDate(nowDate,0,0,0,2,0,0);
 	        map.put("alg", "HS256");
 	        map.put("typ", "JWT");
 		    String token = JWT.create()
-		    	// 设置头部信息 Header
 		    	.withHeader(map)
-		    	// 设置 载荷 Payload
 		    	.withClaim("userId", userId)
 		        .withIssuer(ISSUSER)
 		        .withSubject(SUBJECT)
 		        .withAudience(AUDIENCE)
-		        // 生成签名的时间 
 		        .withIssuedAt(nowDate)
-		        // 签名过期的时间 
 		        .withExpiresAt(expireDate)
-		        // 签名 Signature
 		        .sign(algorithm);
 		    return token;
 		} catch (JWTCreationException exception){
@@ -57,7 +56,7 @@ public class JwtHelper {
 	
 	public Integer verifyTokenAndGetUserId(String token) {
 		try {
-		    Algorithm algorithm = Algorithm.HMAC256(SECRET);
+		    Algorithm algorithm = Algorithm.HMAC256(secret);
 		    JWTVerifier verifier = JWT.require(algorithm)
 		        .withIssuer(ISSUSER)
 		        .build();
@@ -66,7 +65,7 @@ public class JwtHelper {
 		    Claim claim = claims.get("userId");
 		    return claim.asInt();
 		} catch (JWTVerificationException exception){
-//			exception.printStackTrace();
+		} catch (IllegalArgumentException exception){
 		}
 		
 		return 0;
