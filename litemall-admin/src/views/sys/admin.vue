@@ -203,8 +203,32 @@ export default {
         roleIds: []
       }
     },
+    resolveUploadUrl(response) {
+      if (!response || response.errno !== 0) {
+        return ''
+      }
+      if (response.data && response.data.url) {
+        return response.data.url
+      }
+      if (response.data && response.data.data && response.data.data.url) {
+        return response.data.data.url
+      }
+      return ''
+    },
+    notifyUploadError(response) {
+      const message = response && response.errmsg ? response.errmsg : '上传失败'
+      this.$message({
+        type: 'error',
+        message
+      })
+    },
     uploadAvatar: function(response) {
-      this.dataForm.avatar = response.data.url
+      const url = this.resolveUploadUrl(response)
+      if (!url) {
+        this.notifyUploadError(response)
+        return
+      }
+      this.dataForm.avatar = url
     },
     handleCreate() {
       this.resetForm()

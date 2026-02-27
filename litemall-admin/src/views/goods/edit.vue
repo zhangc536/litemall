@@ -464,8 +464,32 @@ export default {
       this.newKeywordVisible = false
       this.newKeyword = ''
     },
+    resolveUploadUrl(response) {
+      if (!response || response.errno !== 0) {
+        return ''
+      }
+      if (response.data && response.data.url) {
+        return response.data.url
+      }
+      if (response.data && response.data.data && response.data.data.url) {
+        return response.data.data.url
+      }
+      return ''
+    },
+    notifyUploadError(response) {
+      const message = response && response.errmsg ? response.errmsg : '上传失败'
+      this.$message({
+        type: 'error',
+        message
+      })
+    },
     uploadPicUrl: function(response) {
-      this.goods.picUrl = response.data.url
+      const url = this.resolveUploadUrl(response)
+      if (!url) {
+        this.notifyUploadError(response)
+        return
+      }
+      this.goods.picUrl = url
     },
     uploadOverrun: function() {
       this.$message({
@@ -474,9 +498,12 @@ export default {
       })
     },
     handleGalleryUrl(response, file, fileList) {
-      if (response.errno === 0) {
-        this.goods.gallery.push(response.data.url)
+      const url = this.resolveUploadUrl(response)
+      if (!url) {
+        this.notifyUploadError(response)
+        return
       }
+      this.goods.gallery.push(url)
     },
     handleRemove: function(file, fileList) {
       for (var i = 0; i < this.goods.gallery.length; i++) {
@@ -510,7 +537,12 @@ export default {
       }
     },
     uploadSpecPicUrl: function(response) {
-      this.specForm.picUrl = response.data.url
+      const url = this.resolveUploadUrl(response)
+      if (!url) {
+        this.notifyUploadError(response)
+        return
+      }
+      this.specForm.picUrl = url
     },
     handleSpecificationShow(row) {
       this.specForm = Object.assign({}, row)
@@ -532,7 +564,12 @@ export default {
       this.productVisiable = true
     },
     uploadProductUrl: function(response) {
-      this.productForm.url = response.data.url
+      const url = this.resolveUploadUrl(response)
+      if (!url) {
+        this.notifyUploadError(response)
+        return
+      }
+      this.productForm.url = url
     },
     handleProductEdit() {
       this.productForm.updateTime = ''
