@@ -61,25 +61,22 @@ public class PermissionUtil {
             }
 
             String button = requiresPermissionsDesc.button();
-            PermVo leftPerm = null;
+            String permissionId = requiresPermissions.value()[0];
+            PermVo existingById = null;
             for (PermVo permVo : perm2.getChildren()) {
-                if (permVo.getLabel().equals(button)) {
-                    leftPerm = permVo;
+                if (permissionId.equals(permVo.getId())) {
+                    existingById = permVo;
                     break;
                 }
             }
-            if (leftPerm == null) {
-                leftPerm = new PermVo();
-                leftPerm.setId(requiresPermissions.value()[0]);
-                leftPerm.setLabel(requiresPermissionsDesc.button());
-                leftPerm.setApi(api);
-                perm2.getChildren().add(leftPerm);
-            } else {
-                // TODO
-                // 目前限制Controller里面每个方法的RequiresPermissionsDesc注解是唯一的
-                // 如果允许相同，可能会造成内部权限不一致。
-                throw new RuntimeException("权限已经存在，不能添加新权限");
+            if (existingById != null) {
+                continue;
             }
+            PermVo leftPerm = new PermVo();
+            leftPerm.setId(permissionId);
+            leftPerm.setLabel(button);
+            leftPerm.setApi(api);
+            perm2.getChildren().add(leftPerm);
 
         }
         return root;

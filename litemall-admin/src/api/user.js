@@ -8,6 +8,14 @@ export function listUser(query) {
   })
 }
 
+export function listPoints(query) {
+  return request({
+    url: '/user/points',
+    method: 'get',
+    params: query
+  })
+}
+
 export function deleteUser(data) {
   return request({
     url: '/user/delete',

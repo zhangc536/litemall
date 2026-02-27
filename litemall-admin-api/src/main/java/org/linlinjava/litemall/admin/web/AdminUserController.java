@@ -46,6 +46,21 @@ public class AdminUserController {
                        @RequestParam(defaultValue = "10") Integer limit,
                        @Sort @RequestParam(defaultValue = "add_time") String sort,
                        @Order @RequestParam(defaultValue = "desc") String order) {
+        return buildUserList(username, mobile, page, limit, sort, order);
+    }
+
+    @RequiresPermissions("admin:points:list")
+    @RequiresPermissionsDesc(menu = {"积分管理", "积分管理"}, button = "查询")
+    @GetMapping("/points")
+    public Object pointsList(String username, String mobile,
+                             @RequestParam(defaultValue = "1") Integer page,
+                             @RequestParam(defaultValue = "10") Integer limit,
+                             @Sort @RequestParam(defaultValue = "add_time") String sort,
+                             @Order @RequestParam(defaultValue = "desc") String order) {
+        return buildUserList(username, mobile, page, limit, sort, order);
+    }
+
+    private Object buildUserList(String username, String mobile, Integer page, Integer limit, String sort, String order) {
         List<LitemallUser> userList = userService.querySelective(username, mobile, page, limit, sort, order);
         Set<Integer> inviterIds = new HashSet<>();
         for (LitemallUser user : userList) {

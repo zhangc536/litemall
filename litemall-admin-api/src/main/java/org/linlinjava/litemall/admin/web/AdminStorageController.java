@@ -112,7 +112,8 @@ public class AdminStorageController {
         }
         LocalDateTime now = LocalDateTime.now();
         String fileName = db + "-" + now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + ".sql";
-        File dir = new File("backup");
+        String backupPath = environment.getProperty("litemall.db.backup.path", "backup");
+        File dir = new File(backupPath);
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -133,7 +134,8 @@ public class AdminStorageController {
     @RequiresPermissionsDesc(menu = {"系统管理", "数据库备份"}, button = "列表")
     @GetMapping("/backup/list")
     public Object backupList() {
-        File dir = new File("backup");
+        String backupPath = environment.getProperty("litemall.db.backup.path", "backup");
+        File dir = new File(backupPath);
         List<Map<String, Object>> list = new ArrayList<>();
         if (dir.exists() && dir.isDirectory()) {
             File[] files = dir.listFiles((file, name) -> name.endsWith(".sql"));

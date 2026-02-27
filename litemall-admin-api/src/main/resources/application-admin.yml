@@ -2,5 +2,5 @@ litemall:
   db:
     backup:
       cron: "0 0 5,17 * * ?"
-      path: backup
+      path: /root/litemall/backup
       keep-days: 7
