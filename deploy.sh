@@ -1073,19 +1073,21 @@ main() {
     mkdir -p "$(dirname "$LOG_FILE")"
     touch "$LOG_FILE"
     
-    if [ "$1" = "--full" ]; then
+    local arg="${1:-}"
+    
+    if [ "$arg" = "--full" ]; then
         full_deploy
-    elif [ "$1" = "--update" ]; then
+    elif [ "$arg" = "--update" ]; then
         update_only
-    elif [ "$1" = "--backup" ]; then
+    elif [ "$arg" = "--backup" ]; then
         backup_only
-    elif [ "$1" = "--restore" ]; then
+    elif [ "$arg" = "--restore" ]; then
         restore_only
-    elif [ "$1" = "--build" ]; then
+    elif [ "$arg" = "--build" ]; then
         build_backend
-    elif [ "$1" = "--permissions" ]; then
+    elif [ "$arg" = "--permissions" ]; then
         update_permissions_only
-    elif [ "$1" = "--init-goods" ]; then
+    elif [ "$arg" = "--init-goods" ]; then
         init_goods_admin_id_only
     else
         show_menu
