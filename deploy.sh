@@ -168,8 +168,16 @@ git_update() {
     
     cd "$PROJECT_DIR"
     if [ -d ".git" ]; then
+        log_info "保存本地更改..."
+        git stash -q 2>/dev/null || true
+        
+        log_info "拉取最新代码..."
         git fetch --all
         git pull --rebase
+        
+        log_info "恢复本地更改..."
+        git stash pop -q 2>/dev/null || true
+        
         log_info "代码更新完成"
     else
         log_warn "未检测到 Git 仓库，跳过代码更新"
