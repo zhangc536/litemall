@@ -39,3 +39,11 @@ export function refundOrder(orderId, refundAmount) {
     data: { orderId, refundAmount }
   })
 }
+
+export function deleteOrder(orderId) {
+  return request({
+    url: '/order/delete',
+    method: 'post',
+    data: { orderId }
+  })
+}

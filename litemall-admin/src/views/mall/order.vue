@@ -70,11 +70,12 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="下单时间" prop="addTime" width="160" />
-      <el-table-column align="center" label="操作" width="180" fixed="right">
+      <el-table-column align="center" label="操作" width="220" fixed="right">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleDetail(scope.row)">详情</el-button>
           <el-button v-if="scope.row.orderStatus === 201" type="success" size="mini" @click="handleShip(scope.row)">发货</el-button>
           <el-button v-if="scope.row.payVoucher && scope.row.voucherStatus === 0" type="warning" size="mini" @click="handleAudit(scope.row)">审核</el-button>
+          <el-button v-if="canDelete(scope.row)" type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -156,7 +157,7 @@
 </template>
 
 <script>
-import { listOrders, shipOrder, auditOrder } from '@/api/order'
+import { listOrders, shipOrder, auditOrder, deleteOrder } from '@/api/order'
 import Pagination from '@/components/Pagination'
 
 export default {
@@ -271,6 +272,27 @@ export default {
         return true
       }
       return false
+    },
+    canDelete(order) {
+      if (!order) {
+        return false
+      }
+      const status = order.orderStatus
+      return status === 102 || status === 103 || status === 203 || status === 401 || status === 402
+    },
+    handleDelete(row) {
+      this.$confirm('确定要删除该订单吗？删除后无法恢复！', '删除确认', {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteOrder(row.id).then(() => {
+          this.$notify.success({ title: '成功', message: '订单已删除' })
+          this.loadOrders()
+        }).catch(() => {
+          this.$notify.error({ title: '失败', message: '删除订单失败' })
+        })
+      }).catch(() => {})
     }
   }
 }

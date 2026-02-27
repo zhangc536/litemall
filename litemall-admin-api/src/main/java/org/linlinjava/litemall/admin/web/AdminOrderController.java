@@ -221,4 +221,33 @@ public class AdminOrderController {
             return null;
         }
     }
+
+    @RequiresPermissions("admin:order:delete")
+    @RequiresPermissionsDesc(menu = {"订单管理", "订单列表"}, button = "删除")
+    @PostMapping("/delete")
+    public Object delete(@RequestBody Map<String, Integer> body) {
+        Integer orderId = body.get("orderId");
+        if (orderId == null || orderId <= 0) {
+            return ResponseUtil.badArgument();
+        }
+        
+        LitemallOrder order = orderService.findById(orderId);
+        if (order == null) {
+            return ResponseUtil.badArgument();
+        }
+        
+        Short orderStatus = order.getOrderStatus();
+        if (orderStatus != OrderUtil.STATUS_CANCEL 
+            && orderStatus != OrderUtil.STATUS_AUTO_CANCEL 
+            && orderStatus != OrderUtil.STATUS_REFUND_CONFIRM 
+            && orderStatus != OrderUtil.STATUS_CONFIRM 
+            && orderStatus != OrderUtil.STATUS_AUTO_CONFIRM) {
+            return ResponseUtil.fail(403, "订单状态不允许删除");
+        }
+        
+        orderService.deleteById(orderId);
+        logger.info("管理员删除订单：orderId=" + orderId);
+        
+        return ResponseUtil.ok();
+    }
 }
