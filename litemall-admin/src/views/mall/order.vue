@@ -289,8 +289,12 @@ export default {
         deleteOrder(row.id).then(() => {
           this.$notify.success({ title: '成功', message: '订单已删除' })
           this.loadOrders()
-        }).catch(() => {
-          this.$notify.error({ title: '失败', message: '删除订单失败' })
+        }).catch((error) => {
+          let msg = '删除订单失败'
+          if (error && error.data && error.data.errmsg) {
+            msg = error.data.errmsg
+          }
+          this.$notify.error({ title: '失败', message: msg })
         })
       }).catch(() => {})
     }
