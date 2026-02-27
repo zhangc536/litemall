@@ -2,6 +2,8 @@ package org.linlinjava.litemall.admin.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.linlinjava.litemall.admin.dto.GoodsAllinone;
 import org.linlinjava.litemall.admin.vo.CatVo;
 import org.linlinjava.litemall.core.qcode.QCodeService;
@@ -41,10 +43,26 @@ public class AdminGoodsService {
     private LitemallCartService cartService;
     @Autowired
     private QCodeService qCodeService;
+    @Autowired
+    private LitemallPermissionService permissionService;
+
+    private Integer getAdminId() {
+        Subject currentUser = SecurityUtils.getSubject();
+        LitemallAdmin admin = (LitemallAdmin) currentUser.getPrincipal();
+        return admin.getId();
+    }
+
+    private boolean isAdmin() {
+        return permissionService.checkSuperPermission(getAdminId());
+    }
 
     public Object list(Integer goodsId, String goodsSn, String name,
                        Integer page, Integer limit, String sort, String order) {
-        List<LitemallGoods> goodsList = goodsService.querySelective(goodsId, goodsSn, name, page, limit, sort, order);
+        Integer adminId = null;
+        if (!isAdmin()) {
+            adminId = getAdminId();
+        }
+        List<LitemallGoods> goodsList = goodsService.querySelective(goodsId, goodsSn, name, page, limit, sort, order, adminId);
         return ResponseUtil.okList(goodsList);
     }
 
@@ -254,6 +272,9 @@ public class AdminGoodsService {
             }
         }
         goods.setRetailPrice(retailPrice);
+
+        // 设置创建者管理员ID
+        goods.setAdminId(getAdminId());
 
         // 商品基本信息表litemall_goods
         goodsService.add(goods);

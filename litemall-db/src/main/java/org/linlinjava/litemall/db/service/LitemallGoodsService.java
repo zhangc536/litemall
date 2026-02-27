@@ -128,6 +128,10 @@ public class LitemallGoodsService {
     }
 
     public List<LitemallGoods> querySelective(Integer goodsId, String goodsSn, String name, Integer page, Integer size, String sort, String order) {
+        return querySelective(goodsId, goodsSn, name, page, size, sort, order, null);
+    }
+
+    public List<LitemallGoods> querySelective(Integer goodsId, String goodsSn, String name, Integer page, Integer size, String sort, String order, Integer adminId) {
         LitemallGoodsExample example = new LitemallGoodsExample();
         LitemallGoodsExample.Criteria criteria = example.createCriteria();
 
@@ -139,6 +143,9 @@ public class LitemallGoodsService {
         }
         if (!StringUtils.isEmpty(name)) {
             criteria.andNameLike("%" + name + "%");
+        }
+        if (adminId != null) {
+            criteria.andAdminIdEqualTo(adminId);
         }
         criteria.andDeletedEqualTo(false);
 
