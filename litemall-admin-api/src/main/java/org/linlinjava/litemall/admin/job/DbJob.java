@@ -40,19 +40,25 @@ public class DbJob {
         int keepDays = parseKeepDays(environment.getProperty("litemall.db.backup.keep-days"), 7);
 
         LocalDate localDate = LocalDate.now();
-        String fileName = localDate.toString() + ".sql";
-        File file = new File(backupPath, fileName);
-        file.getParentFile().mkdirs();
+        File dayDir = new File(backupPath, localDate.toString());
+        dayDir.mkdirs();
+        String fileName = db + "-" + localDate.toString() + ".sql";
+        File file = new File(dayDir, fileName);
         file.createNewFile();
 
         // 备份今天数据库
         DbUtil.backup(file, user, password, db);
         // 删除七天前数据库备份文件
         LocalDate before = localDate.minusDays(keepDays);
-        String fileBeforeName = before.toString()+".sql";
-        File fileBefore = new File(backupPath, fileBeforeName);
-        if (fileBefore.exists()) {
-            fileBefore.delete();
+        File beforeDir = new File(backupPath, before.toString());
+        if (beforeDir.exists() && beforeDir.isDirectory()) {
+            File[] files = beforeDir.listFiles();
+            if (files != null) {
+                for (File item : files) {
+                    item.delete();
+                }
+            }
+            beforeDir.delete();
         }
 
         logger.info("系统结束定时任务数据库备份");
