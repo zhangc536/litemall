@@ -240,34 +240,19 @@ install_maven() {
         return
     fi
     
-    log_info "安装 Maven 3.9.6..."
-    cd /opt
+    log_info "使用包管理器安装 Maven..."
     
-    # 使用国内镜像源下载
-    log_info "从清华镜像下载..."
-    if wget --timeout=120 --tries=3 https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz -O apache-maven-3.9.6-bin.tar.gz; then
-        log_info "下载成功"
-    elif wget --timeout=120 --tries=3 https://mirrors.aliyun.com/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz -O apache-maven-3.9.6-bin.tar.gz; then
-        log_info "下载成功"
+    if [ "$PKG_MANAGER" = "yum" ]; then
+        yum install -y maven
     else
-        log_error "Maven 下载失败，请手动下载"
-        log_info "手动安装命令："
-        log_info "  cd /opt"
-        log_info "  wget https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz"
-        log_info "  tar -xzf apache-maven-3.9.6-bin.tar.gz"
+        apt-get update
+        apt-get install -y maven
+    fi
+    
+    if ! mvn -v &> /dev/null; then
+        log_error "Maven 安装失败"
         exit 1
     fi
-    
-    tar -xzf apache-maven-3.9.6-bin.tar.gz
-    rm -f apache-maven-3.9.6-bin.tar.gz
-    
-    if ! grep -q "MAVEN_HOME" /etc/profile; then
-        echo "export MAVEN_HOME=/opt/apache-maven-3.9.6" >> /etc/profile
-        echo "export PATH=\$MAVEN_HOME/bin:\$PATH" >> /etc/profile
-    fi
-    
-    export MAVEN_HOME=/opt/apache-maven-3.9.6
-    export PATH=$MAVEN_HOME/bin:$PATH
     
     mkdir -p ~/.m2
     cat > ~/.m2/settings.xml <<'EOF'
@@ -669,9 +654,6 @@ build_project() {
     
     cd "$PROJECT_DIR"
     
-    export MAVEN_HOME=/opt/apache-maven-3.9.6
-    export PATH=$MAVEN_HOME/bin:$PATH
-    
     log_info "构建管理后台API..."
     mvn -pl litemall-admin-api -am clean package -DskipTests
     
@@ -694,9 +676,6 @@ build_backend_only() {
     log_step "仅构建后端项目"
     
     cd "$PROJECT_DIR"
-    
-    export MAVEN_HOME=/opt/apache-maven-3.9.6
-    export PATH=$MAVEN_HOME/bin:$PATH
     
     log_info "构建管理后台API..."
     mvn -pl litemall-admin-api -am clean package -DskipTests
