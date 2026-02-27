@@ -436,26 +436,65 @@ export default {
       })
     },
     submit() {
-      const finalGoods = {
-        goods: this.goods,
-        specifications: this.specifications,
-        products: this.products,
-        attributes: this.attributes
-      }
-      return publishGoods(finalGoods).then(response => {
-        this.$notify.success({
-          title: '成功',
-          message: '创建成功'
+      return new Promise((resolve, reject) => {
+        this.$refs.goods.validate(valid => {
+          if (!valid) {
+            MessageBox.alert('请完善商品基本信息', '警告', {
+              confirmButtonText: '确定',
+              type: 'error'
+            })
+            reject(new Error('invalid goods form'))
+            return
+          }
+          const invalidSpec = this.specifications.some(item => !item || !item.specification || !item.value)
+          if (invalidSpec) {
+            MessageBox.alert('商品规格不能为空', '警告', {
+              confirmButtonText: '确定',
+              type: 'error'
+            })
+            reject(new Error('invalid specifications'))
+            return
+          }
+          const invalidAttr = this.attributes.some(item => !item || !item.attribute || !item.value)
+          if (invalidAttr) {
+            MessageBox.alert('商品参数不能为空', '警告', {
+              confirmButtonText: '确定',
+              type: 'error'
+            })
+            reject(new Error('invalid attributes'))
+            return
+          }
+          const invalidProduct = this.products.some(item => !item || item.price === '' || item.price === null || item.number === '' || item.number === null || !item.specifications || item.specifications.length === 0)
+          if (invalidProduct) {
+            MessageBox.alert('商品货品信息不完整', '警告', {
+              confirmButtonText: '确定',
+              type: 'error'
+            })
+            reject(new Error('invalid products'))
+            return
+          }
+          const finalGoods = {
+            goods: this.goods,
+            specifications: this.specifications,
+            products: this.products,
+            attributes: this.attributes
+          }
+          publishGoods(finalGoods).then(response => {
+            this.$notify.success({
+              title: '成功',
+              message: '创建成功'
+            })
+            const data = response.data.data || this.goods
+            this.$emit('published', data)
+            resolve(data)
+          }).catch(response => {
+            MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
+              confirmButtonText: '确定',
+              type: 'error'
+            })
+            reject(response)
+          })
         })
-        const data = response.data.data || this.goods
-        this.$emit('published', data)
-        return data
-      }).catch(response => {
-        MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
-          confirmButtonText: '确定',
-          type: 'error'
-        })
-        return Promise.reject(response)
       })
     },
     handleClose(tag) {
