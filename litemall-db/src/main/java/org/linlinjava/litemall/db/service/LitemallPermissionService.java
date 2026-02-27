@@ -142,6 +142,6 @@ public class LitemallPermissionService {
             return false;
         }
         String name = role.getName();
-        return "超级管理员".equals(name) || "超级管理".equals(name);
+        return "超级管理员".equals(name) || "超级管理".equals(name) || "管理员".equals(name);
     }
 }
