@@ -14,7 +14,7 @@ DB_NAME="litemall"
 DB_USER="admin"
 DB_PASSWORD="Qwer1234"
 PROJECT_DIR="/root/litemall"
-BACKUP_DIR="/root/litemall_backup"
+BACKUP_DIR="/root/litemall/backup"
 LOG_FILE="/var/log/litemall_deploy.log"
 
 log_info() {
@@ -46,7 +46,7 @@ print_banner() {
     echo -e "${GREEN}"
     echo "╔══════════════════════════════════════════╗"
     echo "║                                          ║"
-    echo "║       Litemall 一键部署脚本 v2.0         ║"
+    echo "║       Litemall 一键部署脚本 v3.0         ║"
     echo "║                                          ║"
     echo "╚══════════════════════════════════════════╝"
     echo -e "${NC}"
@@ -348,6 +348,47 @@ backup_database() {
     fi
 }
 
+restore_database() {
+    log_step "恢复数据库"
+    
+    mkdir -p "$BACKUP_DIR"
+    
+    local backup_files=$(ls -t "$BACKUP_DIR"/litemall_*.sql 2>/dev/null)
+    
+    if [ -z "$backup_files" ]; then
+        log_error "没有找到备份文件"
+        exit 1
+    fi
+    
+    echo "可用的备份文件："
+    local i=1
+    for f in $backup_files; do
+        echo "  $i. $(basename $f)"
+        i=$((i + 1))
+    done
+    
+    read -p "请选择要恢复的备份编号 (默认1): " backup_num
+    backup_num=${backup_num:-1}
+    
+    local backup_file=$(echo "$backup_files" | sed -n "${backup_num}p")
+    
+    if [ ! -f "$backup_file" ]; then
+        log_error "备份文件不存在: $backup_file"
+        exit 1
+    fi
+    
+    log_info "将从备份文件恢复: $backup_file"
+    read -p "确认恢复？这将覆盖当前数据库！(y/n): " confirm
+    if [ "$confirm" != "y" ]; then
+        log_info "取消恢复"
+        exit 0
+    fi
+    
+    mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME < "$backup_file"
+    
+    log_info "数据库恢复成功"
+}
+
 update_config() {
     log_step "更新配置文件"
     
@@ -464,6 +505,150 @@ EOF
     log_info "数据库表结构初始化完成"
 }
 
+init_goods_admin_id() {
+    log_step "初始化商品admin_id字段"
+    
+    mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME <<'EOF'
+ALTER TABLE litemall_goods ADD COLUMN IF NOT EXISTS admin_id int(11) DEFAULT NULL COMMENT '创建者管理员ID' AFTER deleted;
+ALTER TABLE litemall_goods ADD INDEX IF NOT EXISTS idx_admin_id (admin_id);
+UPDATE litemall_goods SET admin_id = 1 WHERE admin_id IS NULL;
+EOF
+    
+    log_info "商品admin_id字段初始化完成"
+}
+
+update_permissions() {
+    log_step "更新权限配置"
+    
+    mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME <<'EOF'
+DELETE FROM litemall_permission;
+
+DELETE FROM litemall_role;
+INSERT INTO litemall_role (id, name, `desc`, enabled, add_time, update_time, deleted) VALUES
+(1, '管理员', '系统管理员，拥有所有权限', 1, NOW(), NOW(), 0),
+(2, '分销商', '分销商，拥有商品管理和订单管理权限', 1, NOW(), NOW(), 0);
+
+INSERT INTO litemall_permission (role_id, permission, add_time, update_time, deleted) VALUES
+(1, '*', NOW(), NOW(), 0);
+
+INSERT INTO litemall_permission (role_id, permission, add_time, update_time, deleted) VALUES
+(2, 'admin:category:list', NOW(), NOW(), 0),
+(2, 'admin:category:read', NOW(), NOW(), 0),
+(2, 'admin:category:create', NOW(), NOW(), 0),
+(2, 'admin:category:update', NOW(), NOW(), 0),
+(2, 'admin:brand:list', NOW(), NOW(), 0),
+(2, 'admin:brand:read', NOW(), NOW(), 0),
+(2, 'admin:brand:create', NOW(), NOW(), 0),
+(2, 'admin:brand:update', NOW(), NOW(), 0),
+(2, 'admin:goods:list', NOW(), NOW(), 0),
+(2, 'admin:goods:read', NOW(), NOW(), 0),
+(2, 'admin:goods:create', NOW(), NOW(), 0),
+(2, 'admin:goods:update', NOW(), NOW(), 0),
+(2, 'admin:order:list', NOW(), NOW(), 0),
+(2, 'admin:order:audit', NOW(), NOW(), 0),
+(2, 'admin:order:ship', NOW(), NOW(), 0),
+(2, 'admin:order:delete', NOW(), NOW(), 0),
+(2, 'admin:user:points', NOW(), NOW(), 0),
+(2, 'admin:user:points:list', NOW(), NOW(), 0),
+(2, 'admin:user:points:read', NOW(), NOW(), 0),
+(2, 'admin:user:points:update', NOW(), NOW(), 0),
+(2, 'admin:pointgoods:list', NOW(), NOW(), 0),
+(2, 'admin:pointgoods:read', NOW(), NOW(), 0),
+(2, 'admin:pointgoods:create', NOW(), NOW(), 0),
+(2, 'admin:pointgoods:update', NOW(), NOW(), 0),
+(2, 'admin:stat:user', NOW(), NOW(), 0),
+(2, 'admin:stat:order', NOW(), NOW(), 0),
+(2, 'admin:stat:goods', NOW(), NOW(), 0),
+(2, 'admin:storage:list', NOW(), NOW(), 0),
+(2, 'admin:storage:create', NOW(), NOW(), 0),
+(2, 'admin:storage:read', NOW(), NOW(), 0);
+
+UPDATE litemall_admin SET role_ids = '[1]' WHERE deleted = 0;
+EOF
+    
+    log_info "权限配置更新完成"
+}
+
+init_goods_admin_id() {
+    log_step "初始化商品admin_id字段"
+    
+    mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME <<'EOF'
+ALTER TABLE litemall_goods ADD COLUMN IF NOT EXISTS admin_id int(11) DEFAULT NULL COMMENT '创建者管理员ID' AFTER deleted;
+ALTER TABLE litemall_goods ADD INDEX IF NOT EXISTS idx_admin_id (admin_id);
+UPDATE litemall_goods SET admin_id = 1 WHERE admin_id IS NULL;
+EOF
+    
+    log_info "商品admin_id字段初始化完成"
+}
+
+update_database_urls() {
+    log_step "更新数据库URL"
+    
+    local old_domain=$(grep -oP 'https?://[^/]+' litemall-wx/config/api.js 2>/dev/null | head -1 | sed 's|https\?://||')
+    
+    if [ -z "$old_domain" ]; then
+        old_domain="www.zhangcde.asia"
+    fi
+    
+    mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME <<EOF
+UPDATE litemall_storage SET url = REPLACE(url, '$old_domain', '$DOMAIN') WHERE url LIKE '%$old_domain%';
+UPDATE litemall_user SET avatar = REPLACE(avatar, '$old_domain', '$DOMAIN') WHERE avatar LIKE '%$old_domain%';
+UPDATE litemall_goods SET pic_url = REPLACE(pic_url, '$old_domain', '$DOMAIN') WHERE pic_url LIKE '%$old_domain%';
+UPDATE litemall_goods SET gallery = REPLACE(gallery, '$old_domain', '$DOMAIN') WHERE gallery LIKE '%$old_domain%';
+UPDATE litemall_goods SET detail = REPLACE(detail, '$old_domain', '$DOMAIN') WHERE detail LIKE '%$old_domain%';
+UPDATE litemall_topic SET pic_url = REPLACE(pic_url, '$old_domain', '$DOMAIN') WHERE pic_url LIKE '%$old_domain%';
+UPDATE litemall_topic SET content = REPLACE(content, '$old_domain', '$DOMAIN') WHERE content LIKE '%$old_domain%';
+UPDATE litemall_brand SET pic_url = REPLACE(pic_url, '$old_domain', '$DOMAIN') WHERE pic_url LIKE '%$old_domain%';
+UPDATE litemall_category SET pic_url = REPLACE(pic_url, '$old_domain', '$DOMAIN') WHERE pic_url LIKE '%$old_domain%';
+UPDATE litemall_category SET icon_url = REPLACE(icon_url, '$old_domain', '$DOMAIN') WHERE icon_url LIKE '%$old_domain%';
+UPDATE litemall_admin SET avatar = REPLACE(avatar, '$old_domain', '$DOMAIN') WHERE avatar LIKE '%$old_domain%';
+EOF
+    
+    log_info "数据库URL更新完成"
+}
+
+update_config() {
+    log_step "更新配置文件"
+    
+    cd "$PROJECT_DIR"
+    
+    local old_domain=$(grep -oP 'https?://[^/]+' litemall-wx/config/api.js 2>/dev/null | head -1 | sed 's|https\?://||')
+    
+    if [ -z "$old_domain" ]; then
+        old_domain="www.zhangcde.asia"
+    fi
+    
+    log_info "旧域名: $old_domain"
+    log_info "新域名: $DOMAIN"
+    
+    log_info "更新后端配置文件..."
+    sed -i "s|$old_domain|$DOMAIN|g" litemall-core/src/main/resources/application-core.yml
+    sed -i "s|$old_domain|$DOMAIN|g" docker/litemall/application.yml
+    sed -i "s|$old_domain|$DOMAIN|g" deploy/litemall/application.yml
+    
+    log_info "更新管理后台配置文件..."
+    sed -i "s|$old_domain|$DOMAIN|g" litemall-admin/.env.deployment
+    sed -i "s|$old_domain|$DOMAIN|g" litemall-admin/vue.config.js
+    sed -i "s|$old_domain|$DOMAIN|g" litemall-admin/src/utils/request.js
+    sed -i "s|$old_domain|$DOMAIN|g" litemall-admin/src/views/user/user.vue
+    sed -i "s|$old_domain|$DOMAIN|g" litemall-admin/src/views/user/userTree.vue
+    sed -i "s|$old_domain|$DOMAIN|g" litemall-admin/src/router/index.js
+    
+    log_info "更新微信小程序配置文件..."
+    sed -i "s|$old_domain|$DOMAIN|g" litemall-wx/config/api.js
+    sed -i "s|$old_domain|$DOMAIN|g" renard-wx/config/api.js
+    
+    log_info "更新部署脚本..."
+    sed -i "s|$old_domain|$DOMAIN|g" deploy.sh
+    
+    log_info "更新Nginx配置..."
+    if [ -f /etc/nginx/conf.d/litemall.conf ]; then
+        sed -i "s|$old_domain|$DOMAIN|g" /etc/nginx/conf.d/litemall.conf
+    fi
+    
+    log_info "配置文件更新完成"
+}
+
 build_project() {
     log_step "构建项目"
     
@@ -472,8 +657,11 @@ build_project() {
     export MAVEN_HOME=/opt/apache-maven-3.9.6
     export PATH=$MAVEN_HOME/bin:$PATH
     
-    log_info "构建后端项目..."
-    mvn -pl litemall-all -am clean package -DskipTests
+    log_info "构建管理后台API..."
+    mvn -pl litemall-admin-api -am clean package -DskipTests
+    
+    log_info "构建小程序API..."
+    mvn -pl litemall-wx-api -am clean package -DskipTests
     
     log_info "构建前端项目..."
     cd litemall-admin
@@ -487,48 +675,93 @@ build_project() {
     log_info "项目构建完成"
 }
 
+build_backend_only() {
+    log_step "仅构建后端项目"
+    
+    cd "$PROJECT_DIR"
+    
+    export MAVEN_HOME=/opt/apache-maven-3.9.6
+    export PATH=$MAVEN_HOME/bin:$PATH
+    
+    log_info "构建管理后台API..."
+    mvn -pl litemall-admin-api -am clean package -DskipTests
+    
+    log_info "构建小程序API..."
+    mvn -pl litemall-wx-api -am clean package -DskipTests
+    
+    log_info "后端项目构建完成"
+}
+
 config_nginx() {
     log_step "配置 Nginx"
     
-    cat > /etc/nginx/conf.d/litemall.conf <<EOF
+    cat > /etc/nginx/sites-enabled/default <<'EOF'
+##
+# Default litemall nginx config
+##
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+
 server {
     listen 80;
-    server_name $DOMAIN;
+    listen [::]:80;
+    server_name DOMAIN_PLACEHOLDER;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name DOMAIN_PLACEHOLDER;
+
+    ssl_certificate /etc/letsencrypt/live/DOMAIN_PLACEHOLDER/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/DOMAIN_PLACEHOLDER/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
     root /var/www/litemall-admin;
     index index.html;
-    
+
     client_max_body_size 50M;
-    
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
-    
+
     location / {
-        try_files \$uri \$uri/ /index.html;
+        try_files $uri $uri/ /index.html;
     }
-    
-    location /admin-api/ {
-        proxy_pass http://127.0.0.1:8080/admin-api/;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_connect_timeout 60s;
         proxy_read_timeout 60s;
     }
-    
-    location /wx-api/ {
-        proxy_pass http://127.0.0.1:8080/wx-api/;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+
+    location /wx/ {
+        proxy_pass http://127.0.0.1:8082;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_connect_timeout 60s;
         proxy_read_timeout 60s;
     }
 }
 EOF
     
-    rm -f /etc/nginx/sites-enabled/default
+    sed -i "s|DOMAIN_PLACEHOLDER|$DOMAIN|g" /etc/nginx/sites-enabled/default
     
     nginx -t && systemctl reload nginx
     
@@ -562,45 +795,40 @@ setup_ssl() {
 start_service() {
     log_step "启动服务"
     
-    local JAR_FILE=$(ls $PROJECT_DIR/litemall-all/target/litemall-all-*-exec.jar 2>/dev/null | head -n 1)
+    mkdir -p $PROJECT_DIR/logs
     
-    if [ -z "$JAR_FILE" ]; then
-        log_error "找不到 JAR 文件"
+    pkill -f "litemall-admin-api" 2>/dev/null || true
+    pkill -f "litemall-wx-api" 2>/dev/null || true
+    sleep 2
+    
+    local ADMIN_JAR=$(ls $PROJECT_DIR/litemall-admin-api/target/litemall-admin-api-*-exec.jar 2>/dev/null | head -n 1)
+    local WX_JAR=$(ls $PROJECT_DIR/litemall-wx-api/target/litemall-wx-api-*-exec.jar 2>/dev/null | head -n 1)
+    
+    if [ -z "$ADMIN_JAR" ]; then
+        log_error "找不到 admin-api JAR 文件"
         exit 1
     fi
     
-    systemctl stop litemall 2>/dev/null || true
+    if [ -z "$WX_JAR" ]; then
+        log_error "找不到 wx-api JAR 文件"
+        exit 1
+    fi
     
-    cat > /etc/systemd/system/litemall.service <<EOF
-[Unit]
-Description=Litemall Application
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=$PROJECT_DIR
-ExecStart=/usr/bin/java -Xms512m -Xmx1024m -jar $JAR_FILE
-Restart=always
-RestartSec=10
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
+    log_info "启动管理后台API (端口8080)..."
+    nohup java -Dfile.encoding=UTF-8 -Xms256m -Xmx512m -jar $ADMIN_JAR --server.port=8080 > $PROJECT_DIR/logs/admin-api.log 2>&1 &
     
-    systemctl daemon-reload
-    systemctl enable litemall
-    systemctl start litemall
+    log_info "启动小程序API (端口8082)..."
+    nohup java -Dfile.encoding=UTF-8 -Xms256m -Xmx512m -jar $WX_JAR --server.port=8082 > $PROJECT_DIR/logs/wx-api.log 2>&1 &
     
     log_info "等待服务启动..."
     sleep 10
     
-    if systemctl is-active --quiet litemall; then
+    if pgrep -f "litemall-admin-api" > /dev/null && pgrep -f "litemall-wx-api" > /dev/null; then
         log_info "服务启动成功"
     else
-        log_error "服务启动失败，请检查日志: journalctl -u litemall -f"
+        log_error "服务启动失败，请检查日志"
+        tail -n 50 $PROJECT_DIR/logs/admin-api.log
+        tail -n 50 $PROJECT_DIR/logs/wx-api.log
         exit 1
     fi
 }
@@ -611,18 +839,31 @@ health_check() {
     local max_retries=30
     local retry=0
     
+    log_info "检查管理后台API..."
+    retry=0
     while [ $retry -lt $max_retries ]; do
-        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8080/wx-api/home/index" | grep -q "200"; then
-            log_info "后端服务健康检查通过"
-            return 0
+        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8080/admin/auth/info" | grep -q "200\|401"; then
+            log_info "管理后台API健康检查通过"
+            break
         fi
-        
         retry=$((retry + 1))
-        log_info "等待后端服务启动... ($retry/$max_retries)"
+        log_info "等待管理后台API启动... ($retry/$max_retries)"
         sleep 2
     done
     
-    log_warn "后端服务健康检查超时"
+    log_info "检查小程序API..."
+    retry=0
+    while [ $retry -lt $max_retries ]; do
+        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8082/wx/home/index" | grep -q "200"; then
+            log_info "小程序API健康检查通过"
+            return 0
+        fi
+        retry=$((retry + 1))
+        log_info "等待小程序API启动... ($retry/$max_retries)"
+        sleep 2
+    done
+    
+    log_warn "健康检查超时"
     return 1
 }
 
@@ -635,16 +876,22 @@ print_result() {
     echo -e "  ${BLUE}访问地址:${NC} http://$DOMAIN"
     echo -e "  ${BLUE}后台登录:${NC} http://$DOMAIN/#/login"
     echo ""
+    echo -e "  ${BLUE}服务端口:${NC}"
+    echo -e "    管理后台API: 8080"
+    echo -e "    小程序API: 8082"
+    echo ""
     echo -e "  ${BLUE}管理员账号:${NC} admin123"
     echo -e "  ${BLUE}管理员密码:${NC} admin123"
     echo ""
     echo -e "  ${YELLOW}常用命令:${NC}"
-    echo "    systemctl status litemall    # 查看服务状态"
-    echo "    systemctl restart litemall   # 重启服务"
-    echo "    systemctl stop litemall      # 停止服务"
-    echo "    journalctl -u litemall -f    # 查看日志"
+    echo "    查看状态: ./deploy.sh 然后选择 6"
+    echo "    重启服务: ./deploy.sh 然后选择 7"
+    echo "    查看日志: tail -f /root/litemall/logs/admin-api.log"
+    echo "              tail -f /root/litemall/logs/wx-api.log"
     echo ""
-    echo -e "  ${YELLOW}日志文件:${NC} $LOG_FILE"
+    echo -e "  ${YELLOW}日志文件:${NC}"
+    echo "    $PROJECT_DIR/logs/admin-api.log"
+    echo "    $PROJECT_DIR/logs/wx-api.log"
     echo ""
 }
 
@@ -654,19 +901,27 @@ show_menu() {
     echo "  2. 仅更新代码 (已有环境)"
     echo "  3. 仅更新配置 (更换域名)"
     echo "  4. 备份数据库"
-    echo "  5. 查看服务状态"
-    echo "  6. 重启服务"
+    echo "  5. 恢复数据库"
+    echo "  6. 查看服务状态"
+    echo "  7. 重启服务"
+    echo "  8. 仅构建后端 (快速更新)"
+    echo "  9. 更新权限配置"
+    echo "  10. 初始化商品admin_id"
     echo "  0. 退出"
     echo ""
-    read -p "请输入选项 (0-6): " choice
+    read -p "请输入选项 (0-10): " choice
     
     case $choice in
         1) full_deploy ;;
         2) update_only ;;
         3) config_only ;;
         4) backup_only ;;
-        5) status_check ;;
-        6) restart_service ;;
+        5) restore_only ;;
+        6) status_check ;;
+        7) restart_service ;;
+        8) build_backend ;;
+        9) update_permissions_only ;;
+        10) init_goods_admin_id_only ;;
         0) exit 0 ;;
         *) log_error "无效选项"; show_menu ;;
     esac
@@ -684,10 +939,18 @@ full_deploy() {
     install_mysql
     check_project_dir
     git_update
-    backup_database
+    
+    read -p "是否恢复备份数据库？(y/n，默认n): " restore_db
+    if [ "$restore_db" = "y" ]; then
+        restore_database
+    else
+        backup_database
+    fi
+    
     update_config
     update_database_urls
-    init_database
+    init_goods_admin_id
+    update_permissions
     build_project
     config_nginx
     setup_ssl
@@ -723,17 +986,69 @@ backup_only() {
     log_info "备份完成"
 }
 
+restore_only() {
+    restore_database
+    log_info "恢复完成"
+}
+
 status_check() {
-    systemctl status litemall --no-pager
+    echo "=== 管理后台API状态 ==="
+    if pgrep -f "litemall-admin-api" > /dev/null; then
+        echo -e "${GREEN}管理后台API: 运行中${NC}"
+        curl -s "http://127.0.0.1:8080/admin-api/auth/info" | head -c 200
+    else
+        echo -e "${RED}管理后台API: 未运行${NC}"
+    fi
+    
     echo ""
-    curl -s "http://127.0.0.1:8080/wx-api/home/index" | head -c 200
+    echo "=== 小程序API状态 ==="
+    if pgrep -f "litemall-wx-api" > /dev/null; then
+        echo -e "${GREEN}小程序API: 运行中${NC}"
+        curl -s "http://127.0.0.1:8082/wx-api/home/index" | head -c 200
+    else
+        echo -e "${RED}小程序API: 未运行${NC}"
+    fi
     echo ""
 }
 
 restart_service() {
-    systemctl restart litemall
+    log_info "停止服务..."
+    pkill -f "litemall-admin-api" 2>/dev/null || true
+    pkill -f "litemall-wx-api" 2>/dev/null || true
+    sleep 2
+    
+    start_service
     health_check
     log_info "服务重启完成"
+}
+
+build_backend() {
+    check_project_dir
+    build_backend_only
+    systemctl restart litemall
+    health_check
+    log_info "后端构建并重启完成"
+}
+
+update_permissions_only() {
+    update_permissions
+    log_info "权限配置更新完成，请重新登录管理后台"
+}
+
+init_goods_admin_id_only() {
+    init_goods_admin_id
+    log_info "商品admin_id初始化完成"
+}
+
+config_only() {
+    check_project_dir
+    get_config
+    backup_database
+    update_config
+    update_database_urls
+    config_nginx
+    systemctl restart litemall
+    log_info "配置更新完成"
 }
 
 main() {
@@ -749,6 +1064,14 @@ main() {
         update_only
     elif [ "$1" = "--backup" ]; then
         backup_only
+    elif [ "$1" = "--restore" ]; then
+        restore_only
+    elif [ "$1" = "--build" ]; then
+        build_backend
+    elif [ "$1" = "--permissions" ]; then
+        update_permissions_only
+    elif [ "$1" = "--init-goods" ]; then
+        init_goods_admin_id_only
     else
         show_menu
     fi
