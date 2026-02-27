@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -76,7 +76,6 @@ check_system() {
         PKG_MANAGER="yum"
     elif command -v apt-get &> /dev/null; then
         PKG_MANAGER="apt-get"
-        apt-get update -y
     else
         log_error "不支持的包管理器"
         exit 1
@@ -145,6 +144,35 @@ get_config() {
     read -p "确认配置？(y/n): " confirm
     if [ "$confirm" != "y" ]; then
         exit 0
+    fi
+}
+
+check_project_dir() {
+    log_step "检查项目目录"
+    
+    if [ ! -d "$PROJECT_DIR" ]; then
+        log_error "项目目录不存在: $PROJECT_DIR"
+        exit 1
+    fi
+    
+    if [ ! -d "$PROJECT_DIR/litemall-all" ] || [ ! -d "$PROJECT_DIR/litemall-admin" ] || [ ! -d "$PROJECT_DIR/litemall-wx" ]; then
+        log_error "项目目录不完整，请确认已正确解压或拉取代码"
+        exit 1
+    fi
+    
+    log_info "项目目录检查通过: $PROJECT_DIR"
+}
+
+git_update() {
+    log_step "更新代码"
+    
+    cd "$PROJECT_DIR"
+    if [ -d ".git" ]; then
+        git fetch --all
+        git pull --rebase
+        log_info "代码更新完成"
+    else
+        log_warn "未检测到 Git 仓库，跳过代码更新"
     fi
 }
 
@@ -546,7 +574,7 @@ start_service() {
     cat > /etc/systemd/system/litemall.service <<EOF
 [Unit]
 Description=Litemall Application
-After=network.target mysql.service
+After=network.target
 
 [Service]
 Type=simple
@@ -654,6 +682,8 @@ full_deploy() {
     install_maven
     install_nginx
     install_mysql
+    check_project_dir
+    git_update
     backup_database
     update_config
     update_database_urls
@@ -668,6 +698,8 @@ full_deploy() {
 
 update_only() {
     check_system
+    check_project_dir
+    git_update
     backup_database
     build_project
     systemctl restart litemall
@@ -676,6 +708,7 @@ update_only() {
 }
 
 config_only() {
+    check_project_dir
     get_config
     backup_database
     update_config
