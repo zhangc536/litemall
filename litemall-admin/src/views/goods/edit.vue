@@ -464,8 +464,26 @@ export default {
       this.newKeywordVisible = false
       this.newKeyword = ''
     },
+    resolveUploadUrl(response) {
+      if (!response) {
+        return null
+      }
+      if (response.data && response.data.url) {
+        return response.data.url
+      }
+      if (response.data && response.data.data && response.data.data.url) {
+        return response.data.data.url
+      }
+      if (response.url) {
+        return response.url
+      }
+      return null
+    },
     uploadPicUrl: function(response) {
-      this.goods.picUrl = response.data.url
+      const url = this.resolveUploadUrl(response)
+      if (url) {
+        this.goods.picUrl = url
+      }
     },
     uploadOverrun: function() {
       this.$message({
@@ -474,8 +492,9 @@ export default {
       })
     },
     handleGalleryUrl(response, file, fileList) {
-      if (response.errno === 0) {
-        this.goods.gallery.push(response.data.url)
+      const url = this.resolveUploadUrl(response)
+      if (url) {
+        this.goods.gallery.push(url)
       }
     },
     handleRemove: function(file, fileList) {
@@ -488,7 +507,7 @@ export default {
         if (file.response === undefined) {
           url = file.url
         } else {
-          url = file.response.data.url
+          url = this.resolveUploadUrl(file.response)
         }
 
         if (this.goods.gallery[i] === url) {

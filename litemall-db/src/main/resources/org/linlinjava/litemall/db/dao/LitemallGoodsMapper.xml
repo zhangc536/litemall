@@ -384,6 +384,9 @@
       <if test="deleted != null">
         deleted,
       </if>
+      <if test="adminId != null">
+        admin_id,
+      </if>
       <if test="detail != null">
         detail,
       </if>

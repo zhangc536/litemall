@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,12 @@ public class AdminGoodsService {
     }
 
     private boolean isAdmin() {
-        return permissionService.checkSuperPermission(getAdminId());
+        Subject currentUser = SecurityUtils.getSubject();
+        LitemallAdmin admin = (LitemallAdmin) currentUser.getPrincipal();
+        if (admin == null || admin.getRoleIds() == null || admin.getRoleIds().length == 0) {
+            return false;
+        }
+        return permissionService.checkSuperPermission(Arrays.asList(admin.getRoleIds()));
     }
 
     public Object list(Integer goodsId, String goodsSn, String name,
@@ -80,14 +86,14 @@ public class AdminGoodsService {
         Integer brandId = goods.getBrandId();
         if (brandId != null && brandId != 0) {
             if (brandService.findById(brandId) == null) {
-                return ResponseUtil.badArgumentValue();
+                goods.setBrandId(null);
             }
         }
         // 分类可以不设置，如果设置则需要验证分类存在
         Integer categoryId = goods.getCategoryId();
         if (categoryId != null && categoryId != 0) {
             if (categoryService.findById(categoryId) == null) {
-                return ResponseUtil.badArgumentValue();
+                goods.setCategoryId(null);
             }
         }
 
@@ -354,6 +360,14 @@ public class AdminGoodsService {
         List<LitemallGoodsProduct> products = productService.queryByGid(id);
         List<LitemallGoodsSpecification> specifications = specificationService.queryByGid(id);
         List<LitemallGoodsAttribute> attributes = attributeService.queryByGid(id);
+
+        if (goods != null) {
+            String picUrl = goods.getPicUrl();
+            String[] gallery = goods.getGallery();
+            if ((picUrl == null || picUrl.trim().isEmpty()) && gallery != null && gallery.length > 0) {
+                goods.setPicUrl(gallery[0]);
+            }
+        }
 
         Integer categoryId = goods.getCategoryId();
         LitemallCategory category = categoryService.findById(categoryId);
