@@ -175,46 +175,4 @@
             order by ${orderByClause}
         </if>
     </select>
-
-    <select id="getOrderIdsWithParams" resultType="hashmap">
-        select o.id, o.add_time
-        from litemall_order o
-        left join litemall_user u
-        on o.user_id = u.id
-        left join litemall_order_goods og
-        on o.id = og.order_id
-        <where>
-            <if test="query != null">
-                ${query}
-            </if>
-        </where>
-        group by o.id
-        <if test="orderByClause != null">
-            order by ${orderByClause}
-        </if>
-    </select>
-
-    <select id="getOrderListWithParams" resultMap="orderList">
-        select o.id, o.order_sn, o.order_status, o.actual_price, o.freight_price, o.add_time, o.message,
-        o.consignee, o.address, o.mobile, o.pay_time, o.order_price, o.ship_channel, o.ship_sn,
-        u.id user_id, u.nickname user_name, u.avatar user_avatar, o.integral_price,
-        o.order_type, o.points_used, o.voucher_status,
-        og.id ogid, og.goods_id, og.product_id, og.goods_name, og.pic_url goods_picture,
-        og.specifications goods_specifications, og.number goods_number, og.price goods_price
-        from litemall_order o
-        left join litemall_user u
-        on o.user_id = u.id
-        left join litemall_order_goods og
-        on o.id = og.order_id
-        left join litemall_goods g
-        on og.goods_id = g.id
-        <where>
-            <if test="query != null">
-                ${query}
-            </if>
-        </where>
-        <if test="orderByClause != null">
-            order by ${orderByClause}
-        </if>
-    </select>
 </mapper>

@@ -655,9 +655,6 @@ public class WxAuthController {
         String encryptedData = JacksonUtil.parseString(body, "encryptedData");
         String iv = JacksonUtil.parseString(body, "iv");
         WxMaPhoneNumberInfo phoneNumberInfo = this.wxService.getUserService().getPhoneNoInfo(user.getSessionKey(), encryptedData, iv);
-        if (phoneNumberInfo == null) {
-            return ResponseUtil.fail(500, "获取手机号失败");
-        }
         String phone = phoneNumberInfo.getPhoneNumber();
         user.setMobile(phone);
         if (userService.updateById(user) == 0) {

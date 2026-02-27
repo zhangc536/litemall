@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class LitemallOrderService {
@@ -64,14 +63,14 @@ public class LitemallOrderService {
         return (int) litemallOrderMapper.countByExample(example);
     }
 
-    private static final AtomicLong sequence = new AtomicLong(0);
-    private static final long sequenceMax = 9999L;
-    
-    public synchronized String generateOrderSn(Integer userId) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        String now = df.format(LocalDateTime.now());
-        long seq = sequence.getAndIncrement() % (sequenceMax + 1);
-        String orderSn = now + String.format("%04d", seq) + String.format("%02d", userId % 100);
+    // TODO 这里应该产生一个唯一的订单，但是实际上这里仍然存在两个订单相同的可能性
+    public String generateOrderSn(Integer userId) {
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String now = df.format(LocalDate.now());
+        String orderSn = now + getRandomNum(6);
+        while (countByOrderSn(userId, orderSn) != 0) {
+            orderSn = now + getRandomNum(6);
+        }
         return orderSn;
     }
 
@@ -214,36 +213,20 @@ public class LitemallOrderService {
     public Map<String, Object> queryVoSelective(String nickname, String consignee, String orderSn, LocalDateTime start, LocalDateTime end, List<Short> orderStatusArray, Integer page, Integer limit, String sort, String order) {
         List<String> querys = new ArrayList<>(4);
         if (!StringUtils.isEmpty(nickname)) {
-            querys.add(" u.nickname like concat('%', ?, '%') ");
+            querys.add(" u.nickname like '%" + nickname + "%' ");
         }
         if (!StringUtils.isEmpty(consignee)) {
-            querys.add(" o.consignee like concat('%', ?, '%') ");
+            querys.add(" o.consignee like '%" + consignee + "%' ");
         }
         if (!StringUtils.isEmpty(orderSn)) {
-            querys.add(" o.order_sn = ? ");
+            querys.add(" o.order_sn = '" + orderSn + "' ");
         }
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if (start != null) {
-            querys.add(" o.add_time >= ? ");
+            querys.add(" o.add_time >= '" + df.format(start) + "' ");
         }
         if (end != null) {
-            querys.add(" o.add_time < ? ");
-        }
-        List<Object> params = new ArrayList<>();
-        if (!StringUtils.isEmpty(nickname)) {
-            params.add(nickname);
-        }
-        if (!StringUtils.isEmpty(consignee)) {
-            params.add(consignee);
-        }
-        if (!StringUtils.isEmpty(orderSn)) {
-            params.add(orderSn);
-        }
-        if (start != null) {
-            params.add(df.format(start));
-        }
-        if (end != null) {
-            params.add(df.format(end));
+            querys.add(" o.add_time < '" + df.format(end) + "' ");
         }
         if (orderStatusArray != null && orderStatusArray.size() > 0) {
             querys.add(" o.order_status in (" + StringUtils.collectionToDelimitedString(orderStatusArray, ",") + ") ");
@@ -256,7 +239,7 @@ public class LitemallOrderService {
         }
 
         PageHelper.startPage(page, limit);
-        Page<Map> list1 = (Page) orderMapper.getOrderIdsWithParams(query, orderByClause, params.toArray());
+        Page<Map> list1 = (Page) orderMapper.getOrderIds(query, orderByClause);
         List<Integer> ids = new ArrayList<>();
         for (Map map : list1) {
             Integer id = (Integer) map.get("id");
@@ -267,7 +250,7 @@ public class LitemallOrderService {
         if (!ids.isEmpty()) {
             querys.add(" o.id in (" + StringUtils.collectionToDelimitedString(ids, ",") + ") ");
             query = StringUtils.collectionToDelimitedString(querys, "and");
-            list2 = orderMapper.getOrderListWithParams(query, orderByClause, params.toArray());
+            list2 = orderMapper.getOrderList(query, orderByClause);
         }
         Map<String, Object> data = new HashMap<String, Object>(5);
         data.put("list", list2);

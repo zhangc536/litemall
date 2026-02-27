@@ -94,7 +94,6 @@ const user = {
       return new Promise(resolve => {
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
-        commit('SET_PERMS', [])
         removeToken()
         resolve()
       })

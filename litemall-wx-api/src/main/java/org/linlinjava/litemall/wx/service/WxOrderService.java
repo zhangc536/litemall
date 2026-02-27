@@ -1241,7 +1241,7 @@ public class WxOrderService {
         if (orderGoods != null) {
             Integer orderId = orderGoods.getOrderId();
             LitemallOrder order = orderService.findById(orderId);
-            if (order == null || !order.getUserId().equals(userId)) {
+            if (!order.getUserId().equals(userId)) {
                 return ResponseUtil.badArgument();
             }
         }

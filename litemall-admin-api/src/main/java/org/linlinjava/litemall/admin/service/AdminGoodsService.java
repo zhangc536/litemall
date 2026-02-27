@@ -330,9 +330,6 @@ public class AdminGoodsService {
 
     public Object detail(Integer id) {
         LitemallGoods goods = goodsService.findById(id);
-        if (goods == null) {
-            return ResponseUtil.badArgument();
-        }
         List<LitemallGoodsProduct> products = productService.queryByGid(id);
         List<LitemallGoodsSpecification> specifications = specificationService.queryByGid(id);
         List<LitemallGoodsAttribute> attributes = attributeService.queryByGid(id);

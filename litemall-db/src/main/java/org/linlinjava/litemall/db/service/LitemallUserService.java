@@ -25,10 +25,8 @@ public class LitemallUserService {
     public UserVo findUserVoById(Integer userId) {
         LitemallUser user = findById(userId);
         UserVo userVo = new UserVo();
-        if (user != null) {
-            userVo.setNickname(user.getNickname());
-            userVo.setAvatar(user.getAvatar());
-        }
+        userVo.setNickname(user.getNickname());
+        userVo.setAvatar(user.getAvatar());
         return userVo;
     }
 

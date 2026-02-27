@@ -35,16 +35,18 @@ public class QCodeService {
 
     public String createGrouponShareImage(String goodName, String goodPicUrl, LitemallGroupon groupon) {
         try {
+            //创建该商品的二维码
             File file = wxMaService.getQrcodeService().createWxaCodeUnlimit("groupon," + groupon.getId(), "pages" +
                     "/index/index");
-            try (FileInputStream inputStream = new FileInputStream(file)) {
-                byte[] imageData = drawPicture(inputStream, goodPicUrl, goodName);
-                try (ByteArrayInputStream inputStream2 = new ByteArrayInputStream(imageData)) {
-                    LitemallStorage storageInfo = storageService.store(inputStream2, imageData.length, "image/jpeg",
-                            getKeyName(groupon.getId().toString()));
-                    return storageInfo.getUrl();
-                }
-            }
+            FileInputStream inputStream = new FileInputStream(file);
+            //将商品图片，商品名字,商城名字画到模版图中
+            byte[] imageData = drawPicture(inputStream, goodPicUrl, goodName);
+            ByteArrayInputStream inputStream2 = new ByteArrayInputStream(imageData);
+            //存储分享图
+            LitemallStorage storageInfo = storageService.store(inputStream2, imageData.length, "image/jpeg",
+                    getKeyName(groupon.getId().toString()));
+
+            return storageInfo.getUrl();
         } catch (WxErrorException e) {
             logger.error(e.getMessage(), e);
         } catch (FileNotFoundException e) {
@@ -57,20 +59,29 @@ public class QCodeService {
     }
 
 
+    /**
+     * 创建商品分享图
+     *
+     * @param goodId
+     * @param goodPicUrl
+     * @param goodName
+     */
     public String createGoodShareImage(String goodId, String goodPicUrl, String goodName) {
         if (!SystemConfig.isAutoCreateShareImage())
             return "";
 
         try {
+            //创建该商品的二维码
             File file = wxMaService.getQrcodeService().createWxaCodeUnlimit("goods," + goodId, "pages/index/index");
-            try (FileInputStream inputStream = new FileInputStream(file)) {
-                byte[] imageData = drawPicture(inputStream, goodPicUrl, goodName);
-                try (ByteArrayInputStream inputStream2 = new ByteArrayInputStream(imageData)) {
-                    LitemallStorage litemallStorage = storageService.store(inputStream2, imageData.length, "image/jpeg",
-                            getKeyName(goodId));
-                    return litemallStorage.getUrl();
-                }
-            }
+            FileInputStream inputStream = new FileInputStream(file);
+            //将商品图片，商品名字,商城名字画到模版图中
+            byte[] imageData = drawPicture(inputStream, goodPicUrl, goodName);
+            ByteArrayInputStream inputStream2 = new ByteArrayInputStream(imageData);
+            //存储分享图
+            LitemallStorage litemallStorage = storageService.store(inputStream2, imageData.length, "image/jpeg",
+                    getKeyName(goodId));
+
+            return litemallStorage.getUrl();
         } catch (WxErrorException e) {
             logger.error(e.getMessage(), e);
         } catch (FileNotFoundException e) {
@@ -101,17 +112,15 @@ public class QCodeService {
                     ByteArrayOutputStream bs = new ByteArrayOutputStream();
                     ImageIO.write(merged, "png", bs);
                     byte[] imageData = bs.toByteArray();
-                    try (ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData)) {
-                        LitemallStorage storageInfo = storageService.store(inputStream, imageData.length, "image/png",
-                                fileName);
-                        return storageInfo.getUrl();
-                    }
+                    ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+                    LitemallStorage storageInfo = storageService.store(inputStream, imageData.length, "image/png",
+                            fileName);
+                    return storageInfo.getUrl();
                 }
             }
-            try (FileInputStream inputStream = new FileInputStream(file)) {
-                LitemallStorage storageInfo = storageService.store(inputStream, file.length(), "image/png", fileName);
-                return storageInfo.getUrl();
-            }
+            FileInputStream inputStream = new FileInputStream(file);
+            LitemallStorage storageInfo = storageService.store(inputStream, file.length(), "image/png", fileName);
+            return storageInfo.getUrl();
         } catch (WxErrorException e) {
             logger.error(e.getMessage(), e);
         } catch (FileNotFoundException e) {

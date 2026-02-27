@@ -23,13 +23,16 @@ public class HomeCacheManager {
      */
     public static void loadData(String cacheKey, Map<String, Object> data) {
         Map<String, Object> cacheData = cacheDataList.get(cacheKey);
+        //有记录，则先丢弃
         if (cacheData != null) {
-            cacheDataList.remove(cacheKey);
+            cacheData.remove(cacheKey);
         }
 
         cacheData = new HashMap<>();
+        //深拷贝
         cacheData.putAll(data);
         cacheData.put("isCache", "true");
+        //设置缓存有效期为10分钟
         cacheData.put("expireTime", LocalDateTime.now().plusMinutes(10));
         cacheDataList.put(cacheKey, cacheData);
     }

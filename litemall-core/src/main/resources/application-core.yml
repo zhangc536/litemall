@@ -1,13 +1,18 @@
 litemall:
+  # 开发者应该设置成自己的wx相关信息
   wx:
-    app-id: ${LITEMALL_WX_APP_ID:wx1eedfb8d81a3244b}
-    app-secret: ${LITEMALL_WX_APP_SECRET:}
-    mch-id: ${LITEMALL_WX_MCH_ID:111111}
-    mch-key: ${LITEMALL_WX_MCH_KEY:xxxxxx}
-    notify-url: ${LITEMALL_WX_NOTIFY_URL:https://www.zhangcde.asia/wx/order/pay-notify}
-    key-path: ${LITEMALL_WX_KEY_PATH:xxxxx}
-    token: ${LITEMALL_WX_TOKEN:}
-    aes-key: ${LITEMALL_WX_AES_KEY:}
+    app-id: wx1eedfb8d81a3244b
+    app-secret: b9a76091f0e1a441d4d3727085367dab
+    mch-id: 111111
+    mch-key: xxxxxx
+    notify-url: https://www.zhangcde.asia/wx/order/pay-notify
+    # 商户证书文件路径
+    # 请参考“商户证书”一节 https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_3
+    key-path: xxxxx
+    # 消息推送配置token
+    token:
+    # 消息推送配置AesKey
+    aes-key:
 
   #通知相关配置
   notify:
@@ -45,10 +50,11 @@ litemall:
         accessKeyId: xxx
         accessKeySecret: xxx
 
+  # 快鸟物流查询配置
   express:
     enable: true
-    appId: ${LITEMALL_EXPRESS_APP_ID:1912788}
-    appKey: ${LITEMALL_EXPRESS_APP_KEY:}
+    appId: "1912788"
+    appKey: "3e1ce226-8749-4266-8cef-bb3e6234ec4c"
     vendors:
     - code: "ZTO"
       name: "中通快递"
@@ -357,8 +363,12 @@ litemall:
     - code: "YYSD"
       name: "优优速递"
 
+  # 对象存储配置
   storage:
+    # 当前工作的对象存储模式，分别是local、aliyun、tencent、qiniu
     active: local
+    # 本地对象存储配置信息
     local:
-      storagePath: ${LITEMALL_STORAGE_PATH:/root/litemall/storage}
-      address: ${LITEMALL_STORAGE_ADDRESS:https://www.zhangcde.asia/wx/storage/fetch/}
+      storagePath: /root/litemall/storage
+      # 这个地方应该是wx模块的WxStorageController的fetch方法对应的地址
+      address: https://www.zhangcde.asia/wx/storage/fetch/
