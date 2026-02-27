@@ -508,13 +508,18 @@ EOF
 init_goods_admin_id() {
     log_step "初始化商品admin_id字段"
     
-    mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME <<'EOF'
-ALTER TABLE litemall_goods ADD COLUMN IF NOT EXISTS admin_id int(11) DEFAULT NULL COMMENT '创建者管理员ID' AFTER deleted;
-ALTER TABLE litemall_goods ADD INDEX IF NOT EXISTS idx_admin_id (admin_id);
-UPDATE litemall_goods SET admin_id = 1 WHERE admin_id IS NULL;
-EOF
+    # 检查字段是否存在
+    local column_exists=$(mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME -N -e "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='$DB_NAME' AND table_name='litemall_goods' AND column_name='admin_id';" 2>/dev/null)
     
-    log_info "商品admin_id字段初始化完成"
+    if [ "$column_exists" = "0" ]; then
+        log_info "添加admin_id字段..."
+        mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME -e "ALTER TABLE litemall_goods ADD COLUMN admin_id int(11) DEFAULT NULL COMMENT '创建者管理员ID' AFTER deleted;" 2>/dev/null
+        mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME -e "ALTER TABLE litemall_goods ADD INDEX idx_admin_id (admin_id);" 2>/dev/null
+        mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME -e "UPDATE litemall_goods SET admin_id = 1 WHERE admin_id IS NULL;" 2>/dev/null
+        log_info "admin_id字段添加完成"
+    else
+        log_info "admin_id字段已存在，跳过"
+    fi
 }
 
 update_permissions() {
