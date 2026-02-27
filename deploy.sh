@@ -242,7 +242,16 @@ install_maven() {
     
     log_info "安装 Maven 3.9.6..."
     cd /opt
-    wget -q https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+    
+    # 尝试多个下载源
+    if ! wget -q --timeout=60 https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz 2>/dev/null; then
+        log_info "尝试备用下载源..."
+        if ! wget -q --timeout=60 https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz 1>/dev/null; then
+            log_error "Maven 下载失败，请检查网络连接"
+            exit 1
+        fi
+    fi
+    
     tar -xzf apache-maven-3.9.6-bin.tar.gz
     rm -f apache-maven-3.9.6-bin.tar.gz
     
