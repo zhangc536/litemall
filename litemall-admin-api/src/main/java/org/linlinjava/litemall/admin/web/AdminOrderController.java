@@ -237,16 +237,21 @@ public class AdminOrderController {
         }
         
         Short orderStatus = order.getOrderStatus();
-        if (orderStatus != OrderUtil.STATUS_CANCEL 
-            && orderStatus != OrderUtil.STATUS_AUTO_CANCEL 
-            && orderStatus != OrderUtil.STATUS_REFUND_CONFIRM 
-            && orderStatus != OrderUtil.STATUS_CONFIRM 
-            && orderStatus != OrderUtil.STATUS_AUTO_CONFIRM) {
-            return ResponseUtil.fail(403, "订单状态不允许删除");
+        logger.info("删除订单请求：orderId=" + orderId + ", orderStatus=" + orderStatus);
+        
+        boolean canDelete = orderStatus.shortValue() == OrderUtil.STATUS_CANCEL 
+            || orderStatus.shortValue() == OrderUtil.STATUS_AUTO_CANCEL 
+            || orderStatus.shortValue() == OrderUtil.STATUS_REFUND_CONFIRM 
+            || orderStatus.shortValue() == OrderUtil.STATUS_CONFIRM 
+            || orderStatus.shortValue() == OrderUtil.STATUS_AUTO_CONFIRM;
+        
+        if (!canDelete) {
+            logger.warn("订单状态不允许删除：orderId=" + orderId + ", orderStatus=" + orderStatus);
+            return ResponseUtil.fail(403, "订单状态不允许删除，当前状态：" + orderStatus);
         }
         
         orderService.deleteById(orderId);
-        logger.info("管理员删除订单：orderId=" + orderId);
+        logger.info("管理员删除订单成功：orderId=" + orderId);
         
         return ResponseUtil.ok();
     }
