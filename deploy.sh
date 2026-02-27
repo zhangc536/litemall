@@ -243,13 +243,19 @@ install_maven() {
     log_info "安装 Maven 3.9.6..."
     cd /opt
     
-    # 尝试多个下载源
-    if ! wget -q --timeout=60 https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz 2>/dev/null; then
-        log_info "尝试备用下载源..."
-        if ! wget -q --timeout=60 https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz 1>/dev/null; then
-            log_error "Maven 下载失败，请检查网络连接"
-            exit 1
-        fi
+    # 使用国内镜像源下载
+    log_info "从清华镜像下载..."
+    if wget --timeout=120 --tries=3 https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz -O apache-maven-3.9.6-bin.tar.gz; then
+        log_info "下载成功"
+    elif wget --timeout=120 --tries=3 https://mirrors.aliyun.com/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz -O apache-maven-3.9.6-bin.tar.gz; then
+        log_info "下载成功"
+    else
+        log_error "Maven 下载失败，请手动下载"
+        log_info "手动安装命令："
+        log_info "  cd /opt"
+        log_info "  wget https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz"
+        log_info "  tar -xzf apache-maven-3.9.6-bin.tar.gz"
+        exit 1
     fi
     
     tar -xzf apache-maven-3.9.6-bin.tar.gz
