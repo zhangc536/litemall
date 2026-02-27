@@ -45,6 +45,20 @@ INSERT INTO litemall_permission (role_id, permission, add_time, update_time, del
 (2, 'admin:order:ship', NOW(), NOW(), 0),
 (2, 'admin:order:delete', NOW(), NOW(), 0);
 
+-- 积分管理权限（查看、编辑）
+INSERT INTO litemall_permission (role_id, permission, add_time, update_time, deleted) VALUES
+(2, 'admin:user:points', NOW(), NOW(), 0),
+(2, 'admin:user:points:list', NOW(), NOW(), 0),
+(2, 'admin:user:points:read', NOW(), NOW(), 0),
+(2, 'admin:user:points:update', NOW(), NOW(), 0);
+
+-- 积分商品权限（查看、创建、编辑）
+INSERT INTO litemall_permission (role_id, permission, add_time, update_time, deleted) VALUES
+(2, 'admin:pointgoods:list', NOW(), NOW(), 0),
+(2, 'admin:pointgoods:read', NOW(), NOW(), 0),
+(2, 'admin:pointgoods:create', NOW(), NOW(), 0),
+(2, 'admin:pointgoods:update', NOW(), NOW(), 0);
+
 -- 统计查看权限
 INSERT INTO litemall_permission (role_id, permission, add_time, update_time, deleted) VALUES
 (2, 'admin:stat:user', NOW(), NOW(), 0),
